@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+}
+
+.sidebar {
+  width: 200px;
+  background: #f0f0f0;
+  padding: 20px;
+}
+
+main {
+  flex: 1;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  background: #333;
+  color: white;
+  padding: 10px;
+}
