@@ -1,37 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
-import Hero from './components/Hero';
-import Features from './components/Features';
-import Stats from './components/Stats';
-import HowItWorks from './components/HowItWorks';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
-import './App.css';
+import LandingPage from './components/LandingPage';
+import Login from './components/Login';
+import Dashboard from './components/Dashboard';
 
 const App = () => {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 1000); // 1 soniya kutish
-  }, []);
-
   return (
     <Router>
-      <div className="app">
-        {loading && (
-          <div className="loading" id="loading">
-            <div className="spinner"></div>
-          </div>
-        )}
-        <Header />
-        <Hero />
-        <Features />
-        <Stats />
-        <HowItWorks />
-        <Contact />
-        <Footer />
-      </div>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/dashboard/*"
+          element={<Dashboard />}
+        />
+      </Routes>
     </Router>
   );
 };
