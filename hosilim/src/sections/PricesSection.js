@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Panel from '../components/Panel';
 import Table from '../components/Table';
 import AddPriceModal from '../components/AddPriceModal';
+import API_BASE_URL from "../config";
 
 const PricesSection = () => {
   const [prices, setPrices] = useState([]);
@@ -13,7 +14,7 @@ const PricesSection = () => {
     const fetchPrices = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://api.hosilim.uz/prices', {
+        const response = await fetch(`${API_BASE_URL}/prices`, {
           headers: { 'Content-Type': 'application/json' },
         });
         if (!response.ok) throw new Error('Narxlarni olishda xato');
@@ -36,7 +37,7 @@ const PricesSection = () => {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`https://api.hosilim.uz/prices/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}/prices/${id}`, { method: 'DELETE' });
       setPrices(prices.filter(p => p.id !== id));
     } catch (err) {
       setError('O\'chirishda xato');

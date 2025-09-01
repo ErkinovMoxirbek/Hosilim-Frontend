@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Panel from '../components/Panel';
 import Table from '../components/Table';
 import AddFarmerModal from '../components/AddFarmerModal';
+import API_BASE_URL from "../config";
 
 const FarmersSection = () => {
   const [farmers, setFarmers] = useState([]);
@@ -16,7 +17,7 @@ const FarmersSection = () => {
     const fetchFarmers = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://api.hosilim.uz/farmers?page=${page}&search=${search}`, {
+        const response = await fetch(`${API_BASE_URL}/farmers?page=${page}&search=${search}`, {
           headers: { 'Content-Type': 'application/json' },
         });
         if (!response.ok) throw new Error('Dehqonlarni olishda xato');
@@ -39,7 +40,7 @@ const FarmersSection = () => {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`https://api.hosilim.uz/farmers/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}/farmers/${id}`, { method: 'DELETE' });
       setFarmers(farmers.filter(f => f.id !== id));
     } catch (err) {
       setError('O\'chirishda xato');

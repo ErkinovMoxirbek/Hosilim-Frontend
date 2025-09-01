@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from "../config";
+
+
+
 
 const Login = () => {
   const [phone, setPhone] = useState('');
@@ -22,7 +26,7 @@ const Login = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch('https://api.hosilim.uz/api/v1/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: fullPhone }),
@@ -49,7 +53,7 @@ const Login = () => {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch('https://api.hosilim.uz/api/v1/auth/verify', {
+      const response = await fetch(`${API_BASE_URL}/auth/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: `+998${phone}`, otp }),
@@ -65,6 +69,8 @@ const Login = () => {
       const data = await response.json();
       console.log("Login muvaffaqiyatli:", data);
 
+    // 🔑 Tokenni saqlash
+    localStorage.setItem("authToken", data.token);
       // Login muvaffaqiyatli bo'lsa, dashboardga yo'naltirish
       navigate('/dashboard');
 

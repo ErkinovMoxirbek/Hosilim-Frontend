@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Panel from '../components/Panel';
 import Table from '../components/Table';
 import StatCard from '../components/StatCard';
+import API_BASE_URL from "../config";
 
 const ReportsSection = () => {
   const [reportForm, setReportForm] = useState({ type: 'daily', date: '', farmer: '', fruitType: '' });
@@ -14,7 +15,7 @@ const ReportsSection = () => {
     const fetchReports = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://api.hosilim.uz/reports', {
+        const response = await fetch(`${API_BASE_URL}/reports`, {
           headers: { 'Content-Type': 'application/json' },
         });
         if (!response.ok) throw new Error('Hisobotlarni olishda xato');
@@ -45,7 +46,7 @@ const ReportsSection = () => {
 
   const handleGenerateReport = async () => {
     try {
-      const response = await fetch('https://api.hosilim.uz/reports/generate', {
+      const response = await fetch(`${API_BASE_URL}/reports/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reportForm),
@@ -60,7 +61,7 @@ const ReportsSection = () => {
 
   const handleDownloadReport = async (id) => {
     try {
-      const response = await fetch(`https://api.hosilim.uz/reports/download/${id}`);
+      const response = await fetch(`${API_BASE_URL}/reports/download/${id}`);
       // Handle file download (e.g., create a blob and trigger download)
     } catch (err) {
       setError('Yuklab olishda xato');

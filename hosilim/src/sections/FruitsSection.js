@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Panel from '../components/Panel';
 import Table from '../components/Table';
 import AddFruitModal from '../components/AddFruitModal';
+import API_BASE_URL from "../config";
 
 const FruitsSection = () => {
   const [fruits, setFruits] = useState([]);
@@ -17,7 +18,7 @@ const FruitsSection = () => {
       try {
         setLoading(true);
         const query = new URLSearchParams({ ...filters, page }).toString();
-        const response = await fetch(`https://api.hosilim.uz/fruits?${query}`, {
+        const response = await fetch(`${API_BASE_URL}/fruits?${query}`, {
           headers: { 'Content-Type': 'application/json' },
         });
         if (!response.ok) throw new Error('Mevalarni olishda xato');
@@ -40,7 +41,7 @@ const FruitsSection = () => {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`https://api.hosilim.uz/fruits/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}/fruits/${id}`, { method: 'DELETE' });
       setFruits(fruits.filter(f => f.id !== id));
     } catch (err) {
       setError('O\'chirishda xato');

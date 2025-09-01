@@ -3,6 +3,8 @@ import StatCard from '../components/StatCard';
 import Panel from '../components/Panel';
 import Table from '../components/Table';
 import AddFruitModal from '../components/AddFruitModal';
+import API_BASE_URL from "../config";
+
 
 const DashboardSection = () => {
   const [stats, setStats] = useState({
@@ -21,7 +23,7 @@ const DashboardSection = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://api.hosilim.uz/dashboard', {
+        const response = await fetch(`${API_BASE_URL}/dashboard`, {
           headers: { 'Content-Type': 'application/json' },
         });
         if (!response.ok) throw new Error('Ma\'lumotlarni olishda xato');
