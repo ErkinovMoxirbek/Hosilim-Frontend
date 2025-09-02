@@ -4,6 +4,7 @@ import LandingPage from './components/LandingPage';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import PrivateRoute from "./components/PrivateRoute";
+import UserExtraInfoForm from "./components/UserExtraInfoForm";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
             </PrivateRoute>
           } 
         />
+        <Route path="/extra-info" element={<UserExtraInfoForm />} />
       </Routes>
     </Router>
   );

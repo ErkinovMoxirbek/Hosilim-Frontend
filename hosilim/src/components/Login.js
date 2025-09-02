@@ -69,17 +69,45 @@ const Login = () => {
       const data = await response.json();
       console.log("Login muvaffaqiyatli:", data);
 
-    // 🔑 Tokenni saqlash
-    localStorage.setItem("authToken", data.token);
-      // Login muvaffaqiyatli bo'lsa, dashboardga yo'naltirish
-      navigate('/dashboard');
+      localStorage.setItem("authToken", data.data.accessToken);
 
-    } catch (err) {
-      console.error("Fetch xatolik:", err);
-      setError("Xatolik yuz berdi");
-    } finally {
-      setIsLoading(false);
-    }
+      localStorage.setItem("refreshToken", data.data.refreshToken);
+
+      const token = localStorage.getItem("authToken");
+      if(!token){
+        navigate('/login');
+      }
+      try {
+        const res = await fetch(`${API_BASE_URL}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.ok) {
+          const user = await res.json();
+          if (user.data.status === "ACTIVE") {
+            console.log("Foydalanuvchi aktiv, tizimga kiritildi:", user);
+            navigate("/dashboard");
+          } else {
+            console.log("Foydalanuvchi aktiv emas!");
+            navigate("/extra-info");
+          }
+        } else {
+          console.log("Token noto‘g‘ri yoki muddati tugagan");
+          navigate("/login");
+        }
+      } catch (error) {
+        console.error("Xatolik:", error);
+        navigate("/login");
+      }
+
+      } catch (err) {
+        console.error("Fetch xatolik:", err);
+        setError("Xatolik yuz berdi");
+      } finally {
+        setIsLoading(false);
+      }
   };
 
 

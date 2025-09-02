@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from "../config";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -31,14 +32,37 @@ const LandingPage = () => {
     return () => observer.disconnect();
   }, []);
 
-  const handleLogin = () => {
-    console.log('Login page ga o\'tish');
-    navigate('/login');
-  };
 
-  const handleRegister = () => {
-    console.log('Register page ga o\'tish');
-    navigate('/login');
+  const handleLogin = async () => {
+    const token = localStorage.getItem("authToken");
+    console.log(token);
+    if(!token){
+      navigate('/login');
+    }
+    try {
+    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.ok) {
+      const user = await res.json();
+      if (user.data.status === "ACTIVE") {
+        console.log("Foydalanuvchi aktiv, tizimga kiritildi:", user);
+        navigate("/dashboard"); // yoki kerakli sahifa
+      } else {
+        console.log("Foydalanuvchi aktiv emas!");
+        navigate("/login");
+      }
+    } else {
+      console.log("Token noto‘g‘ri yoki muddati tugagan");
+      navigate("/login");
+    }
+  } catch (error) {
+    console.error("Xatolik:", error);
+    navigate("/login");
+  }
   };
 
   return (
@@ -79,15 +103,9 @@ const LandingPage = () => {
             <div className="flex space-x-4">
               <button 
                 onClick={handleLogin}
-                className="text-green-700 hover:text-green-800 font-medium transition-colors"
-              >
-                Kirish
-              </button>
-              <button 
-                onClick={handleRegister}
                 className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition-colors"
               >
-                Ro'yxatdan o'tish
+                Tizimga kirish
               </button>
             </div>
           </div>
@@ -124,7 +142,7 @@ const LandingPage = () => {
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <button 
-                  onClick={handleRegister}
+                  onClick={handleLogin}
                   className="bg-green-700 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-green-800 transition-colors shadow-lg"
                 >
                   Boshlash
@@ -148,7 +166,7 @@ const LandingPage = () => {
                 ].map((fruit, index) => (
                   <div 
                     key={fruit.name}
-                    className={`bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 ${index % 2 === 1 ? 'mt-8' : ''}`}
+                    className={`bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 ${index % 2 === 1 ? 'mt-8' : 'mt-3'}`}
                   >
                     <div className="text-center">
                       <div className="text-5xl mb-3">{fruit.emoji}</div>
@@ -315,10 +333,10 @@ const LandingPage = () => {
               Minglab dehqon va xaridorlar bizga ishonishadi. Siz ham ulardan biri bo'ling!
             </p>
             <button 
-              onClick={handleRegister}
+              onClick={handleLogin}
               className="bg-green-700 text-white px-12 py-4 rounded-xl text-xl font-semibold hover:bg-green-800 transition-colors shadow-lg hover:shadow-xl hover:-translate-y-1"
             >
-              Ro'yxatdan o'tish
+              Tizimga kirish
             </button>
           </div>
         </div>
