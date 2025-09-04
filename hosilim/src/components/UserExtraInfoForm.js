@@ -81,8 +81,10 @@ const UserExtraInfoForm = () => {
       if (!response.ok) {
         throw new Error("Ma'lumotlarni saqlashda xatolik yuz berdi.");
       }
-
-      navigate("/dashboard");
+      const user = await response.json();
+      if (user.data.status === "ACTIVE") {
+        navigate("/dashboard");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -97,46 +99,46 @@ const UserExtraInfoForm = () => {
         {/* Apple illustration - top left */}
         <div className="absolute top-10 left-10 opacity-20">
           <svg width="60" height="60" viewBox="0 0 60 60" className="text-red-400">
-            <path fill="currentColor" d="M30 10c-8 0-15 7-15 15 0 12 15 25 15 25s15-13 15-25c0-8-7-15-15-15z"/>
-            <path fill="currentColor" d="M28 8c2-3 6-2 6 1 0 2-2 3-3 3-2 0-3-2-3-4z" opacity="0.7"/>
+            <path fill="currentColor" d="M30 10c-8 0-15 7-15 15 0 12 15 25 15 25s15-13 15-25c0-8-7-15-15-15z" />
+            <path fill="currentColor" d="M28 8c2-3 6-2 6 1 0 2-2 3-3 3-2 0-3-2-3-4z" opacity="0.7" />
           </svg>
         </div>
 
         {/* Orange illustration - top right */}
         <div className="absolute top-20 right-16 opacity-15">
           <svg width="50" height="50" viewBox="0 0 50 50" className="text-orange-500">
-            <circle cx="25" cy="25" r="20" fill="currentColor"/>
-            <circle cx="25" cy="25" r="15" fill="currentColor" opacity="0.8"/>
-            <path d="M25 5l3 8-8-3z" fill="currentColor" opacity="0.6"/>
+            <circle cx="25" cy="25" r="20" fill="currentColor" />
+            <circle cx="25" cy="25" r="15" fill="currentColor" opacity="0.8" />
+            <path d="M25 5l3 8-8-3z" fill="currentColor" opacity="0.6" />
           </svg>
         </div>
 
         {/* Grape cluster - bottom left */}
         <div className="absolute bottom-20 left-8 opacity-20">
           <svg width="40" height="60" viewBox="0 0 40 60" className="text-purple-400">
-            <circle cx="20" cy="15" r="6" fill="currentColor"/>
-            <circle cx="12" cy="22" r="6" fill="currentColor"/>
-            <circle cx="28" cy="22" r="6" fill="currentColor"/>
-            <circle cx="16" cy="30" r="6" fill="currentColor"/>
-            <circle cx="24" cy="30" r="6" fill="currentColor"/>
-            <circle cx="20" cy="38" r="6" fill="currentColor"/>
-            <path d="M20 8c0-4 4-6 6-3l-3 5z" fill="currentColor" opacity="0.7"/>
+            <circle cx="20" cy="15" r="6" fill="currentColor" />
+            <circle cx="12" cy="22" r="6" fill="currentColor" />
+            <circle cx="28" cy="22" r="6" fill="currentColor" />
+            <circle cx="16" cy="30" r="6" fill="currentColor" />
+            <circle cx="24" cy="30" r="6" fill="currentColor" />
+            <circle cx="20" cy="38" r="6" fill="currentColor" />
+            <path d="M20 8c0-4 4-6 6-3l-3 5z" fill="currentColor" opacity="0.7" />
           </svg>
         </div>
 
         {/* Pear - bottom right */}
         <div className="absolute bottom-32 right-12 opacity-15">
           <svg width="45" height="55" viewBox="0 0 45 55" className="text-green-400">
-            <path fill="currentColor" d="M22.5 10c-6 0-12 4-12 12 0 8 4 12 4 18 0 8 4 12 8 12s8-4 8-12c0-6 4-10 4-18 0-8-6-12-12-12z"/>
-            <path d="M20 8c1-3 5-2 5 1 0 2-2 3-2.5 3-1.5 0-2.5-2-2.5-4z" fill="currentColor" opacity="0.7"/>
+            <path fill="currentColor" d="M22.5 10c-6 0-12 4-12 12 0 8 4 12 4 18 0 8 4 12 8 12s8-4 8-12c0-6 4-10 4-18 0-8-6-12-12-12z" />
+            <path d="M20 8c1-3 5-2 5 1 0 2-2 3-2.5 3-1.5 0-2.5-2-2.5-4z" fill="currentColor" opacity="0.7" />
           </svg>
         </div>
 
         {/* Mountain/Hills silhouette */}
         <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-green-100/30 to-transparent">
           <svg className="absolute bottom-0 w-full h-24" viewBox="0 0 400 100" preserveAspectRatio="none">
-            <path d="M0,100 C50,70 100,40 150,50 C200,60 250,30 300,45 C350,60 380,80 400,70 L400,100 Z" 
-                  fill="currentColor" className="text-green-200/40"/>
+            <path d="M0,100 C50,70 100,40 150,50 C200,60 250,30 300,45 C350,60 380,80 400,70 L400,100 Z"
+              fill="currentColor" className="text-green-200/40" />
           </svg>
         </div>
       </div>
@@ -147,8 +149,8 @@ const UserExtraInfoForm = () => {
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full shadow-lg mb-6 border-2 border-green-100">
             <svg className="w-10 h-10 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Hosilim</h1>

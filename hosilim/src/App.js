@@ -5,6 +5,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import PrivateRoute from "./components/PrivateRoute";
 import UserExtraInfoForm from "./components/UserExtraInfoForm";
+import { ThemeProvider } from './context/ThemeContext';
 
 const App = () => {
   return (
@@ -16,7 +17,9 @@ const App = () => {
           path="/dashboard/*"
           element={
             <PrivateRoute>
-              <Dashboard />
+              <ThemeProvider>
+                <Dashboard /> 
+              </ThemeProvider>
             </PrivateRoute>
           } 
         />

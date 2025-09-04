@@ -40,7 +40,7 @@ const LandingPage = () => {
       navigate('/login');
     }
     try {
-    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+    const res = await fetch(`${API_BASE_URL}/user/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
