@@ -15,7 +15,7 @@ import FarmerDashboard from './dashboards/FarmerDashboard';
 const Sidebar = ({ user, sections, activeSection, setActiveSection, onLogout }) => (
   <div className="w-64 lg:w-72 bg-white border-r border-gray-200 h-full">
     <div className="p-4 lg:p-6 border-b border-gray-200">
-      <h2 className="text-lg lg:text-xl font-bold text-gray-900">Hosil Tizimi</h2>
+      <h2 className="text-lg lg:text-xl font-bold text-gray-900">Hosilim Tizimi</h2>
       <div className="flex items-center mt-2">
         <div className={`w-2 h-2 lg:w-3 lg:h-3 rounded-full mr-2 ${
           user.role === 'ADMIN' ? 'bg-red-500' : 
@@ -190,7 +190,7 @@ const renderDashboardContent = () => {
           <Sidebar 
             user={user}
             sections={getSections()}
-            activeSection={setActiveSection}
+            activeSection={activeSection}
             setActiveSection={setActiveSection}
             onLogout={logout}
           />
@@ -205,7 +205,7 @@ const renderDashboardContent = () => {
               
               {/* Admin routes */}
               <Route path="/admin/*" element={
-                user.role === 'ADMIN' ? (
+                user.role && user.role.includes('ADMIN') ? (
                   <Routes>
                     <Route path="/" element={<AdminDashboard />} />
                     <Route path="/users" element={renderSectionContent()} />
@@ -222,7 +222,7 @@ const renderDashboardContent = () => {
               
               {/* Broker routes */}
               <Route path="/broker/*" element={
-                user.role === 'BROKER' ? (
+                user.role && user.role.includes('BROKER') ? (
                   <Routes>
                     <Route path="/" element={<BrokerDashboard />} />
                     <Route path="/orders" element={renderSectionContent()} />
@@ -239,7 +239,7 @@ const renderDashboardContent = () => {
               
               {/* Farmer routes */}
               <Route path="/farmer/*" element={
-                user.role === 'FARMER' ? (
+                user.role && user.role.includes('FARMER') ? (
                   <Routes>
                     <Route path="/" element={<FarmerDashboard />} />
                     <Route path="/products" element={renderSectionContent()} />

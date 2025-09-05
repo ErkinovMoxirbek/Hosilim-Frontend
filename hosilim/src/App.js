@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import PrivateRoute from "./components/PrivateRoute";
 import UserExtraInfoForm from "./components/UserExtraInfoForm";
 import { ThemeProvider } from './context/ThemeContext';
+import FarmerDashboard from './components/dashboards/FarmerDashboard';
 
 const App = () => {
   return (
