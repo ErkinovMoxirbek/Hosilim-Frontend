@@ -34,7 +34,7 @@ const FarmerDashboard = () => {
       }
 
       // Mening mahsulotlarim
-      const productsResponse = await fetch(`${API_BASE_URL}/farmer/products?limit=10`, {
+      const productsResponse = await fetch(`${API_BASE_URL}/products`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (productsResponse.ok) {
@@ -98,7 +98,7 @@ const FarmerDashboard = () => {
     
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(`${API_BASE_URL}/farmer/products/${productId}`, {
+      const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
