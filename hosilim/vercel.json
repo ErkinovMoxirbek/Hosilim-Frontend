@@ -1,22 +1,18 @@
 {
-  "headers": [
+  "routes": [
     {
-      "source": "/sitemap.xml",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/xml"
-        }
-      ]
+      "src": "/sitemap.xml",
+      "headers": {
+        "Content-Type": "application/xml"
+      },
+      "dest": "/sitemap.xml"
     },
     {
-      "source": "/robots.txt",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "text/plain"
-        }
-      ]
+      "src": "/robots.txt",
+      "headers": {
+        "Content-Type": "text/plain"
+      },
+      "dest": "/robots.txt"
     }
   ]
 }
