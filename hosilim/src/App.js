@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import MarketDashboard from './components/dashboards/MarketDashboard';
-import LandingPageOld from './components/LandingPageOld';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import PrivateRoute from "./components/PrivateRoute";
@@ -15,7 +14,6 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/old" element={<LandingPageOld />} />
         <Route path="/login" element={<Login />} />
         <Route path="/market" element={<MarketDashboard />} />
         <Route
