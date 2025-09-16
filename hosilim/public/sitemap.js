@@ -1,5 +1,5 @@
 const express = require('express');
-const { SitemapStream, streamToPromise } = require('sitemap');
+const { SitemapStream } = require('sitemap');
 const fetch = require('node-fetch');
 
 const app = express();
@@ -14,7 +14,7 @@ app.get('/sitemap.xml', async (req, res) => {
     smStream.write({ url: '/', changefreq: 'weekly', priority: 1.0 });
     smStream.write({ url: '/market', changefreq: 'daily', priority: 0.9 });
 
-    // 1) API’dan active offers olish
+    // API’dan active offers olish
     const offersRes = await fetch('https://api.hosilim.uz/api/v1/offers?status=active&limit=100&sort=-createdAt');
     const offersData = await offersRes.json();
 
@@ -22,7 +22,7 @@ app.get('/sitemap.xml', async (req, res) => {
       offersData.data.forEach(p => {
         if (p.slug) {
           smStream.write({
-            url: `/product/${p.slug}`,
+            url: `/${p.slug}`,
             changefreq: 'weekly',
             priority: 0.8
           });
@@ -30,10 +30,11 @@ app.get('/sitemap.xml', async (req, res) => {
       });
     }
 
+    // stream tugatish
     smStream.end();
 
-    const sitemapOutput = await streamToPromise(smStream);
-    res.send(sitemapOutput.toString());
+    // sitemap’ni to‘g‘ridan-to‘g‘ri response’ga yuborish
+    smStream.pipe(res);
 
   } catch (err) {
     console.error(err);
