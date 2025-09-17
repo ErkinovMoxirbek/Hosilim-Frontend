@@ -43,8 +43,8 @@ const AdminDashboard = () => {
         regionsRes, complaintsRes, systemRes, marketRes, financialRes
       ] = await Promise.all([
         fetch(`${API_BASE_URL}/admin/dashboard/stats?period=${selectedPeriod}`, { headers }),
-        fetch(`${API_BASE_URL}/admin/users/recent?limit=10`, { headers }),
-        fetch(`${API_BASE_URL}/admin/activities?limit=10`, { headers }),
+        fetch(`${API_BASE_URL}/admin/users/recent?limit=${selectedPeriod}`, { headers }),
+        fetch(`${API_BASE_URL}/admin/activities?limit=${selectedPeriod}`, { headers }),
         fetch(`${API_BASE_URL}/admin/products/top?limit=5`, { headers }),
         fetch(`${API_BASE_URL}/admin/regions/stats`, { headers }),
         fetch(`${API_BASE_URL}/admin/complaints?status=open&limit=5`, { headers }),

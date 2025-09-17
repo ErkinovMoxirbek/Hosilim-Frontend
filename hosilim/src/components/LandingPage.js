@@ -280,18 +280,12 @@ const HosilimLanding = () => {
                   <div className="text-sm text-gray-600">Foydalanuvchi</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">
-                    {statsLoading ? '—' : (stats.totalTransactions?.toLocaleString?.() || 0)}
-                  </div>
-                  <div className="text-sm text-gray-600">Tranzaksiya</div>
-                </div>
-                <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900">{statsLoading ? '—' : (stats.activeBrokers || 0)}</div>
                   <div className="text-sm text-gray-600">Faol broker</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900">{statsLoading ? '—' : (stats.platformRevenue || '0')}</div>
-                  <div className="text-sm text-gray-600">So'm aylanma</div>
+                  <div className="text-sm text-gray-600">Faol e’lonlar</div>
                 </div>
               </div>
 
