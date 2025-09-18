@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Users, Truck, Apple, DollarSign, Eye, CheckCircle,
   AlertTriangle, Clock, MapPin, Bell, Download, Send,
   Filter, Activity, BarChart3, RefreshCw, X, Search,
@@ -32,17 +32,17 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const headers = { 
+      const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       };
 
       // Parallel API calls
       const [
-        statsRes, usersRes, activitiesRes, productsRes, 
+        statsRes, usersRes, activitiesRes, productsRes,
         regionsRes, complaintsRes, systemRes, marketRes, financialRes
       ] = await Promise.all([
-        fetch(`${API_BASE_URL}/admin/dashboard/stats?period=${selectedPeriod}`, { headers }),
+        fetch(`${API_BASE_URL}/admin/dashboard1/stats?period=${selectedPeriod}`, { headers }),
         fetch(`${API_BASE_URL}/admin/users/recent?limit=${selectedPeriod}`, { headers }),
         fetch(`${API_BASE_URL}/admin/activities?limit=${selectedPeriod}`, { headers }),
         fetch(`${API_BASE_URL}/admin/products/top?limit=5`, { headers }),
@@ -58,7 +58,7 @@ const AdminDashboard = () => {
         const data = await statsRes.json();
         setStats(data.data);
       }
-      
+
       if (usersRes.ok) {
         const data = await usersRes.json();
         setUsers(data.data);
@@ -117,15 +117,15 @@ const AdminDashboard = () => {
       const token = localStorage.getItem("authToken");
       const res = await fetch(`${API_BASE_URL}/admin/users/${id}/approve`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (res.ok) {
-        setUsers(users.map(u => u.id === id ? {...u, status: 'ACTIVE'} : u));
-        setStats(prev => ({...prev, pendingApprovals: prev.pendingApprovals - 1}));
+        setUsers(users.map(u => u.id === id ? { ...u, status: 'ACTIVE' } : u));
+        setStats(prev => ({ ...prev, pendingApprovals: prev.pendingApprovals - 1 }));
         showNotification('Foydalanuvchi tasdiqlandi', 'success');
       } else {
         const error = await res.json();
@@ -139,20 +139,20 @@ const AdminDashboard = () => {
 
   const rejectUser = async (id) => {
     if (!window.confirm('Foydalanuvchini rad etishga ishonchingiz komilmi?')) return;
-    
+
     try {
       const token = localStorage.getItem("authToken");
       const res = await fetch(`${API_BASE_URL}/admin/users/${id}/reject`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (res.ok) {
         setUsers(users.filter(u => u.id !== id));
-        setStats(prev => ({...prev, pendingApprovals: prev.pendingApprovals - 1}));
+        setStats(prev => ({ ...prev, pendingApprovals: prev.pendingApprovals - 1 }));
         showNotification('Foydalanuvchi rad etildi', 'success');
       }
     } catch (error) {
@@ -164,7 +164,7 @@ const AdminDashboard = () => {
   const sendNotification = async () => {
     const message = prompt('Barcha foydalanuvchilarga yuborilacak xabarni kiriting:');
     if (!message?.trim()) return;
-    
+
     try {
       const token = localStorage.getItem("authToken");
       const res = await fetch(`${API_BASE_URL}/admin/notifications/broadcast`, {
@@ -173,13 +173,13 @@ const AdminDashboard = () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-          message: message.trim(), 
+        body: JSON.stringify({
+          message: message.trim(),
           type: 'announcement',
           priority: 'normal'
         })
       });
-      
+
       if (res.ok) {
         showNotification('Xabar barcha foydalanuvchilarga yuborildi', 'success');
       } else {
@@ -198,7 +198,7 @@ const AdminDashboard = () => {
       const res = await fetch(`${API_BASE_URL}/admin/export/dashboard?period=${selectedPeriod}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       if (res.ok) {
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
@@ -221,12 +221,12 @@ const AdminDashboard = () => {
       const token = localStorage.getItem("authToken");
       const res = await fetch(`${API_BASE_URL}/admin/complaints/${id}/resolve`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (res.ok) {
         setComplaints(complaints.filter(c => c.id !== id));
         showNotification('Shikoyat hal qilindi', 'success');
@@ -239,8 +239,8 @@ const AdminDashboard = () => {
 
   const formatNumber = (num) => {
     if (!num) return '0';
-    if (num >= 1000000) return `${(num/1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num/1000).toFixed(0)}k`;
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(0)}k`;
     return num.toLocaleString();
   };
 
@@ -269,7 +269,7 @@ const AdminDashboard = () => {
           <p className="text-gray-600">Tizim boshqaruv markazi - {new Date().toLocaleDateString('uz-UZ')}</p>
         </div>
         <div className="flex items-center space-x-3">
-          <select 
+          <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
             className="px-4 py-2 border border-gray-200 rounded-lg bg-white"
@@ -279,25 +279,25 @@ const AdminDashboard = () => {
             <option value="month">Bu oy</option>
             <option value="year">Bu yil</option>
           </select>
-          
-          <button 
-            onClick={() => {setRefreshing(true); fetchData();}} 
+
+          <button
+            onClick={() => { setRefreshing(true); fetchData(); }}
             disabled={refreshing}
             className="p-2 bg-white rounded-lg border hover:bg-gray-50 disabled:opacity-50"
           >
             <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
           </button>
-          
-          <button 
+
+          <button
             onClick={exportData}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center"
           >
             <Download className="w-4 h-4 mr-2" />
             Eksport
           </button>
-          
-          <button 
-            onClick={sendNotification} 
+
+          <button
+            onClick={sendNotification}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
           >
             <Send className="w-4 h-4 mr-2" />
@@ -376,9 +376,8 @@ const AdminDashboard = () => {
               <div className="ml-4">
                 <p className="text-sm text-gray-600">Tasdiqlash Kutmoqda</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.pendingApprovals || 0}</p>
-                <p className={`text-xs font-medium ${
-                  (stats.pendingApprovals || 0) > 0 ? 'text-orange-600' : 'text-green-600'
-                }`}>
+                <p className={`text-xs font-medium ${(stats.pendingApprovals || 0) > 0 ? 'text-orange-600' : 'text-green-600'
+                  }`}>
                   {(stats.pendingApprovals || 0) > 0 ? 'Diqqat talab qiladi' : 'Hammasi hal qilingan'}
                 </p>
               </div>
@@ -429,7 +428,7 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="overflow-x-auto">
             {users.length > 0 ? (
               <table className="w-full">
@@ -449,57 +448,69 @@ const AdminDashboard = () => {
                     </th>
                   </tr>
                 </thead>
+
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map(user => (
-                    <tr key={user.id} className="hover:bg-gray-50">
+                  {users.map((user, idx) => (
+                    <tr
+                      key={user.id || `${user.phone || 'no-phone'}-${user.createdAt || idx}`}
+                      className="hover:bg-gray-50"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
-                            {user.name?.charAt(0) || user.phone?.slice(-1)}
+                            {(user.name && user.name.trim()[0]) || (user.phone ? user.phone.slice(-1) : '?')}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">{user.name || user.surname || 'Nomsiz'}</p>
+                            <p className="font-medium text-gray-900">
+                              {user.name || user.surname || user.phone || 'Nomsiz'}
+                            </p>
                             <p className="text-sm text-gray-500">{user.phone}</p>
                           </div>
                         </div>
                       </td>
+
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                          user.role === 'ADMIN' ? 'bg-red-100 text-red-700' :
-                          user.role === 'BROKER' ? 'bg-blue-100 text-blue-700' :
-                          'bg-green-100 text-green-700'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full font-medium ${user.role === 'ADMIN'
+                              ? 'bg-red-100 text-red-700'
+                              : user.role === 'BROKER'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-green-100 text-green-700'
+                            }`}
+                        >
                           {user.role}
                         </span>
                       </td>
+
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 text-xs rounded-full font-medium ${
-                          user.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                        }`}>
-                          {user.status === 'ACTIVE' ? 'Faol' : 'Kutmoqda'}
+                        <span
+                          className={`px-3 py-1 text-xs rounded-full font-medium ${user.status === 'ACTIVE'
+                              ? 'bg-green-100 text-green-700'
+                              : user.status === 'BLOCKED'
+                                ? 'bg-red-100 text-red-700'
+                                : user.status === 'REJECTED'
+                                  ? 'bg-gray-100 text-gray-700'
+                                  : user.status === 'NOACTIVE'
+                                    ? 'bg-yellow-100 text-yellow-700'
+                                    : 'bg-slate-100 text-slate-700'
+                            }`}
+                        >
+                          {user.status === 'ACTIVE'
+                            ? 'Faol'
+                            : user.status === 'BLOCKED'
+                              ? 'Bloklangan'
+                              : user.status === 'REJECTED'
+                                ? 'Rad etilgan'
+                                : user.status === 'NOACTIVE'
+                                  ? 'Faol emas'
+                                  : (user.status || 'Noma’lum')}
                         </span>
                       </td>
+
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
-                          {user.status === 'PENDING' && (
-                            <>
-                              <button 
-                                onClick={() => approveUser(user.id)} 
-                                className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
-                                title="Tasdiqlash"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                              </button>
-                              <button 
-                                onClick={() => rejectUser(user.id)} 
-                                className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-                                title="Rad etish"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
-                          <button 
+                          {/* Approve/Reject olib tashlandi — tizimda tasdiqlash yo‘q */}
+                          <button
                             className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
                             title="Batafsil"
                           >
@@ -520,6 +531,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
+
         {/* Activities */}
         <div className="bg-white rounded-xl shadow-sm border">
           <div className="p-6 border-b border-gray-100">
@@ -531,25 +543,24 @@ const AdminDashboard = () => {
               <Activity className="w-5 h-5 text-gray-400" />
             </div>
           </div>
-          
+
           <div className="p-6">
             {activities.length > 0 ? (
               <div className="space-y-4">
                 {activities.map(activity => (
                   <div key={activity.id} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      activity.type === 'transaction' ? 'bg-green-100' :
-                      activity.type === 'user' ? 'bg-blue-100' :
-                      activity.type === 'complaint' ? 'bg-red-100' :
-                      'bg-yellow-100'
-                    }`}>
-                      {activity.type === 'transaction' ? 
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${activity.type === 'transaction' ? 'bg-green-100' :
+                        activity.type === 'user' ? 'bg-blue-100' :
+                          activity.type === 'complaint' ? 'bg-red-100' :
+                            'bg-yellow-100'
+                      }`}>
+                      {activity.type === 'transaction' ?
                         <DollarSign className="w-4 h-4 text-green-600" /> :
-                        activity.type === 'user' ? 
-                        <Users className="w-4 h-4 text-blue-600" /> :
-                        activity.type === 'complaint' ? 
-                        <AlertTriangle className="w-4 h-4 text-red-600" /> :
-                        <Activity className="w-4 h-4 text-yellow-600" />
+                        activity.type === 'user' ?
+                          <Users className="w-4 h-4 text-blue-600" /> :
+                          activity.type === 'complaint' ?
+                            <AlertTriangle className="w-4 h-4 text-red-600" /> :
+                            <Activity className="w-4 h-4 text-yellow-600" />
                       }
                     </div>
                     <div className="flex-1">
@@ -586,19 +597,18 @@ const AdminDashboard = () => {
               <BarChart3 className="w-5 h-5 text-gray-400" />
             </div>
           </div>
-          
+
           <div className="p-6">
             {products.length > 0 ? (
               <div className="space-y-4">
                 {products.map((product, index) => (
                   <div key={product.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:shadow-sm transition-shadow">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 text-white rounded-lg flex items-center justify-center font-bold text-sm ${
-                        index === 0 ? 'bg-gradient-to-br from-yellow-400 to-orange-500' :
-                        index === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-500' :
-                        index === 2 ? 'bg-gradient-to-br from-orange-400 to-red-500' :
-                        'bg-gradient-to-br from-blue-400 to-purple-500'
-                      }`}>
+                      <div className={`w-8 h-8 text-white rounded-lg flex items-center justify-center font-bold text-sm ${index === 0 ? 'bg-gradient-to-br from-yellow-400 to-orange-500' :
+                          index === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-500' :
+                            index === 2 ? 'bg-gradient-to-br from-orange-400 to-red-500' :
+                              'bg-gradient-to-br from-blue-400 to-purple-500'
+                        }`}>
                         {index + 1}
                       </div>
                       <div>
@@ -608,9 +618,8 @@ const AdminDashboard = () => {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-gray-900">{formatCurrency(product.revenue)}</p>
-                      <p className={`text-sm font-medium ${
-                        product.growth?.toString().startsWith('+') ? 'text-green-600' : 'text-red-600'
-                      }`}>
+                      <p className={`text-sm font-medium ${product.growth?.toString().startsWith('+') ? 'text-green-600' : 'text-red-600'
+                        }`}>
                         {product.growth}
                       </p>
                     </div>
@@ -642,18 +651,17 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="p-6">
             {complaints.length > 0 ? (
               <div className="space-y-4">
                 {complaints.map(complaint => (
                   <div key={complaint.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
                     <div className="flex items-center space-x-4">
-                      <div className={`w-3 h-3 rounded-full ${
-                        complaint.priority === 'high' ? 'bg-red-500' :
-                        complaint.priority === 'medium' ? 'bg-yellow-500' :
-                        'bg-green-500'
-                      }`}></div>
+                      <div className={`w-3 h-3 rounded-full ${complaint.priority === 'high' ? 'bg-red-500' :
+                          complaint.priority === 'medium' ? 'bg-yellow-500' :
+                            'bg-green-500'
+                        }`}></div>
                       <div>
                         <p className="font-medium text-gray-900">{complaint.title || complaint.issue}</p>
                         <p className="text-sm text-gray-600">{complaint.userName || complaint.user}</p>
@@ -661,15 +669,14 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                        complaint.priority === 'high' ? 'bg-red-100 text-red-700' :
-                        complaint.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-green-100 text-green-700'
-                      }`}>
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${complaint.priority === 'high' ? 'bg-red-100 text-red-700' :
+                          complaint.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-green-100 text-green-700'
+                        }`}>
                         {complaint.priority === 'high' ? 'Yuqori' :
-                         complaint.priority === 'medium' ? 'O\'rta' : 'Past'}
+                          complaint.priority === 'medium' ? 'O\'rta' : 'Past'}
                       </span>
-                      <button 
+                      <button
                         onClick={() => resolveComplaint(complaint.id)}
                         className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
                       >
@@ -745,11 +752,10 @@ const AdminDashboard = () => {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold">{item.volume} kg</p>
-                      <div className={`flex items-center text-sm ${
-                        item.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {item.trend === 'up' ? 
-                          <TrendingUp className="w-3 h-3 mr-1" /> : 
+                      <div className={`flex items-center text-sm ${item.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                        {item.trend === 'up' ?
+                          <TrendingUp className="w-3 h-3 mr-1" /> :
                           <TrendingDown className="w-3 h-3 mr-1" />
                         }
                         {item.change}%

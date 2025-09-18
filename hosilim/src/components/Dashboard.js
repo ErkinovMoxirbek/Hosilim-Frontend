@@ -12,6 +12,7 @@ import AdminDashboard from './dashboards/AdminDashboard';
 import BrokerDashboard from './dashboards/BrokerDashboard';
 import FarmerDashboard from './dashboards/FarmerDashboard';
 import ProductsPage from './page/ProductsPage';
+import AdminUsersPage from './page/admin/AdminUsersPage';
 
 // Sidebar komponenti
 const Sidebar = ({ user, sections, activeSection, setActiveSection, onLogout }) => {
@@ -20,15 +21,16 @@ const Sidebar = ({ user, sections, activeSection, setActiveSection, onLogout }) 
   const handleClick = (section) => {
     setActiveSection(section.id);
 
-    console.log(user.role.includes('FARMER'));
+    console.log(user.role.includes('ADMIN'));
 
     if (user.role.includes('FARMER')) {
       navigate(section.id === "dashboard" ? "/dashboard/farmer" : `/dashboard/farmer/${section.id}`);
     }
-    if (user.role === "ADMIN") {
+    if (user.role.includes('ADMIN')) {
       navigate(section.id === "dashboard" ? "/dashboard/admin" : `/dashboard/admin/${section.id}`);
+
     }
-    if (user.role === "BROKER") {
+    if (user.role.includes('BROKER')) {
       navigate(section.id === "dashboard" ? "/dashboard/broker" : `/dashboard/broker/${section.id}`);
     }
   };
@@ -250,7 +252,7 @@ const Dashboard = () => {
                 user.role && user.role.includes('ADMIN') ? (
                   <Routes>
                     <Route path="/" element={<AdminDashboard />} />
-                    <Route path="/users" element={renderSectionContent()} />
+                    <Route path="/users" element={<AdminUsersPage />} />
                     <Route path="/brokers" element={renderSectionContent()} />
                     <Route path="/farmers" element={renderSectionContent()} />
                     <Route path="/transactions" element={renderSectionContent()} />
