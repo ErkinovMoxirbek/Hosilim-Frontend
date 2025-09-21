@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   Users, Search, Plus, MoreVertical, Eye, Edit2,
   Trash2, Shield, UserCheck, Phone,
@@ -7,48 +7,59 @@ import {
   Star, Activity, DollarSign, Save, ArrowUpDown,
   Settings, Unlock, Lock, MessageSquare, Database, X
 } from 'lucide-react';
+import 'rsuite/dist/rsuite.min.css';
+import { DateRangePicker } from 'rsuite';
+
+import API_BASE_URL from "../../../config";
 
 const AdminUsersManagement = () => {
-  // Core State
+  /* ======================= Core State ======================= */
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingInitial, setLoadingInitial] = useState(true); // 1st load
+  const [tableLoading, setTableLoading] = useState(false);     // re-fetches
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Filters
+  /* ======================= Filters ======================= */
   const [filters, setFilters] = useState({
     search: '',
     role: 'ALL',
     status: 'ALL',
     region: 'ALL',
-    verified: 'ALL', // VERIFIED | UNVERIFIED | ALL
-    dateRange: 'ALL'
+    startDateTime: null,
+    endDateTime: null
   });
 
-  // Sorting
-  const [sorting, setSorting] = useState({ field: 'createdAt', direction: 'desc' });
+  // Debounced search (500ms) + Enter instant apply
+  const [searchText, setSearchText] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setFilters(f => (f.search === searchText ? f : { ...f, search: searchText }));
+    }, 500);
+    return () => clearTimeout(t);
+  }, [searchText]);
 
-  // Selection
+  /* ======================= Sorting/Selection/Pagination ======================= */
+  const [sorting, setSorting] = useState({ field: 'createdAt', direction: 'desc' });
   const [selectedUsers, setSelectedUsers] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
-
-  // Pagination
   const [pagination, setPagination] = useState({ page: 1, limit: 25, total: 0, totalPages: 0 });
 
-  // Modal
-  const [modal, setModal] = useState({ isOpen: false, type: null, data: null }); // type: 'view'|'edit'|'create'
-
-  // Form (no defaults — API centric)
+  /* ======================= Modal/Form ======================= */
+  const [modal, setModal] = useState({ isOpen: false, type: null, data: null });
   const [formData, setFormData] = useState({});
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
-  // API BASE
-  const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:3001/api';
+  const API_BASE = API_BASE_URL;
+  const today = new Date();
+  const rangeValue = (filters.startDateTime && filters.endDateTime)
+    ? [new Date(filters.startDateTime), new Date(filters.endDateTime)]
+    : null;
 
   /* ======================= API Client ======================= */
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
     return headers;
@@ -72,7 +83,7 @@ const AdminUsersManagement = () => {
     async post(path, body) {
       const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
       const headers = getAuthHeaders();
-      if (isForm) delete headers['Content-Type']; // FormData uchun kerak emas
+      if (isForm) delete headers['Content-Type'];
       const res = await fetch(`${API_BASE}${path}`, {
         method: 'POST',
         headers,
@@ -101,37 +112,32 @@ const AdminUsersManagement = () => {
   };
 
   /* ======================= Fetching ======================= */
-  const fetchUsers = useCallback(async (override = {}) => {
+  const hasLoadedRef = useRef(false);
+  const fetchUsers = useCallback(async () => {
     try {
-      setLoading(true);
+      if (!hasLoadedRef.current) setLoadingInitial(true);
+      else setTableLoading(true);
       setError(null);
 
-      const verifiedParam = filters.verified === 'VERIFIED'
-        ? true
-        : filters.verified === 'UNVERIFIED'
-          ? false
-          : undefined;
-
       const params = {
-        page: override.page ?? pagination.page,
-        limit: override.limit ?? pagination.limit,
-        sortBy: override.sortBy ?? sorting.field,
-        sortOrder: override.sortOrder ?? sorting.direction,
+        page: pagination.page,
+        limit: pagination.limit,
+        sortBy: sorting.field,
+        sortOrder: sorting.direction,
         search: filters.search,
         role: filters.role,
         status: filters.status,
         region: filters.region,
-        verified: verifiedParam,
-        dateRange: filters.dateRange,
+        startDateTime: filters.startDateTime ? new Date(filters.startDateTime).toISOString() : undefined,
+        endDateTime: filters.endDateTime ? new Date(filters.endDateTime).toISOString() : undefined,
       };
 
       const res = await api.get('/admin/users', params);
-
       const items = res.data ?? res.items ?? res.results ?? res.users ?? [];
-      const meta  = res.meta ?? {};
+      const meta = res.meta ?? {};
       const total = Number(res.total ?? meta.total ?? res.count ?? items.length ?? 0);
-      const limit = Number(meta.limit ?? override.limit ?? pagination.limit ?? params?.limit ?? 25);
-      const page  = Number(meta.page  ?? override.page  ?? pagination.page  ?? 1);
+      const limit = Number(meta.limit ?? pagination.limit ?? params?.limit ?? 25);
+      const page = Number(meta.page ?? pagination.page ?? 1);
       const totalPages = Number(meta.totalPages ?? (limit > 0 ? Math.ceil(total / limit) : 0));
 
       setUsers(items);
@@ -140,18 +146,23 @@ const AdminUsersManagement = () => {
       console.error('Fetch users error:', err);
       setError("Ma'lumotlar yuklanishda xatolik yuz berdi");
     } finally {
-      setLoading(false);
+      if (!hasLoadedRef.current) {
+        hasLoadedRef.current = true;
+        setLoadingInitial(false);
+      } else {
+        setTableLoading(false);
+      }
       setRefreshing(false);
     }
   }, [filters, pagination.page, pagination.limit, sorting.field, sorting.direction]);
 
-  // Initial & on deps change
+  // initial mount
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  // Reset page to 1 when filters/sorting change
+  // page reset when filters/sorting change
   useEffect(() => { setPagination(p => ({ ...p, page: 1 })); }, [filters, sorting]);
 
-  /* ======================= Stats (current page) ======================= */
+  /* ======================= Stats ======================= */
   const statistics = useMemo(() => {
     if (!users.length) return null;
     return {
@@ -221,10 +232,7 @@ const AdminUsersManagement = () => {
   };
 
   const handleBulkAction = async (action) => {
-    if (selectedUsers.size === 0) {
-      showNotification('Foydalanuvchilar tanlanmagan', 'warning');
-      return;
-    }
+    if (selectedUsers.size === 0) { showNotification('Foydalanuvchilar tanlanmagan', 'warning'); return; }
     const confirmed = window.confirm(`${selectedUsers.size} ta foydalanuvchi uchun "${action}" amalini bajarishni tasdiqlaysizmi?`);
     if (!confirmed) return;
 
@@ -256,10 +264,7 @@ const AdminUsersManagement = () => {
     e.preventDefault();
     const errors = validateForm(formData);
     setFormErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      showNotification("Forma ma'lumotlarini to'g'rilang", 'error');
-      return;
-    }
+    if (Object.keys(errors).length > 0) { showNotification("Forma ma'lumotlarini to'g'rilang", 'error'); return; }
 
     try {
       setSubmitting(true);
@@ -302,8 +307,12 @@ const AdminUsersManagement = () => {
   const closeModal = () => { setModal({ isOpen: false, type: null, data: null }); setFormData({}); setFormErrors({}); };
 
   /* ======================= Formatters ======================= */
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'short', day: 'numeric' });
-  const formatCurrency = (amount) => new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', minimumFractionDigits: 0 }).format(amount || 0);
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'short', day: 'numeric' });
+
+  const formatCurrency = (amount) =>
+    new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', minimumFractionDigits: 0 }).format(amount || 0);
+
   const formatRelativeTime = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -388,7 +397,7 @@ const AdminUsersManagement = () => {
   };
 
   /* ======================= Render ======================= */
-  if (loading && users.length === 0) {
+  if (loadingInitial && users.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -413,10 +422,15 @@ const AdminUsersManagement = () => {
             <p className="text-gray-600 mt-1">Tizim foydalanuvchilarini professional boshqarish paneli</p>
           </div>
           <div className="flex items-center space-x-3">
-            <button onClick={() => { setRefreshing(true); fetchUsers(); }} disabled={refreshing} className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+            <button
+              onClick={() => { setRefreshing(true); fetchUsers(); }}
+              disabled={refreshing}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            >
               <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
               Yangilash
             </button>
+
             <div className="relative group">
               <button className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                 <Download className="w-4 h-4 mr-2" />
@@ -428,6 +442,7 @@ const AdminUsersManagement = () => {
                 <button onClick={() => handleExport('json')} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 last:rounded-b-lg">JSON formatida</button>
               </div>
             </div>
+
             <button onClick={() => openModal('create')} className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
               <Plus className="w-4 h-4 mr-2" />
               Yangi Foydalanuvchi
@@ -528,10 +543,56 @@ const AdminUsersManagement = () => {
         <div className="bg-white shadow-sm rounded-lg border mb-6">
           <div className="px-6 py-4">
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+              {/* Search */}
               <div className="lg:col-span-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <input type="text" placeholder="Qidirish (ism, telefon, email)..." value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                  <input
+                    type="text"
+                    placeholder="Qidirish (ism, telefon)..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setFilters((f) => ({ ...f, search: e.target.value }));
+                      }
+                    }}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Date range */}
+              <div className="flex items-center">
+                <div className="w-80">
+                  <DateRangePicker
+                    placeholder="Sanani Tanlang"
+                    format="dd-MM-yyyy HH:mm:ss"
+                    showMeridian
+                    placement="bottomStart"
+                    character=" to "
+                    showOneCalendar={false}
+                    showOk
+                    disabledDate={(date) => date.getTime() > today.getTime()}
+                    value={rangeValue}
+                    onOk={(range) => {
+                      if (!range) return;
+                      const [start, end] = range;
+                      setFilters(f => ({ ...f, startDateTime: start, endDateTime: end }));
+                    }}
+                    onClean={() => setFilters(f => ({ ...f, startDateTime: null, endDateTime: null }))}
+                    onChange={(range) => {
+                      if (!range) return;
+                      const [start, end] = range;
+                      if (start && end) {
+                        const s = new Date(start), e = new Date(end), now = new Date();
+                        if (e < s) return;
+                        if (s > now) s.setTime(now.getTime());
+                        if (e > now) e.setTime(now.getTime());
+                        setFilters(f => ({ ...f, startDateTime: s, endDateTime: e }));
+                      }
+                    }}
+                  />
                 </div>
               </div>
 
@@ -548,31 +609,9 @@ const AdminUsersManagement = () => {
                 <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })} className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                   <option value="ALL">Barcha statuslar</option>
                   <option value="ACTIVE">Faol</option>
-                  <option value="PENDING">Kutmoqda</option>
                   <option value="BLOCKED">Bloklangan</option>
                   <option value="INACTIVE">Faol emas</option>
                 </select>
-              </div>
-
-              <div>
-                <select value={filters.verified} onChange={(e) => setFilters({ ...filters, verified: e.target.value })} className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                  <option value="ALL">Tasdiqlash holati</option>
-                  <option value="VERIFIED">Tasdiqlangan</option>
-                  <option value="UNVERIFIED">Tasdiqlanmagan</option>
-                </select>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <select value={sorting.field} onChange={(e) => setSorting({ ...sorting, field: e.target.value })} className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                  <option value="createdAt">Yaratilgan sana</option>
-                  <option value="name">Ism</option>
-                  <option value="lastActive">Oxirgi faollik</option>
-                  <option value="totalTransactions">Tranzaksiyalar</option>
-                  <option value="rating">Reyting</option>
-                </select>
-                <button onClick={() => setSorting(s => ({ ...s, direction: s.direction === 'asc' ? 'desc' : 'asc' }))} className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <ArrowUpDown className="h-4 w-4" />
-                </button>
               </div>
             </div>
 
@@ -607,17 +646,22 @@ const AdminUsersManagement = () => {
         )}
 
         {/* Table */}
-        <div className="bg-white shadow-sm rounded-lg border overflow-hidden">
+        <div className="bg-white shadow-sm rounded-lg border overflow-hidden relative">
           <div className="min-w-full divide-y divide-gray-200">
             <table className="min-w-full">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left">
-                    <input type="checkbox" checked={selectAll} onChange={(e) => {
-                      setSelectAll(e.target.checked);
-                      if (e.target.checked) setSelectedUsers(new Set(users.map(u => u.id)));
-                      else setSelectedUsers(new Set());
-                    }} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                    <input
+                      type="checkbox"
+                      checked={selectAll}
+                      onChange={(e) => {
+                        setSelectAll(e.target.checked);
+                        if (e.target.checked) setSelectedUsers(new Set(users.map(u => u.id)));
+                        else setSelectedUsers(new Set());
+                      }}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foydalanuvchi</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aloqa ma'lumotlari</th>
@@ -627,15 +671,45 @@ const AdminUsersManagement = () => {
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amallar</th>
                 </tr>
               </thead>
+
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map(user => (
+                {/* Skeleton rows when tableLoading && users.length === 0 */}
+                {tableLoading && users.length === 0 && (
+                  Array.from({ length: 8 }).map((_, i) => (
+                    <tr key={`sk-${i}`} className="animate-pulse">
+                      <td className="px-6 py-4"><div className="h-4 w-4 bg-gray-200 rounded" /></td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="h-10 w-10 rounded-full bg-gray-200" />
+                          <div>
+                            <div className="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                            <div className="h-3 w-20 bg-gray-200 rounded"></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4"><div className="h-4 w-40 bg-gray-200 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-6 w-24 bg-gray-200 rounded-full" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-28 bg-gray-200 rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-200 rounded" /></td>
+                      <td className="px-6 py-4 text-right"><div className="h-6 w-20 bg-gray-200 rounded ml-auto" /></td>
+                    </tr>
+                  ))
+                )}
+
+                {/* Real rows */}
+                {!tableLoading && users.map(user => (
                   <tr key={user.id} className={`hover:bg-gray-50 ${selectedUsers.has(user.id) ? 'bg-blue-50' : ''}`}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <input type="checkbox" checked={selectedUsers.has(user.id)} onChange={(e) => {
-                        const next = new Set(selectedUsers);
-                        if (e.target.checked) next.add(user.id); else next.delete(user.id);
-                        setSelectedUsers(next);
-                      }} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.has(user.id)}
+                        onChange={(e) => {
+                          const next = new Set(selectedUsers);
+                          if (e.target.checked) next.add(user.id); else next.delete(user.id);
+                          setSelectedUsers(next);
+                        }}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
                     </td>
 
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -720,7 +794,18 @@ const AdminUsersManagement = () => {
             </table>
           </div>
 
-          {users.length === 0 && !loading && (
+          {/* Overlay loader when updating table but we already have rows */}
+          {tableLoading && users.length > 0 && (
+            <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+              <div className="flex items-center bg-white border rounded-lg px-4 py-2 shadow">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2"></div>
+                <span className="text-sm text-gray-700">Yuklanmoqda...</span>
+              </div>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {users.length === 0 && !tableLoading && (
             <div className="text-center py-12">
               <Users className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">Foydalanuvchilar topilmadi</h3>
@@ -802,30 +887,12 @@ const AdminUsersManagement = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <dt className="text-sm font-medium text-gray-500">Telefon</dt>
-                        <dd className="mt-1 text-sm text-gray-900">{modal.data.phone}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-gray-500">Email</dt>
-                        <dd className="mt-1 text-sm text-gray-900">{modal.data.email}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-gray-500">Viloyat</dt>
-                        <dd className="mt-1 text-sm text-gray-900">{modal.data.region}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-gray-500">Tuman</dt>
-                        <dd className="mt-1 text-sm text-gray-900">{modal.data.district}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-gray-500">Ro'yxatdan o'tgan</dt>
-                        <dd className="mt-1 text-sm text-gray-900">{modal.data.createdAt ? formatDate(modal.data.createdAt) : '-'}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-gray-500">Oxirgi faollik</dt>
-                        <dd className="mt-1 text-sm text-gray-900">{modal.data.lastActive ? formatRelativeTime(modal.data.lastActive) : '-'}</dd>
-                      </div>
+                      <div><dt className="text-sm font-medium text-gray-500">Telefon</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.phone}</dd></div>
+                      <div><dt className="text-sm font-medium text-gray-500">Email</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.email}</dd></div>
+                      <div><dt className="text-sm font-medium text-gray-500">Viloyat</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.region}</dd></div>
+                      <div><dt className="text-sm font-medium text-gray-500">Tuman</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.district}</dd></div>
+                      <div><dt className="text-sm font-medium text-gray-500">Ro'yxatdan o'tgan</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.createdAt ? formatDate(modal.data.createdAt) : '-'}</dd></div>
+                      <div><dt className="text-sm font-medium text-gray-500">Oxirgi faollik</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.lastActive ? formatRelativeTime(modal.data.lastActive) : '-'}</dd></div>
                     </div>
 
                     {modal.data.notes && (
@@ -918,12 +985,13 @@ const AdminUsersManagement = () => {
         </div>
       )}
 
-      {(loading || submitting) && (
+      {/* Global overlay faqat action/submit uchun */}
+      {submitting && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 shadow-xl">
             <div className="flex items-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
-              <span className="text-gray-700 font-medium">{loading ? "Ma'lumotlar yuklanmoqda..." : 'Amal bajarilmoqda...'}</span>
+              <span className="text-gray-700 font-medium">Amal bajarilmoqda...</span>
             </div>
           </div>
         </div>
