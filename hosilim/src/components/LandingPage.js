@@ -295,7 +295,7 @@ const HosilimLanding = () => {
                   className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center justify-center"
                 >
                   <Users className="w-5 h-5 mr-2" />
-                  Ro'yxatdan o'tish
+                  Tizimga kirish
                 </button>
                 <button
                   onClick={() => scrollToSection('how-it-works')}

@@ -8,12 +8,14 @@ import PrivateRoute from "./components/PrivateRoute";
 import UserExtraInfoForm from "./components/UserExtraInfoForm";
 import { ThemeProvider } from './context/ThemeContext';
 import FarmerDashboard from './components/dashboards/FarmerDashboard';
+import Iqtibosxona from './components/Iqtibosxona';
 
 const App = () => {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/iqtibosxona" element={<Iqtibosxona />} />
         <Route path="/login" element={<Login />} />
         <Route path="/market" element={<MarketDashboard />} />
         <Route
