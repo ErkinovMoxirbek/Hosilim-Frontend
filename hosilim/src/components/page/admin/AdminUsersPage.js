@@ -168,7 +168,6 @@ const AdminUsersManagement = () => {
     return {
       total: users.length,
       active: users.filter(u => u.status === 'ACTIVE').length,
-      pending: users.filter(u => u.status === 'PENDING').length,
       blocked: users.filter(u => u.status === 'BLOCKED').length,
       verified: users.filter(u => u.isVerified).length,
       totalRevenue: users.reduce((sum, u) => sum + (Number(u.totalRevenue) || 0), 0),
@@ -254,7 +253,6 @@ const AdminUsersManagement = () => {
     const errors = {};
     if (!data.name?.trim()) errors.name = 'Ism majburiy';
     if (!data.phone?.trim()) errors.phone = 'Telefon majburiy';
-    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = "Email format noto'g'ri";
     if (!data.role) errors.role = 'Rol majburiy';
     if (!data.status) errors.status = 'Status majburiy';
     return errors;
@@ -288,18 +286,18 @@ const AdminUsersManagement = () => {
       setFormData({
         name: data.name ?? '',
         phone: data.phone ?? '',
-        email: data.email ?? '',
         role: data.role ?? '',
         status: data.status ?? '',
         region: data.region ?? '',
         district: data.district ?? '',
+        village: data.village ?? '',
         isVerified: !!data.isVerified,
         notes: data.notes ?? ''
       });
     }
     if (type === 'create') {
       setFormData({
-        name: '', phone: '', email: '', role: '', status: '', region: '', district: '', isVerified: false, notes: ''
+        name: '', phone: '', role: '', status: '', region: '', district: '',village: '', isVerified: false, notes: ''
       });
     }
   };
@@ -331,12 +329,12 @@ const AdminUsersManagement = () => {
         ID: user.id,
         Ism: user.name,
         Telefon: user.phone,
-        Email: user.email,
         Rol: user.role,
         Status: user.status,
         Viloyat: user.region,
+        Tuman: user.district,
+        Qishloq: user.village,
         'Yaratilgan sana': user.createdAt ? formatDate(user.createdAt) : '-',
-        'Oxirgi faollik': user.lastActive ? formatRelativeTime(user.lastActive) : '-',
         'Tranzaksiyalar': user.totalTransactions ?? 0,
         'Daromad': user.totalRevenue ?? 0,
         'Reyting': user.rating ?? 0,
@@ -378,9 +376,8 @@ const AdminUsersManagement = () => {
   const StatusBadge = ({ status }) => {
     const statusConfig = {
       'ACTIVE': { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', label: 'Faol' },
-      'PENDING': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', label: 'Kutmoqda' },
       'BLOCKED': { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', label: 'Bloklangan' },
-      'INACTIVE': { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200', label: 'Faol emas' }
+      'INACTIVE': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-gray-200', label: 'Faol emas' }
     };
     const config = statusConfig[status] || statusConfig['INACTIVE'];
     return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.bg} ${config.text} ${config.border}`}>{config.label}</span>;
@@ -488,7 +485,7 @@ const AdminUsersManagement = () => {
                   <div className="ml-3 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">Kutmoqda</dt>
-                      <dd className="text-lg font-semibold text-yellow-600">{statistics.pending}</dd>
+                      <dd className="text-lg font-semibold text-yellow-600">{statistics.total - statistics.active}</dd>
                     </dl>
                   </div>
                 </div>
@@ -732,7 +729,6 @@ const AdminUsersManagement = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         <div className="flex items-center mb-1"><Phone className="h-4 w-4 mr-2 text-gray-400" />{user.phone}</div>
-                        <div className="flex items-center"><Mail className="h-4 w-4 mr-2 text-gray-400" />{user.email}</div>
                       </div>
                     </td>
 
@@ -753,7 +749,6 @@ const AdminUsersManagement = () => {
 
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="space-y-1">
-                        <div>Oxirgi: {user.lastActive ? formatRelativeTime(user.lastActive) : '-'}</div>
                         <div>Ro'yxat: {user.createdAt ? formatDate(user.createdAt) : '-'}</div>
                         <div className="text-xs">{user.loginCount ?? 0} ta login</div>
                       </div>
@@ -764,9 +759,6 @@ const AdminUsersManagement = () => {
                         <button onClick={() => openModal('view', user)} className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" title="Ko'rish"><Eye className="h-4 w-4" /></button>
                         <button onClick={() => openModal('edit', user)} className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50" title="Tahrirlash"><Edit2 className="h-4 w-4" /></button>
 
-                        {user.status === 'PENDING' && (
-                          <button onClick={() => handleUserAction('approve', user.id)} className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50" title="Tasdiqlash"><UserCheck className="h-4 w-4" /></button>
-                        )}
 
                         {user.status === 'ACTIVE' ? (
                           <button onClick={() => handleUserAction('block', user.id)} className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50" title="Bloklash"><Lock className="h-4 w-4" /></button>
@@ -888,19 +880,14 @@ const AdminUsersManagement = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div><dt className="text-sm font-medium text-gray-500">Telefon</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.phone}</dd></div>
-                      <div><dt className="text-sm font-medium text-gray-500">Email</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.email}</dd></div>
                       <div><dt className="text-sm font-medium text-gray-500">Viloyat</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.region}</dd></div>
                       <div><dt className="text-sm font-medium text-gray-500">Tuman</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.district}</dd></div>
+                      <div><dt className="text-sm font-medium text-gray-500">Qishloq</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.village}</dd></div>
                       <div><dt className="text-sm font-medium text-gray-500">Ro'yxatdan o'tgan</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.createdAt ? formatDate(modal.data.createdAt) : '-'}</dd></div>
                       <div><dt className="text-sm font-medium text-gray-500">Oxirgi faollik</dt><dd className="mt-1 text-sm text-gray-900">{modal.data.lastActive ? formatRelativeTime(modal.data.lastActive) : '-'}</dd></div>
                     </div>
 
-                    {modal.data.notes && (
-                      <div>
-                        <dt className="text-sm font-medium text-gray-500 mb-2">Admin izohlari</dt>
-                        <dd className="text-sm text-gray-900 p-3 bg-gray-50 rounded-lg">{modal.data.notes}</dd>
-                      </div>
-                    )}
+                  
                   </div>
                 )}
 
@@ -920,8 +907,8 @@ const AdminUsersManagement = () => {
                       </div>
 
                       <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="email" value={formData.email || ''} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.email ? 'border-red-300' : 'border-gray-300'}`} />
+                        <label htmlFor="Qishloq" className="block text-sm font-medium text-gray-700">Qishloq</label>
+                        <input type="text" id="text" value={formData.village || ''} onChange={(e) => setFormData({ ...formData, village: e.target.value })} className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.email ? 'border-red-300' : 'border-gray-300'}`} />
                         {formErrors.email && <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>}
                       </div>
 
@@ -931,7 +918,6 @@ const AdminUsersManagement = () => {
                           <option value="" disabled>Rolni tanlang</option>
                           <option value="FARMER">Fermer</option>
                           <option value="BROKER">Broker</option>
-                          <option value="ADMIN">Admin</option>
                         </select>
                         {formErrors.role && <p className="mt-1 text-sm text-red-600">{formErrors.role}</p>}
                       </div>
@@ -941,9 +927,7 @@ const AdminUsersManagement = () => {
                         <select id="status" value={formData.status ?? ''} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
                           <option value="" disabled>Statusni tanlang</option>
                           <option value="ACTIVE">Faol</option>
-                          <option value="PENDING">Kutmoqda</option>
                           <option value="BLOCKED">Bloklangan</option>
-                          <option value="INACTIVE">Faol emas</option>
                         </select>
                         {formErrors.status && <p className="mt-1 text-sm text-red-600">{formErrors.status}</p>}
                       </div>
@@ -956,13 +940,6 @@ const AdminUsersManagement = () => {
                       <div>
                         <label htmlFor="district" className="block text-sm font-medium text-gray-700">Tuman</label>
                         <input type="text" id="district" value={formData.district || ''} onChange={(e) => setFormData({ ...formData, district: e.target.value })} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex items-center">
-                        <input id="isVerified" type="checkbox" checked={!!formData.isVerified} onChange={(e) => setFormData({ ...formData, isVerified: e.target.checked })} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
-                        <label htmlFor="isVerified" className="ml-2 block text-sm text-gray-900">Tasdiqlangan foydalanuvchi</label>
                       </div>
                     </div>
 
