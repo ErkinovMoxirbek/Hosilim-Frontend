@@ -6,7 +6,8 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import {
   Users, Apple, TrendingUp, BarChart3, DollarSign, Package,
-  Settings, ShoppingCart, Truck, Home, Menu, X, LogOut, ChevronLeft
+  Settings, ShoppingCart, Truck, Home, Menu, X, LogOut, ChevronLeft,
+  ShoppingBasket, PackagePlus, ArrowRightLeft, RotateCcw, List
 } from 'lucide-react';
 
 // Dashboard komponentlari
@@ -15,118 +16,30 @@ import BrokerDashboard from './dashboards/BrokerDashboard';
 import FarmerDashboard from './dashboards/FarmerDashboard';
 import ProductsPage from './page/ProductsPage';
 import AdminUsersPage from './page/admin/AdminUsersPage';
+import NewSalePage from './page/broker/NewSalePage';
+import CancelledSalePage from './page/broker/CancelledSalePage';
+import AllSalePage from './page/broker/AllSalePage';
+import PricingPage from './page/broker/PricingPage';
+import NewBasketsPage from './page/broker/NewBasketsPage';
+import AllBasketsPage from './page/broker/AllBasketsPage';
+import ReturnedBasketsPage from './page/broker/ReturnedBasketsPage';
+import BasketDistributionPage from './page/broker/BasketDistributionPage';
 
-/* ----------------------- Broker Sales: Layout & Pages (routing uchun) ----------------------- */
+/* ----------------------- Broker Sales: Layout & Pages ----------------------- */
 const BrokerSalesLayout = () => {
   return (
-    <div className="p-4 lg:p-8 bg-white rounded-lg lg:rounded-xl border border-gray-200">
-      <div className="flex items-center mb-6">
-        <TrendingUp className="w-6 h-6 mr-3 text-blue-600" />
-        <h2 className="text-lg lg:text-xl font-bold text-gray-900">Sotuvlar</h2>
-      </div>
       <Outlet />
-    </div>
   );
 };
 
-const NewSalePage = () => (
-  <div className="space-y-4">
-    <p className="text-gray-700">Bu yerda “Yangi sotuv” formasi bo‘ladi.</p>
-    <div className="p-3 bg-gray-50 rounded border border-gray-200">
-      <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
-        <li>Fermer tanlash</li>
-        <li>Mahsulot(lar) va miqdor</li>
-        <li>Narx/Narx belgilash</li>
-        <li>To‘lov va yetkazish ma’lumotlari</li>
-        <li>Saqlash / Jo‘natish</li>
-      </ul>
-    </div>
-  </div>
-);
-
-const AllSaleRow = ({ sale }) => (
-  <tr className="border-t">
-    <td className="px-3 py-2">{sale.id}</td>
-    <td className="px-3 py-2">{sale.date}</td>
-    <td className="px-3 py-2">{sale.broker}</td>
-    <td className="px-3 py-2">{sale.buyer}</td>
-    <td className="px-3 py-2">{sale.total}</td>
-    <td className="px-3 py-2">
-      <span
-        className={`px-2 py-1 rounded text-xs ${
-          sale.status === 'Yakunlangan'
-            ? 'bg-green-50 text-green-700 border border-green-200'
-            : sale.status === 'Jarayonda'
-            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-            : 'bg-gray-50 text-gray-700 border border-gray-200'
-        }`}
-      >
-        {sale.status}
-      </span>
-    </td>
-  </tr>
-);
-
-const AllSalesPage = () => {
-  const data = [
-    { id: 'S-1001', date: '2025-09-28', broker: 'Broker 1', buyer: 'Bozor X', total: '23,500,000 so‘m', status: 'Yakunlangan' },
-    { id: 'S-1002', date: '2025-09-28', broker: 'Broker 2', buyer: 'Zavod Y', total: '12,000,000 so‘m', status: 'Jarayonda' },
-  ];
+/* ----------------------- Broker Baskets: Layout & Pages ----------------------- */
+const BrokerBasketsLayout = () => {
   return (
-    <div className="overflow-auto rounded border border-gray-200">
-      <table className="min-w-full text-sm">
-        <thead className="bg-gray-50 text-gray-600">
-          <tr>
-            <th className="px-3 py-2 text-left font-semibold">ID</th>
-            <th className="px-3 py-2 text-left font-semibold">Sana</th>
-            <th className="px-3 py-2 text-left font-semibold">Broker</th>
-            <th className="px-3 py-2 text-left font-semibold">Xaridor</th>
-            <th className="px-3 py-2 text-left font-semibold">Jami</th>
-            <th className="px-3 py-2 text-left font-semibold">Holat</th>
-          </tr>
-        </thead>
-        <tbody className="text-gray-800 bg-white">
-          {data.map(s => <AllSaleRow key={s.id} sale={s} />)}
-        </tbody>
-      </table>
-    </div>
+      <Outlet />
   );
 };
 
-const CancelledSalesPage = () => {
-  const data = [
-    { id: 'S-0991', date: '2025-09-20', reason: 'Xaridor bekor qildi', amount: '7,200,000 so‘m' },
-  ];
-  return (
-    <div className="space-y-4">
-      <p className="text-gray-700">Bekor qilingan sotuvlar ro‘yxati:</p>
-      <div className="overflow-auto rounded border border-gray-200">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-50 text-gray-600">
-            <tr>
-              <th className="px-3 py-2 text-left font-semibold">ID</th>
-              <th className="px-3 py-2 text-left font-semibold">Sana</th>
-              <th className="px-3 py-2 text-left font-semibold">Sabab</th>
-              <th className="px-3 py-2 text-left font-semibold">Summa</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-800 bg-white">
-            {data.map((r) => (
-              <tr key={r.id} className="border-t">
-                <td className="px-3 py-2">{r.id}</td>
-                <td className="px-3 py-2">{r.date}</td>
-                <td className="px-3 py-2">{r.reason}</td>
-                <td className="px-3 py-2">{r.amount}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
-/* ----------------------- Sidebar (2-darajali menyu bilan) ----------------------- */
+/* ----------------------- Sidebar Component ----------------------- */
 const Sidebar = ({
   user,
   sections,
@@ -141,24 +54,45 @@ const Sidebar = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Broker sotuvlar submenu elementlari
+  // Broker sotuvlar submenu
   const salesSubmenu = useMemo(
     () => ([
-      { id: 'new', name: 'Yangi sotuv' },
-      { id: 'all', name: 'Barcha sotuvlar' },
-      { id: 'cancelled', name: 'Bekor qilingan' },
+      { id: 'new', name: 'Yangi sotuv', icon: PackagePlus },
+      { id: 'all', name: 'Barcha sotuvlar', icon: List },
+      { id: 'cancelled', name: 'Bekor qilingan', icon: X },
     ]),
     []
   );
 
-  // URLga qarab active’larni sinxronlash (refresh yoki tashqi navigatsiya holatlari)
+  // Broker savatlar submenu
+  const basketsSubmenu = useMemo(
+    () => ([
+      { id: 'new', name: 'Yangi qo\'shish', icon: PackagePlus },
+      { id: 'distribution', name: 'Savat tarqatish', icon: ArrowRightLeft },
+      { id: 'returned', name: 'Qaytarilgan savatlar', icon: RotateCcw },
+      { id: 'all', name: 'Savatlar hammasi', icon: List },
+    ]),
+    []
+  );
+
+  // URLga qarab active'larni sinxronlash
   React.useEffect(() => {
     if (user?.role?.includes('BROKER')) {
+      // Sales submenu
       if (/\/dashboard\/broker\/sales(\/|$)/.test(location.pathname)) {
         setActiveSection('sales');
         setIsSubmenuOpen(true);
         if (/\/sales\/new$/.test(location.pathname)) setActiveSubSection('new');
         else if (/\/sales\/cancelled$/.test(location.pathname)) setActiveSubSection('cancelled');
+        else setActiveSubSection('all');
+      }
+      // Baskets submenu
+      else if (/\/dashboard\/broker\/baskets(\/|$)/.test(location.pathname)) {
+        setActiveSection('baskets');
+        setIsSubmenuOpen(true);
+        if (/\/baskets\/new$/.test(location.pathname)) setActiveSubSection('new');
+        else if (/\/baskets\/distribution$/.test(location.pathname)) setActiveSubSection('distribution');
+        else if (/\/baskets\/returned$/.test(location.pathname)) setActiveSubSection('returned');
         else setActiveSubSection('all');
       }
     }
@@ -168,17 +102,30 @@ const Sidebar = ({
     setActiveSection('sales');
     setIsSubmenuOpen(true);
     setActiveSubSection('all');
-    navigate('/dashboard/broker/sales'); // index -> all ga redirect bo'ladi
+    navigate('/dashboard/broker/sales');
+  };
+
+  const openBasketsSubmenu = () => {
+    setActiveSection('baskets');
+    setIsSubmenuOpen(true);
+    setActiveSubSection('all');
+    navigate('/dashboard/broker/baskets');
   };
 
   const handleMainClick = (section) => {
-    // Broker va Sotuvlar bo'lsa — submenu ochiladi
+    // Broker va Sotuvlar bo'lsa
     if (user.role.includes('BROKER') && section.id === 'sales') {
       openSalesSubmenu();
       return;
     }
 
-    // Aks holda oddiy navigatsiya
+    // Broker va Savatlar bo'lsa
+    if (user.role.includes('BROKER') && section.id === 'baskets') {
+      openBasketsSubmenu();
+      return;
+    }
+
+    // Oddiy navigatsiya
     setActiveSection(section.id);
 
     if (user.role.includes('FARMER')) {
@@ -195,100 +142,129 @@ const Sidebar = ({
 
   const handleSubClick = (sub) => {
     setActiveSubSection(sub.id);
-    navigate(`/dashboard/broker/sales/${sub.id}`);
+    if (activeSection === 'sales') {
+      navigate(`/dashboard/broker/sales/${sub.id}`);
+    } else if (activeSection === 'baskets') {
+      navigate(`/dashboard/broker/baskets/${sub.id}`);
+    }
   };
 
   const handleBack = () => {
     setIsSubmenuOpen(false);
-    // “Sotuvlar”da turgan bo‘lsak, broker dashboardga yoki oldingi bo‘limga qaytamiz:
     navigate('/dashboard/broker');
   };
 
-  return (
-    <div className="w-64 lg:w-72 bg-white border-r border-gray-200 h-full">
-      {/* Top header */}
-      <div className="p-4 lg:p-6 border-b border-gray-200 flex items-center justify-between">
-        <div>
-          <h2 className="text-lg lg:text-xl font-bold text-gray-900">Hosilim Tizimi</h2>
-          <div className="flex items-center mt-2">
-            <div
-              className={`w-2 h-2 lg:w-3 lg:h-3 rounded-full mr-2 ${
-                user.role === "ADMIN"
-                  ? "bg-red-500"
-                  : user.role === "BROKER"
-                  ? "bg-blue-500"
-                  : "bg-green-500"
-              }`}
-            />
-            <p className="text-sm lg:text-base text-gray-600">{user.role}</p>
-          </div>
-        </div>
+  // Hozirgi active submenu ro'yxatini tanlash
+  const currentSubmenu = activeSection === 'sales' ? salesSubmenu : 
+                         activeSection === 'baskets' ? basketsSubmenu : [];
 
-        {/* Submenu rejimida "Orqaga" */}
-        {isSubmenuOpen && (
-          <button
-            onClick={handleBack}
-            className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
-            title="Orqaga"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-        )}
+  return (
+    <div className="w-64 lg:w-72 bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 h-full shadow-sm">
+      {/* Top header */}
+      <div className="p-4 lg:p-6 border-b border-gray-200 bg-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg lg:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Hosilim Tizimi
+            </h2>
+            <div className="flex items-center mt-2">
+              <div
+                className={`w-2 h-2 lg:w-3 lg:h-3 rounded-full mr-2 animate-pulse ${
+                  user.role === "ADMIN"
+                    ? "bg-red-500"
+                    : user.role === "BROKER"
+                    ? "bg-blue-500"
+                    : "bg-green-500"
+                }`}
+              />
+              <p className="text-sm lg:text-base text-gray-600 font-medium">{user.role}</p>
+            </div>
+          </div>
+
+          {/* Submenu rejimida "Orqaga" */}
+          {isSubmenuOpen && (
+            <button
+              onClick={handleBack}
+              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+              title="Orqaga"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main list yoki Submenu list */}
-      <nav className="p-3 lg:p-4">
+      <nav className="p-3 lg:p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
         {!isSubmenuOpen ? (
           // Asosiy bo'limlar
           <>
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => handleMainClick(section)}
-                className={`w-full flex items-center px-3 lg:px-4 py-2.5 lg:py-3 mb-1 lg:mb-2 rounded-lg text-sm lg:text-base font-medium transition-colors text-left ${
-                  activeSection === section.id
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <section.icon className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3 flex-shrink-0" />
-                <span className="truncate">{section.name}</span>
+            {sections.map((section) => {
+              const hasSubmenu = user.role.includes('BROKER') && 
+                                (section.id === 'sales' || section.id === 'baskets');
+              
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => handleMainClick(section)}
+                  className={`w-full flex items-center px-3 lg:px-4 py-2.5 lg:py-3 mb-1 lg:mb-2 rounded-xl text-sm lg:text-base font-medium transition-all text-left group ${
+                    activeSection === section.id
+                      ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md"
+                      : "text-gray-700 hover:bg-white hover:shadow-sm"
+                  }`}
+                >
+                  <section.icon className={`w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3 flex-shrink-0 ${
+                    activeSection === section.id ? '' : 'group-hover:scale-110 transition-transform'
+                  }`} />
+                  <span className="truncate">{section.name}</span>
 
-                {/* “Sotuvlar” bo'lsa, yoniga kichik indikator */}
-                {user.role.includes('BROKER') && section.id === 'sales' && (
-                  <span className="ml-auto text-xs text-gray-500">▶</span>
-                )}
-              </button>
-            ))}
+                  {/* Submenu indicator */}
+                  {hasSubmenu && (
+                    <ChevronLeft className={`ml-auto w-4 h-4 transform rotate-180 ${
+                      activeSection === section.id ? 'text-white' : 'text-gray-400'
+                    }`} />
+                  )}
+                </button>
+              );
+            })}
 
             <div className="mt-6 lg:mt-8 pt-3 lg:pt-4 border-t border-gray-200">
               <button
                 onClick={onLogout}
-                className="w-full flex items-center px-3 lg:px-4 py-2.5 lg:py-3 text-sm lg:text-base font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="w-full flex items-center px-3 lg:px-4 py-2.5 lg:py-3 text-sm lg:text-base font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all group"
               >
-                <LogOut className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3 flex-shrink-0" />
+                <LogOut className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3 flex-shrink-0 group-hover:scale-110 transition-transform" />
                 Chiqish
               </button>
             </div>
           </>
         ) : (
-          // Submenu (faqat broker/sales)
+          // Submenu
           <div>
-            <div className="px-3 lg:px-4 py-2.5 lg:py-3 mb-2 text-xs font-semibold text-gray-500 uppercase">
-              Sotuvlar bo‘limi
+            <div className="px-3 lg:px-4 py-2.5 lg:py-3 mb-3 flex items-center">
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  {activeSection === 'sales' ? 'Sotuvlar bo\'limi' : 'Savatlar bo\'limi'}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {currentSubmenu.length} ta bo'lim
+                </p>
+              </div>
             </div>
-            {salesSubmenu.map((sub) => (
+            
+            {currentSubmenu.map((sub) => (
               <button
                 key={sub.id}
                 onClick={() => handleSubClick(sub)}
-                className={`w-full flex items-center px-3 lg:px-4 py-2.5 lg:py-3 mb-1 lg:mb-2 rounded-lg text-sm lg:text-base font-medium transition-colors text-left ${
+                className={`w-full flex items-center px-3 lg:px-4 py-2.5 lg:py-3 mb-1 lg:mb-2 rounded-xl text-sm lg:text-base font-medium transition-all text-left group ${
                   activeSubSection === sub.id
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md"
+                    : "text-gray-700 hover:bg-white hover:shadow-sm"
                 }`}
               >
-                {/* Submenu ikonkalarini xohlasangiz alohida qo'shishingiz mumkin; hozircha bullet */}
-                <span className="w-2 h-2 rounded-full bg-gray-300 mr-3" />
+                <sub.icon className={`w-4 h-4 mr-3 flex-shrink-0 ${
+                  activeSubSection === sub.id ? '' : 'group-hover:scale-110 transition-transform'
+                }`} />
                 <span className="truncate">{sub.name}</span>
               </button>
             ))}
@@ -296,9 +272,9 @@ const Sidebar = ({
             <div className="mt-6 lg:mt-8 pt-3 lg:pt-4 border-t border-gray-200">
               <button
                 onClick={onLogout}
-                className="w-full flex items-center px-3 lg:px-4 py-2.5 lg:py-3 text-sm lg:text-base font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="w-full flex items-center px-3 lg:px-4 py-2.5 lg:py-3 text-sm lg:text-base font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all group"
               >
-                <LogOut className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3 flex-shrink-0" />
+                <LogOut className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3 flex-shrink-0 group-hover:scale-110 transition-transform" />
                 Chiqish
               </button>
             </div>
@@ -313,16 +289,17 @@ const Sidebar = ({
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const [activeSection, setActiveSection] = useState('dashboard');
-
-  // 2-darajali menyu holatlari (faqat broker uchun ishlatiladi)
   const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
   const [activeSubSection, setActiveSubSection] = useState('all');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Yuklanmoqda...</p>
+        </div>
       </div>
     );
   }
@@ -353,10 +330,11 @@ const Dashboard = () => {
     if (user.role.includes('BROKER')) {
       return [
         { id: 'dashboard', name: 'Bosh Sahifa', icon: Home },
+        { id: 'sales', name: 'Sotuvlar', icon: TrendingUp },
+        { id: 'baskets', name: 'Savatlar', icon: ShoppingBasket }, // YANGI!
         { id: 'farmers', name: 'Fermerlar', icon: Users },
         { id: 'inventory', name: 'Omborxona', icon: Package },
         { id: 'pricing', name: 'Narx Belgilash', icon: DollarSign },
-        { id: 'sales', name: 'Sotuvlar', icon: TrendingUp }, // <-- Submenu ochiladi
         { id: 'profile', name: 'Profil', icon: Settings }
       ];
     }
@@ -407,16 +385,18 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm">
         <div>
-          <h1 className="text-lg font-bold text-gray-900">Hosil Tizimi</h1>
+          <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            Hosil Tizimi
+          </h1>
           <p className="text-sm text-gray-600">{user.role}</p>
         </div>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
+          className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
         >
           {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -424,7 +404,10 @@ const Dashboard = () => {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setIsMobileMenuOpen(false)} />
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm" 
+          onClick={() => setIsMobileMenuOpen(false)} 
+        />
       )}
 
       <div className="flex">
@@ -444,7 +427,7 @@ const Dashboard = () => {
         </div>
 
         {/* Mobile Sidebar */}
-        <div className={`lg:hidden fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className={`lg:hidden fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <Sidebar
             user={user}
             sections={getSections()}
@@ -462,7 +445,7 @@ const Dashboard = () => {
         <div className="flex-1 min-w-0">
           <main className="p-3 lg:p-8">
             <Routes>
-              {/* Default dashboard route - role ga qarab redirect */}
+              {/* Default dashboard route */}
               <Route path="/" element={<Navigate to={getRoleBasedRoute()} replace />} />
 
               {/* Admin routes */}
@@ -492,13 +475,22 @@ const Dashboard = () => {
                     <Route path="/sales/*" element={<BrokerSalesLayout />}>
                       <Route index element={<Navigate to="all" replace />} />
                       <Route path="new" element={<NewSalePage />} />
-                      <Route path="all" element={<AllSalesPage />} />
-                      <Route path="cancelled" element={<CancelledSalesPage />} />
+                      <Route path="all" element={<AllSalePage />} />
+                      <Route path="cancelled" element={<CancelledSalePage />} />
+                    </Route>
+
+                    {/* Savatlar: nested - YANGI! */}
+                    <Route path="/baskets/*" element={<BrokerBasketsLayout />}>
+                      <Route index element={<Navigate to="all" replace />} />
+                      <Route path="new" element={<NewBasketsPage />} />
+                      <Route path="distribution" element={<BasketDistributionPage />} />
+                      <Route path="returned" element={<ReturnedBasketsPage />} />
+                      <Route path="all" element={<AllBasketsPage />} />
                     </Route>
 
                     <Route path="/farmers" element={renderSectionContent()} />
                     <Route path="/inventory" element={renderSectionContent()} />
-                    <Route path="/pricing" element={renderSectionContent()} />
+                    <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/profile" element={renderSectionContent()} />
                   </Routes>
                 ) : (
