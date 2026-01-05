@@ -66,7 +66,7 @@ const HosilimLanding = () => {
           {/* Logo */}
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
             <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white shadow-lg">
-              <TrendingUp size={24} strokeWidth={3} />
+              <img src="/logo-white.png" alt="Hosilim Logo" className="w-6 h-6" />
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold tracking-tight text-gray-900 leading-none">Hosilim</span>
