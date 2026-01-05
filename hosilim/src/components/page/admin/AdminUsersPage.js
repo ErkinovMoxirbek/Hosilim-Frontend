@@ -15,8 +15,8 @@ import API_BASE_URL from "../../../config";
 const AdminUsersManagement = () => {
   /* ======================= Core State ======================= */
   const [users, setUsers] = useState([]);
-  const [loadingInitial, setLoadingInitial] = useState(true); // 1st load
-  const [tableLoading, setTableLoading] = useState(false);     // re-fetches
+  const [loadingInitial, setLoadingInitial] = useState(true); 
+  const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 

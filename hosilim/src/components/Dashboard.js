@@ -7,7 +7,7 @@ import { useAuth } from '../hooks/useAuth';
 import {
   Users, Apple, TrendingUp, BarChart3, DollarSign, Package,
   Settings, ShoppingCart, Truck, Home, Menu, X, LogOut, ChevronLeft,
-  ShoppingBasket, PackagePlus, ArrowRightLeft, RotateCcw, List
+  ShoppingBasket, PackagePlus, ArrowRightLeft, RotateCcw, List, MapPin
 } from 'lucide-react';
 
 // Dashboard komponentlari
@@ -20,10 +20,11 @@ import NewSalePage from './page/broker/NewSalePage';
 import CancelledSalePage from './page/broker/CancelledSalePage';
 import AllSalePage from './page/broker/AllSalePage';
 import PricingPage from './page/broker/PricingPage';
-import NewBasketsPage from './page/broker/NewBasketsPage';
+import NewBasketsPage from './page/broker/TypeBasketsPage';
 import AllBasketsPage from './page/broker/AllBasketsPage';
 import ReturnedBasketsPage from './page/broker/ReturnedBasketsPage';
 import BasketDistributionPage from './page/broker/BasketDistributionPage';
+import CollectionPointsPage from './page/admin/CollectionPointsPage';
 
 /* ----------------------- Broker Sales: Layout & Pages ----------------------- */
 const BrokerSalesLayout = () => {
@@ -67,7 +68,7 @@ const Sidebar = ({
   // Broker savatlar submenu
   const basketsSubmenu = useMemo(
     () => ([
-      { id: 'new', name: 'Yangi qo\'shish', icon: PackagePlus },
+      { id: 'new', name: 'Savat turlari', icon: PackagePlus },
       { id: 'distribution', name: 'Savat tarqatish', icon: ArrowRightLeft },
       { id: 'returned', name: 'Qaytarilgan savatlar', icon: RotateCcw },
       { id: 'all', name: 'Savatlar hammasi', icon: List },
@@ -319,6 +320,7 @@ const Dashboard = () => {
       return [
         { id: 'dashboard', name: 'Bosh Sahifa', icon: Home },
         { id: 'users', name: 'Foydalanuvchilar', icon: Users },
+        { id: 'collection-points', name: 'Yig\'ish punktlari', icon: MapPin },
         { id: 'brokers', name: 'Brokerlar', icon: Truck },
         { id: 'farmers', name: 'Fermerlar', icon: Apple },
         { id: 'transactions', name: 'Moliyaviy Hisobotlar', icon: DollarSign },
@@ -455,6 +457,7 @@ const Dashboard = () => {
                     <Route path="/" element={<AdminDashboard />} />
                     <Route path="/users" element={<AdminUsersPage />} />
                     <Route path="/brokers" element={renderSectionContent()} />
+                    <Route path="/collection-points" element={<CollectionPointsPage /> } />
                     <Route path="/farmers" element={renderSectionContent()} />
                     <Route path="/transactions" element={renderSectionContent()} />
                     <Route path="/analytics" element={renderSectionContent()} />
