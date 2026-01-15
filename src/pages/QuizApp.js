@@ -7,7 +7,14 @@ const QuizApp = () => {
   const [currentGroup, setCurrentGroup] = useState(null);
 
   const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({}); // { [questionId]: optionIndex }
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // answers: { [questionId]: optionIndex }
+  const [answers, setAnswers] = useState({});
+
+  // feedback: { selected, isCorrect }
+  const [feedback, setFeedback] = useState(null);
+
   const [finished, setFinished] = useState(false);
 
   const [loadingGroups, setLoadingGroups] = useState(false);
@@ -57,8 +64,12 @@ const QuizApp = () => {
         if (!alive) return;
         setQuestions(Array.isArray(data) ? data : []);
         setCurrentGroup(groupId);
+
+        // reset states
         setFinished(false);
         setAnswers({});
+        setCurrentIndex(0);
+        setFeedback(null);
       })
       .catch((e) => {
         if (!alive) return;
@@ -74,54 +85,77 @@ const QuizApp = () => {
     };
   };
 
-  const selectAnswer = (questionId, optionIndex) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: optionIndex }));
-  };
-
-  const resetGroup = () => {
-    // shu guruhni qaytadan
-    if (currentGroup) startQuiz(currentGroup);
-  };
-
   const backToGroups = () => {
     setCurrentGroup(null);
     setQuestions([]);
     setAnswers({});
     setFinished(false);
+    setCurrentIndex(0);
+    setFeedback(null);
     setError(null);
   };
 
-  // Natijalarni hisoblash
-  const stats = useMemo(() => {
-    if (!questions.length) return { correct: 0, wrong: 0, unanswered: 0, total: 0 };
+  const resetGroup = () => {
+    if (currentGroup) startQuiz(currentGroup);
+  };
 
+  const currentQuestion = questions[currentIndex];
+
+  const handleSelect = (optionIndex) => {
+    if (!currentQuestion) return;
+    if (feedback) return; // feedback chiqib turganda qayta bosishni bloklaymiz
+
+    const q = currentQuestion;
+    const isCorrect = optionIndex === q.correctAnswer;
+
+    setAnswers((prev) => ({ ...prev, [q.id]: optionIndex }));
+    setFeedback({ selected: optionIndex, isCorrect });
+  };
+
+  const goNext = () => {
+    if (!currentQuestion) return;
+
+    // feedbackni yopamiz
+    setFeedback(null);
+
+    // oxirgi savol bo‘lsa yakunlash
+    if (currentIndex >= questions.length - 1) {
+      setFinished(true);
+      return;
+    }
+
+    setCurrentIndex((i) => i + 1);
+  };
+
+  // Natijalar
+  const stats = useMemo(() => {
     let correct = 0;
     let wrong = 0;
-    let unanswered = 0;
 
     for (const q of questions) {
       const chosen = answers[q.id];
-      if (chosen === undefined || chosen === null) {
-        unanswered++;
-        continue;
-      }
+      if (chosen === undefined) continue;
       if (chosen === q.correctAnswer) correct++;
       else wrong++;
     }
 
-    return { correct, wrong, unanswered, total: questions.length };
+    return {
+      correct,
+      wrong,
+      total: questions.length,
+      answered: Object.keys(answers).length,
+    };
   }, [questions, answers]);
 
-  // Noto‘g‘ri + belgilanmagan savollar ro‘yxati
   const wrongList = useMemo(() => {
     return questions.filter((q) => {
       const chosen = answers[q.id];
-      if (chosen === undefined || chosen === null) return true; // belgilanmagan ham chiqsin
+      if (chosen === undefined) return false; // bu variantda hamma javob berilgan bo‘ladi odatda
       return chosen !== q.correctAnswer;
     });
   }, [questions, answers]);
 
-  // Quiz tanlanmagan bo‘lsa: guruhlar ekrani
+  // GROUPS VIEW
   if (!currentGroup) {
     return (
       <div className="p-8">
@@ -155,77 +189,24 @@ const QuizApp = () => {
     );
   }
 
-  // Quiz ekrani
-  return (
-    <div className="max-w-3xl mx-auto p-6">
-      {error && (
-        <div className="mb-4 p-3 rounded bg-red-50 border border-red-200 text-red-700">
-          {error}
-        </div>
-      )}
-
-      {loadingQuestions ? (
+  // LOADING QUESTIONS
+  if (loadingQuestions) {
+    return (
+      <div className="max-w-3xl mx-auto p-6">
         <div className="p-6 bg-white rounded-xl shadow-sm border">Savollar yuklanmoqda...</div>
-      ) : !finished ? (
-        <>
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={backToGroups}
-              className="px-3 py-2 rounded bg-gray-100 hover:bg-gray-200"
-            >
-              Guruhlarga qaytish
-            </button>
+      </div>
+    );
+  }
 
-            <div className="text-sm text-gray-600">
-              Belgilangan:{" "}
-              <span className="font-semibold">
-                {Object.keys(answers).length}/{questions.length}
-              </span>
-            </div>
-          </div>
-
-          {questions.map((q, idx) => (
-            <div key={q.id} className="mb-8 p-4 bg-white border rounded-lg shadow-sm">
-              <p className="font-bold mb-3">
-                {idx + 1}. {q.question}
-              </p>
-
-              {q.options.map((opt, i) => (
-                <button
-                  key={i}
-                  onClick={() => selectAnswer(q.id, i)}
-                  className={`block w-full text-left p-2 my-1 rounded border transition ${
-                    answers[q.id] === i
-                      ? "bg-blue-100 border-blue-300"
-                      : "bg-gray-50 border-gray-200 hover:bg-gray-100"
-                  }`}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-          ))}
-
-          <div className="flex gap-3">
-            <button
-              onClick={() => setFinished(true)}
-              className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded"
-            >
-              YAKUNLASH
-            </button>
-            <button
-              onClick={resetGroup}
-              className="py-3 px-4 bg-gray-800 hover:bg-gray-900 text-white font-bold rounded"
-            >
-              Qayta boshlash
-            </button>
-          </div>
-        </>
-      ) : (
+  // FINISHED VIEW
+  if (finished)
+  {
+    return (
+      <div className="max-w-3xl mx-auto p-6">
         <div className="bg-white p-6 rounded-lg shadow-xl border">
           <h2 className="text-2xl font-bold mb-4 text-center text-blue-800">Natijalar</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
             <div className="p-4 rounded border bg-green-50">
               <div className="text-sm text-gray-600">To‘g‘ri</div>
               <div className="text-2xl font-bold">{stats.correct}</div>
@@ -234,53 +215,37 @@ const QuizApp = () => {
               <div className="text-sm text-gray-600">Noto‘g‘ri</div>
               <div className="text-2xl font-bold">{stats.wrong}</div>
             </div>
-            <div className="p-4 rounded border bg-yellow-50">
-              <div className="text-sm text-gray-600">Belgilanmagan</div>
-              <div className="text-2xl font-bold">{stats.unanswered}</div>
-            </div>
           </div>
 
-          <div className="mb-3 text-sm text-gray-700">
+          <div className="mb-5 text-sm text-gray-700">
             Jami savol: <span className="font-semibold">{stats.total}</span>
           </div>
 
-          <h3 className="text-lg font-bold mb-3">
-            Noto‘g‘ri / belgilanmagan savollar ({wrongList.length})
-          </h3>
+          {/* Noto‘g‘ri savollarni ko‘rsatish (ixtiyoriy) */}
+          {wrongList.length > 0 && (
+            <>
+              <h3 className="text-lg font-bold mb-3">
+                Noto‘g‘ri javoblar ({wrongList.length})
+              </h3>
 
-          {wrongList.length === 0 ? (
-            <div className="p-4 rounded bg-green-50 border text-green-700">
-              Barchasi to‘g‘ri. Ajoyib natija.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {wrongList.map((q) => {
-                const chosen = answers[q.id];
-                const isUnanswered = chosen === undefined || chosen === null;
-
-                return (
-                  <div
-                    key={q.id}
-                    className={`p-4 rounded border ${
-                      isUnanswered ? "bg-yellow-50" : "bg-red-50"
-                    }`}
-                  >
-                    <p className="font-semibold mb-2">{q.question}</p>
-
-                    <p className="text-sm">
-                      Sizning javob:{" "}
-                      <span className="font-bold">
-                        {isUnanswered ? "Belgilanmagan" : q.options[chosen]}
-                      </span>
-                    </p>
-
-                    <p className="text-sm text-green-800 font-semibold mt-1">
-                      To‘g‘ri javob: {q.options[q.correctAnswer]}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
+              <div className="space-y-3">
+                {wrongList.map((q) => {
+                  const chosen = answers[q.id];
+                  return (
+                    <div key={q.id} className="p-4 rounded border bg-red-50">
+                      <p className="font-semibold mb-2">{q.question}</p>
+                      <p className="text-sm">
+                        Sizning javob:{" "}
+                        <span className="font-bold">{q.options[chosen]}</span>
+                      </p>
+                      <p className="text-sm text-green-800 font-semibold mt-1">
+                        To‘g‘ri javob: {q.options[q.correctAnswer]}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
 
           <div className="flex gap-3 mt-6">
@@ -297,6 +262,107 @@ const QuizApp = () => {
               Guruh tanlash
             </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // QUIZ VIEW (ONE QUESTION AT A TIME)
+  return (
+    <div className="max-w-3xl mx-auto p-6">
+      {error && (
+        <div className="mb-4 p-3 rounded bg-red-50 border border-red-200 text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={backToGroups}
+          className="px-3 py-2 rounded bg-gray-100 hover:bg-gray-200"
+        >
+          Guruhlarga qaytish
+        </button>
+
+        <div className="text-sm text-gray-600">
+          Savol: <span className="font-semibold">{currentIndex + 1}</span> /{" "}
+          <span className="font-semibold">{questions.length}</span>
+        </div>
+      </div>
+
+      {currentQuestion && (
+        <div className="p-5 bg-white border rounded-lg shadow-sm">
+          <p className="font-bold mb-4">{currentQuestion.question}</p>
+
+          <div className="space-y-2">
+            {currentQuestion.options.map((opt, i) => {
+              const selected = feedback?.selected === i;
+              const correct = currentQuestion.correctAnswer === i;
+
+              // feedback bo‘lsa: ranglar
+              let cls =
+                "w-full text-left p-3 rounded border transition bg-gray-50 border-gray-200 hover:bg-gray-100";
+
+              if (feedback) {
+                // tanlangan javob
+                if (selected && feedback.isCorrect) cls = "w-full text-left p-3 rounded border bg-green-100 border-green-300";
+                else if (selected && !feedback.isCorrect) cls = "w-full text-left p-3 rounded border bg-red-100 border-red-300";
+                // to‘g‘ri javobni ham ajratib ko‘rsatish (noto‘g‘ri tanlanganda)
+                else if (!feedback.isCorrect && correct) cls = "w-full text-left p-3 rounded border bg-green-50 border-green-200";
+                else cls = "w-full text-left p-3 rounded border bg-gray-50 border-gray-200";
+              }
+
+              return (
+                <button key={i} onClick={() => handleSelect(i)} className={cls}>
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Feedback blok */}
+          {feedback && (
+            <div className={`mt-4 p-3 rounded border ${feedback.isCorrect ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
+              {feedback.isCorrect ? (
+                <div className="font-semibold">To‘g‘ri!</div>
+              ) : (
+                <>
+                  <div className="font-semibold">Noto‘g‘ri tanladingiz.</div>
+                  <div className="mt-1 text-sm">
+                    To‘g‘ri javob:{" "}
+                    <span className="font-bold">
+                      {currentQuestion.options[currentQuestion.correctAnswer]}
+                    </span>
+                  </div>
+                </>
+              )}
+
+              <button
+                onClick={goNext}
+                className="mt-3 w-full py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold"
+              >
+                {currentIndex === questions.length - 1 ? "YAKUNLASH" : "KEYINGI"}
+              </button>
+            </div>
+          )}
+
+          {/* Agar javob tanlanmagan bo‘lsa, pastda yordamchi tugmalar */}
+          {!feedback && (
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={resetGroup}
+                className="py-2 px-4 bg-gray-800 hover:bg-gray-900 text-white font-bold rounded"
+              >
+                Qayta boshlash
+              </button>
+              <button
+                onClick={() => setFinished(true)}
+                className="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded"
+              >
+                Yakunlash (erta)
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
