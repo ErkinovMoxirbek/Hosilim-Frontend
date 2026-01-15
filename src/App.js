@@ -1,34 +1,12 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import LandingPage from './components/LandingPage';
-import MarketDashboard from './components/dashboards/MarketDashboard';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
-import PrivateRoute from "./components/PrivateRoute";
-import UserExtraInfoForm from "./components/UserExtraInfoForm";
-import { ThemeProvider } from './context/ThemeContext';
-import FarmerDashboard from './components/dashboards/FarmerDashboard';
-import Iqtibosxona from './components/Iqtibosxona';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import QuizApp from "./pages/QuizApp";
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/iqtibosxona" element={<Iqtibosxona />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/market" element={<MarketDashboard />} />
-        <Route
-          path="/dashboard/*"
-          element={
-            <PrivateRoute>
-              <ThemeProvider>
-                <Dashboard /> 
-              </ThemeProvider>
-            </PrivateRoute>
-          } 
-        />
-        <Route path="/extra-info" element={<UserExtraInfoForm />} />
+        <Route path="/" element={<QuizApp />} />
       </Routes>
     </Router>
   );

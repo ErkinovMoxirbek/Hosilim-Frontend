@@ -25,6 +25,7 @@ import AllBasketsPage from './page/broker/AllBasketsPage';
 import ReturnedBasketsPage from './page/broker/ReturnedBasketsPage';
 import BasketDistributionPage from './page/broker/BasketDistributionPage';
 import CollectionPointsPage from './page/admin/CollectionPointsPage';
+import AdminUsersManagement from '../pages/admin/AdminUsersManagement';
 
 /* ----------------------- Broker Sales: Layout & Pages ----------------------- */
 const BrokerSalesLayout = () => {
@@ -455,7 +456,7 @@ const Dashboard = () => {
                 user.role && user.role.includes('ADMIN') ? (
                   <Routes>
                     <Route path="/" element={<AdminDashboard />} />
-                    <Route path="/users" element={<AdminUsersPage />} />
+                    <Route path="/users" element={<AdminUsersManagement />} />
                     <Route path="/brokers" element={renderSectionContent()} />
                     <Route path="/collection-points" element={<CollectionPointsPage /> } />
                     <Route path="/farmers" element={renderSectionContent()} />
