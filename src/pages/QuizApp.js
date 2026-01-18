@@ -287,10 +287,10 @@ const QuizApp = () => {
     <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-pink-100 mb-6">
       <div className="max-w-3xl mx-auto px-4 py-3 flex flex-col items-center justify-center text-center">
         <h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
-          Nilufarxon uchun maxsus ✨(م)dan
+          Bu maxsus Nilufarxon uchun tayyorlangan.
         </h1>
         <p className="text-xs text-gray-500 font-medium mt-0.5">
-          O‘qishlaringizga doim omad tilayman! 🎓
+          Agar siz Nilufarxon bo'lmasangiz, iltimos, Nilufarxonga raxmat ayting!  
         </p>
       </div>
     </div>
