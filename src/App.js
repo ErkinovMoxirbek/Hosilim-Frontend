@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import QuizApp from "./pages/QuizApp";
 import LandingPage from "./components/LandingPage";
