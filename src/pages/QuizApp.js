@@ -290,7 +290,7 @@ const QuizApp = () => {
           Bu maxsus Nilufarxon uchun tayyorlangan.
         </h1>
         <p className="text-xs text-gray-500 font-medium mt-0.5">
-          Agar siz Nilufarxon bo'lmasangiz, iltimos, Nilufarxonga raxmat ayting!  
+          Texnalogiya  
         </p>
       </div>
     </div>
