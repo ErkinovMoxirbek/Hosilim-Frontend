@@ -46,10 +46,10 @@ const HosilimLanding = () => {
     setMobileOpen(false);
   };
 
-  const handleLogin = () => {
+  const handleAuth = () => {
     // Agar token bo'lsa dashboardga, bo'lmasa loginga
     const token = localStorage.getItem('authToken');
-    navigate(token ? '/dashboard' : '/login');
+    navigate(token ? '/dashboard' : '/auth');
   };
 
   return (
@@ -90,7 +90,7 @@ const HosilimLanding = () => {
           {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-4">
             <button 
-              onClick={handleLogin}
+              onClick={handleAuth}
               className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
             >
               Tizimga kirish
@@ -119,7 +119,7 @@ const HosilimLanding = () => {
               </button>
             ))}
             <button 
-              onClick={handleLogin}
+              onClick={handleAuth}
               className="w-full py-3 bg-green-600 text-white font-bold rounded-lg mt-2"
             >
               Tizimga kirish
@@ -154,7 +154,7 @@ const HosilimLanding = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button 
-              onClick={handleLogin}
+              onClick={handleAuth}
               className="w-full sm:w-auto px-8 py-4 bg-green-600 text-white text-lg font-bold rounded-xl shadow-lg shadow-green-200 hover:bg-green-700 transition-all hover:-translate-y-1 flex items-center justify-center gap-2"
             >
               Hoziroq boshlash <ArrowRight size={20} />

@@ -10,7 +10,7 @@ import {
 import 'rsuite/dist/rsuite.min.css';
 import { DateRangePicker } from 'rsuite';
 
-import API_BASE_URL from "../../../config";
+import API_BASE_URL from "../../config";
 
 const AdminUsersManagement = () => {
   /* ======================= Core State ======================= */

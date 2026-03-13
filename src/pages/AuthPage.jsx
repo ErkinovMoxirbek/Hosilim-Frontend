@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Award, ShieldCheck, Users, Truck,
@@ -8,6 +8,7 @@ import {
 
 import API_BASE_URL from "../config";
 import { authService } from "../services/authService";
+import { useAuth } from "../hooks/useAuth"; // ✅ MUHIM
 
 const RESEND_SECONDS = 60;
 
@@ -49,8 +50,11 @@ async function fetchStatsWithFailover(signal) {
   return { totalUsers: 1200, totalTransactions: 4500, activeBrokers: 85 };
 }
 
-export default function Login() {
+export default function AuthPage() {
   const navigate = useNavigate();
+
+  // ✅ AuthContext
+  const { boot, user, loading } = useAuth();
 
   const [phone, setPhone] = useState(() => onlyDigits9(localStorage.getItem("lastPhone") || ""));
   const [otp, setOtp] = useState("");
@@ -64,6 +68,13 @@ export default function Login() {
 
   const otpRef = useRef(null);
   const abortRef = useRef(null);
+
+  // ✅ Agar user allaqachon login bo‘lsa, bu sahifada turmasin
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [loading, user, navigate]);
 
   // stats
   useEffect(() => {
@@ -133,13 +144,14 @@ export default function Login() {
     setError("");
 
     try {
+      // 1) OTP verify
       await authService.verifyOtp(fullE164(phone), otp, ctrl.signal);
 
-      const me = await authService.me(ctrl.signal);
-      const status = me?.data?.status;
+      // ✅ 2) ENG MUHIM: AuthContext’ni yangilash
+      await boot();
 
-      if (status === "ACTIVE") navigate("/dashboard", { replace: true });
-      else navigate("/extra-info", { replace: true });
+      // ✅ 3) endi user contextda bor bo‘ladi
+      navigate("/dashboard", { replace: true });
     } catch (e) {
       setError(e?.message || "Kod noto'g'ri kiritildi");
     } finally {
@@ -200,27 +212,6 @@ export default function Login() {
                   <span className="font-semibold text-gray-700">{item.title}</span>
                 </div>
               ))}
-            </div>
-
-            <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
-              {statsLoading ? (
-                <div className="text-sm text-gray-400">Statistika yuklanmoqda...</div>
-              ) : (
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div>
-                    <div className="text-xl font-black text-gray-900">{stats.totalUsers}</div>
-                    <div className="text-xs text-gray-500">Foydalanuvchi</div>
-                  </div>
-                  <div>
-                    <div className="text-xl font-black text-gray-900">{stats.totalTransactions}</div>
-                    <div className="text-xs text-gray-500">Tranzaksiya</div>
-                  </div>
-                  <div>
-                    <div className="text-xl font-black text-gray-900">{stats.activeBrokers}</div>
-                    <div className="text-xs text-gray-500">Broker</div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
