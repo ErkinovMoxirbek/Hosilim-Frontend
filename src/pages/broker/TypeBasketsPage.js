@@ -501,9 +501,7 @@ export default function BasketTypesManagement() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    loadBasketTypes();
-  }, [page]);
+
 
   const filteredTypesMemo = useMemo(() => {
     if (!searchQuery) return basketTypes;

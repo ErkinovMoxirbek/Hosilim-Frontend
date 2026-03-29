@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Apple, ShoppingCart, DollarSign, Package, Plus,
   Star, Check, X, TrendingUp, TrendingDown, Eye, AlertCircle,
@@ -266,9 +266,6 @@ const FarmerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchFarmerData();
-  }, []);
 
   const fetchFarmerData = async () => {
     try {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './oriental-styles.css'; 
 
 const translations = {
@@ -12,8 +12,9 @@ const translations = {
     timerTitle: "BAXTLI ONLARGACHA",
     lblDays: "KUN", lblHours: "SOAT", lblMinutes: "DAQIQA", lblSeconds: "SONIYA",
     galleryTitle: "BIZNING LAHZALAR",
+    videoTitle: "SEVGI QISSAMIZ",
     programTitle: "TO'Y DASTURI",
-    prog1: "Kuyovnavkar", prog2: "Kuyov va kelin tashrifi",
+    prog1: "Kuyovnavkar", prog2: "Kelin va kuyovning tashrifi",
     prog3: "To'y oshi va tabriklar", prog4: "To'y yakuni",
     dressCodeTitle: "DRESS CODE",
     dressCodeText: "Oqshomimiz yanada ko'rkam o'tishi uchun quyidagi ranglardagi liboslarda tashrif buyurishingizni tavsiya qilamiz:",
@@ -25,6 +26,11 @@ const translations = {
     giftsText: "Sizning e'tiboringiz va samimiy tilaklaringiz biz uchun eng katta sovg'adir. Agar istasangiz, quyidagi hisob orqali qutlov yuborishingiz mumkin:",
     copyBtn: "NUSXA OLISH",
     copiedBtn: "NUSXA OLINDI ✔",
+    guestbookTitle: "DIL SO'ZLARINGIZ",
+    gbName: "Ism va Familiyangiz",
+    gbMessage: "Samimiy tilaklaringizni yozing...",
+    gbSend: "TILAKNI YUBORISH",
+    gbSent: "Rahmat! Tilagingiz qabul qilindi ❤️",
     rsvpTitle: "TASHRIFINGIZNI TASDIQLANG",
     rsvpText: "Marosimda ishtirok etishingizni oldindan ma'lum qilishingizni so'raymiz.",
     btnAccept: "ALBATTA BORAMAN",
@@ -40,8 +46,9 @@ const translations = {
     timerTitle: "ДО СЧАСТЛИВЫХ МГНОВЕНИЙ",
     lblDays: "ДНЕЙ", lblHours: "ЧАСОВ", lblMinutes: "МИНУТ", lblSeconds: "СЕКУНД",
     galleryTitle: "НАШИ МОМЕНТЫ",
+    videoTitle: "НАША ИСТОРИЯ ЛЮБВИ",
     programTitle: "ПРОГРАММА ВЕЧЕРА",
-    prog1: "Друзья жениха", prog2: "Организация жениха и невесты",
+    prog1: "Утренний плов", prog2: "Выход жениха и невесты",
     prog3: "Свадебный плов и поздравления", prog4: "Завершение вечера",
     dressCodeTitle: "ДРЕСС-КОД",
     dressCodeText: "Для поддержания атмосферы праздника, будем рады видеть вас в нарядах следующих оттенков:",
@@ -53,6 +60,11 @@ const translations = {
     giftsText: "Ваше присутствие и теплые слова — лучший подарок для нас. При желании вы можете отправить поздравление по реквизитам ниже:",
     copyBtn: "СКОПИРОВАТЬ",
     copiedBtn: "СКОПИРОВАНО ✔",
+    guestbookTitle: "ВАШИ ПОЖЕЛАНИЯ",
+    gbName: "Ваше Имя и Фамилия",
+    gbMessage: "Напишите ваши искренние пожелания...",
+    gbSend: "ОТПРАВИТЬ ПОЖЕЛАНИЕ",
+    gbSent: "Спасибо! Ваше пожелание принято ❤️",
     rsvpTitle: "ПОДТВЕРДИТЕ ПРИСУТСТВИЕ",
     rsvpText: "Просим заранее сообщить о вашем присутствии на нашем торжестве.",
     btnAccept: "ОБЯЗАТЕЛЬНО БУДУ",
@@ -66,9 +78,7 @@ export default function OrientalInvitation() {
   const [isGateHidden, setIsGateHidden] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   
-  // ==========================================
-  // TO'G'RILANGAN QISM: LOCAL STORAGE
-  // ==========================================
+  // LocalStorage RSVP Hisoblagichi
   const [rsvpStatus, setRsvpStatus] = useState(() => {
     const savedStatus = localStorage.getItem('rsvpStatus');
     return savedStatus ? savedStatus : null;
@@ -80,18 +90,15 @@ export default function OrientalInvitation() {
   });
 
   useEffect(() => {
-    if (rsvpStatus) {
-      localStorage.setItem('rsvpStatus', rsvpStatus);
-    }
+    if (rsvpStatus) localStorage.setItem('rsvpStatus', rsvpStatus);
   }, [rsvpStatus]);
 
   useEffect(() => {
     localStorage.setItem('rsvpCounts', JSON.stringify(counts));
   }, [counts]);
-  // ==========================================
-  
+
   const [timeLeft, setTimeLeft] = useState({ days: '00', hours: '00', minutes: '00', seconds: '00' });
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(false); 
 
   const revealRefs = useRef([]);
   revealRefs.current = [];
@@ -140,8 +147,9 @@ export default function OrientalInvitation() {
   const handleOpenGate = () => {
     setIsGateOpened(true);
     if (audioRef.current) {
-      audioRef.current.play().catch(e => console.log(e));
-      setIsPlaying(true);
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(e => console.log("Audio play error:", e));
     }
     setTimeout(() => setIsGateHidden(true), 1500);
   };
@@ -164,10 +172,10 @@ export default function OrientalInvitation() {
   };
 
   const handleCopyCard = () => {
-    const cardNumber = "8600 1234 5678 9012";
+    const cardNumber = "4067 0700 0947 4359"; 
     navigator.clipboard.writeText(cardNumber);
     setCopied(true);
-    setTimeout(() => setCopied(false), 3000);
+    setTimeout(() => setCopied(false), 3000); 
   };
 
   const googleCalendarLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Mohirbek+va+Nilufarxon+To'y+Tantanasi&dates=20260526T130000Z/20260526T180000Z&details=Bizning+quvonchli+kunimizda+mehmonimiz+bo'ling!&location=Imperial+Tantanalar+Saroyi,+Farg'ona";
@@ -185,28 +193,45 @@ export default function OrientalInvitation() {
         <button className={`lang-circle ${lang === 'ru' ? 'active' : ''}`} onClick={() => setLang('ru')}>RU</button>
       </div>
 
+      {/* ==========================================
+          YANGILANGAN INTRO: O'YMA NAQSHLI DARVOZA
+      ========================================== */}
       {!isGateHidden && (
         <div className={`gate-container ${isGateOpened ? 'open' : ''}`}>
           <div className="gate left">
-            <div className="gate-line left-line"></div>
-            <div className="star-icon left-star">✦</div>
+            {/* Xunuk chiziq o'rniga naqshli border */}
+            <div className="gate-edge left-edge"></div>
           </div>
           <div className="gate right">
-            <div className="gate-line right-line"></div>
-            <div className="star-icon right-star">✦</div>
+            <div className="gate-edge right-edge"></div>
           </div>
           
           <div className={`intro-center ${isGateOpened ? 'fade-out' : ''}`}>
-            <p className="intro-subtitle">{t.invitation}</p>
-            <h1 className="main-names gold-text">MOHIRBEK <span className="ampersand">&</span> NILUFARXON</h1>
-            <p className="intro-date">26 . 05 . 2026</p>
-            <button className="capsule-btn primary" onClick={handleOpenGate}>
-              {t.openBtn}
-            </button>
+            {/* Arkali Ramka (Ochiluvchi xat ko'rinishi) */}
+            <div className="intro-frame">
+              
+              {/* Tepada nafis yulduzchalar */}
+              <div style={{display: 'flex', justifyContent: 'center', gap: '40px', marginBottom: '20px'}}>
+                 <span className="star-icon text-glow">✦</span>
+                 <span className="star-icon text-glow">✦</span>
+              </div>
+
+              <p className="intro-subtitle">{t.invitation}</p>
+              <h1 className="main-names gold-text title-glow">MOHIRBEK <span className="ampersand">&</span> NILUFARXON</h1>
+              
+              {/* JS xato bermasligi uchun oddiy yozuv */}
+              <p className="intro-date">26 . 05 . 2026</p>
+              <button className="capsule-btn glowing-btn pulse-effect" onClick={handleOpenGate}>
+                {t.openBtn}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
+      {/* ==========================================
+          ASOSIY SAHIFA QISMI
+      ========================================== */}
       <div className={`main-scroll-content ${isGateOpened ? 'show' : ''}`}>
         
         <button className={`music-fab ${isPlaying ? 'spin' : ''}`} onClick={toggleMusic}>
@@ -285,7 +310,7 @@ export default function OrientalInvitation() {
             <p className="intro-date" style={{fontSize: '1.2rem', margin: '20px 0'}}>{t.calendarTime}</p>
             
             <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap', marginTop: '20px' }}>
-              <a href="https://yandex.uz/maps/-/CPVdUQMb" target="_blank" rel="noreferrer" className="capsule-btn outline">
+              <a href="https://yandex.uz/maps/-/CPVdUQMb" target="_blank" rel="noreferrer" className="capsule-btn outline-dark">
                 {t.mapBtn}
               </a>
               <a href={googleCalendarLink} target="_blank" rel="noreferrer" className="capsule-btn outline-dark" style={{color: '#ceab5d', borderColor: '#ceab5d'}}>
@@ -312,15 +337,17 @@ export default function OrientalInvitation() {
         </section>
 
         <section className="reveal rsvp-section" ref={addToRefs}>
-          <h2 className="section-title">{t.rsvpTitle}</h2>
-          <p className="main-lead" style={{marginBottom: '40px', fontStyle: 'italic'}}>{t.rsvpText}</p>
+          <h2 className="section-title rsvp-main-title">{t.rsvpTitle}</h2>
+          <p className="rsvp-subtitle">{t.rsvpText}</p>
           
           <div className="capsule-group">
-            <button className={`capsule-btn ${rsvpStatus === 'accept' ? 'primary' : 'outline-dark'}`} onClick={() => handleRsvp('accept')}>
-              {t.btnAccept} <span className="count-badge">{counts.accept}</span>
+            <button className={`capsule-btn rsvp-btn ${rsvpStatus === 'accept' ? 'active-accept' : ''}`} onClick={() => handleRsvp('accept')}>
+              <span className="rsvp-text">{t.btnAccept}</span> 
+              <span className="count-circle">{counts.accept}</span>
             </button>
-            <button className={`capsule-btn ${rsvpStatus === 'decline' ? 'outline' : 'outline-dark'}`} onClick={() => handleRsvp('decline')}>
-              {t.btnDecline} <span className="count-badge">{counts.decline}</span>
+            <button className={`capsule-btn rsvp-btn ${rsvpStatus === 'decline' ? 'active-decline' : ''}`} onClick={() => handleRsvp('decline')}>
+              <span className="rsvp-text">{t.btnDecline}</span> 
+              <span className="count-circle">{counts.decline}</span>
             </button>
           </div>
         </section>
