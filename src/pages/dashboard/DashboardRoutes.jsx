@@ -4,14 +4,12 @@ import { useAuth } from "../../hooks/useAuth";
 
 import AdminLayout from "./layouts/AdminLayout";
 import BrokerLayout from "./layouts/BrokerLayout";
-import BigBrokerLayout from "./layouts/BigBrokerLayout";
 import FarmerLayout from "./layouts/FarmerLayout";
 
 export default function DashboardRoutes() {
   const { user, loading } = useAuth();
-
-  // ✅ 1-kirishda user set bo‘lishi uchun kichik grace
   const [grace, setGrace] = useState(true);
+
   useEffect(() => {
     const t = setTimeout(() => setGrace(false), 600);
     return () => clearTimeout(t);
@@ -46,7 +44,6 @@ export default function DashboardRoutes() {
     );
   }
 
-  // ✅ Auth page’ga qaytish
   if (!user) return <Navigate to="/auth" replace />;
 
   return (
@@ -55,22 +52,35 @@ export default function DashboardRoutes() {
 
       <Route
         path="/admin/*"
-        element={hasRole("ADMIN") ? <AdminLayout /> : <Navigate to={defaultRoute()} replace />}
+        element={
+          hasRole("ADMIN") ? (
+            <AdminLayout />
+          ) : (
+            <Navigate to={defaultRoute()} replace />
+          )
+        }
       />
 
       <Route
-        path="/big-broker/*"
-        element={hasRole("BIG_BROKER") ? <BigBrokerLayout /> : <Navigate to={defaultRoute()} replace />}
-      />
-      
-      <Route
         path="/broker/*"
-        element={hasRole("BROKER") ? <BrokerLayout /> : <Navigate to={defaultRoute()} replace />}
+        element={
+          hasRole("BROKER") ? (
+            <BrokerLayout />
+          ) : (
+            <Navigate to={defaultRoute()} replace />
+          )
+        }
       />
 
       <Route
         path="/farmer/*"
-        element={hasRole("FARMER") ? <FarmerLayout /> : <Navigate to={defaultRoute()} replace />}
+        element={
+          hasRole("FARMER") ? (
+            <FarmerLayout />
+          ) : (
+            <Navigate to={defaultRoute()} replace />
+          )
+        }
       />
 
       <Route path="*" element={<Navigate to={defaultRoute()} replace />} />

@@ -1,31 +1,18 @@
-import { Navigate, Outlet } from "react-router-dom";
+import React from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { getAccessToken, getUser } from "../utils/tokenManager";
 
-const PrivateRoute = () => {
-  const { loading } = useAuth();
-  const token = getAccessToken();
-  const user = getUser();
+export default function PrivateRoute() {
+  const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
-  // Token bor, lekin user hali kelmagan bo‘lsa — redirect qilmay kutamiz
-  if (!user && token) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-        <p className="ml-3 text-gray-600">Sessiya yuklanmoqda...</p>
-      </div>
-    );
+  if (!user) {
+    return <Navigate to="/auth" replace state={{ from: location }} />;
   }
 
-  return user ? <Outlet /> : <Navigate to="/login" replace />;
-};
-
-export default PrivateRoute;
+  return <Outlet />;
+}

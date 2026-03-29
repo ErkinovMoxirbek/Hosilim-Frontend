@@ -1,241 +1,245 @@
-import React, { useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronLeft, LogOut } from "lucide-react";
+import React, { useMemo, useState, useEffect } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ChevronRight,
+  LogOut,
+  TrendingUp,
+  ShoppingBasket,
+  Users,
+  Package,
+  DollarSign,
+  Settings,
+  List,
+  X,
+  PackagePlus,
+  ArrowRightLeft,
+  RotateCcw,
+  LayoutGrid,
+  ArrowLeft
+} from "lucide-react";
 
-const Sidebar = ({
-  user,
-  sections,
-  activeSection,
-  setActiveSection,
-  onLogout,
-  isSubmenuOpen,
-  setIsSubmenuOpen,
-  activeSubSection,
-  setActiveSubSection,
-  salesSubmenu = [],
-  basketsSubmenu = [],
-}) => {
-  const navigate = useNavigate();
+function getBasePath(user) {
+  const roles = Array.isArray(user?.roles) ? user.roles : [user?.role].filter(Boolean);
+  const hasRole = (key) => roles.some((r) => String(r).toUpperCase().includes(key));
+
+  if (hasRole("ADMIN")) return "/dashboard/admin";
+  if (hasRole("BIG_BROKER")) return "/dashboard/big-broker";
+  if (hasRole("BROKER")) return "/dashboard/broker";
+  return "/dashboard/farmer";
+}
+
+export default function Sidebar({ user, onLogout }) {
+  const basePath = useMemo(() => getBasePath(user), [user]);
   const location = useLocation();
+  const isBrokerLike = basePath.includes("broker");
+  
+  // "main", "sales" yoki "baskets" holatlarini ushlab turadi
+  const [currentView, setCurrentView] = useState("main");
 
-  // URLga qarab active'larni sinxronlash (BROKER submenu)
-  React.useEffect(() => {
-    if (!user?.role?.includes("BROKER")) return;
+  // Sahifa yangilanganda kerakli menyuni ochiq qoldirish
+  useEffect(() => {
+    if (location.pathname.includes("/sales")) setCurrentView("sales");
+    else if (location.pathname.includes("/baskets")) setCurrentView("baskets");
+    else setCurrentView("main");
+  }, []);
 
-    // Sales
-    if (/\/dashboard\/broker\/sales(\/|$)/.test(location.pathname)) {
-      setActiveSection("sales");
-      setIsSubmenuOpen(true);
+  const mainItems = [
+    { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
+    ...(isBrokerLike ? [
+      { id: "sales", label: "Sotuvlar", icon: TrendingUp, hasSubMenu: true },
+      { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
+    ] : []),
+    { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
+    { id: "farmers", label: "Fermerlar", icon: Users, to: `${basePath}/farmers` },
+    { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
+    { id: "pricing", label: "Narx belgilash", icon: DollarSign, to: `${basePath}/pricing` },
+    { id: "profile", label: "Profil", icon: Settings, to: `${basePath}/profile` },
+  ];
 
-      if (/\/sales\/new$/.test(location.pathname)) setActiveSubSection("new");
-      else if (/\/sales\/cancelled$/.test(location.pathname))
-        setActiveSubSection("cancelled");
-      else setActiveSubSection("all");
+  const subMenus = {
+    sales: {
+      title: "Sotuvlar",
+      icon: TrendingUp,
+      items: [
+        { id: "new", label: "Yangi sotuv", icon: PackagePlus, to: `${basePath}/sales/new` },
+        { id: "all", label: "Barcha sotuvlar", icon: List, to: `${basePath}/sales/all` },
+        { id: "cancelled", label: "Bekor qilingan", icon: X, to: `${basePath}/sales/cancelled` },
+      ]
+    },
+    baskets: {
+      title: "Savatlar",
+      icon: ShoppingBasket,
+      items: [
+        { id: "new", label: "Savat turlari", icon: PackagePlus, to: `${basePath}/baskets/new` },
+        { id: "distribution", label: "Savat tarqatish", icon: ArrowRightLeft, to: `${basePath}/baskets/distribution` },
+        { id: "returned", label: "Qaytarilgan savatlar", icon: RotateCcw, to: `${basePath}/baskets/returned` },
+        { id: "all", label: "Barchasi", icon: List, to: `${basePath}/baskets/all` },
+      ]
     }
-    // Baskets
-    else if (/\/dashboard\/broker\/baskets(\/|$)/.test(location.pathname)) {
-      setActiveSection("baskets");
-      setIsSubmenuOpen(true);
-
-      if (/\/baskets\/new$/.test(location.pathname)) setActiveSubSection("new");
-      else if (/\/baskets\/distribution$/.test(location.pathname))
-        setActiveSubSection("distribution");
-      else if (/\/baskets\/returned$/.test(location.pathname))
-        setActiveSubSection("returned");
-      else setActiveSubSection("all");
-    }
-  }, [
-    location.pathname,
-    setActiveSection,
-    setIsSubmenuOpen,
-    setActiveSubSection,
-    user,
-  ]);
-
-  const handleBack = () => {
-    setIsSubmenuOpen(false);
-    navigate("/dashboard/broker");
   };
 
-  const openSalesSubmenu = () => {
-    setActiveSection("sales");
-    setIsSubmenuOpen(true);
-    setActiveSubSection("all");
-    navigate("/dashboard/broker/sales/all");
+  // Animatsiya sozlamalari (O'ngdan chapga siljish)
+  const variants = {
+    enter: (direction) => ({
+      x: direction === "forward" ? 20 : -20,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction) => ({
+      x: direction === "forward" ? -20 : 20,
+      opacity: 0,
+    }),
   };
 
-  const openBasketsSubmenu = () => {
-    setActiveSection("baskets");
-    setIsSubmenuOpen(true);
-    setActiveSubSection("all");
-    navigate("/dashboard/broker/baskets/all");
-  };
-
-  const handleMainClick = (section) => {
-    // BROKER submenu bo'limlari
-    if (user?.role?.includes("BROKER") && section.id === "sales") {
-      openSalesSubmenu();
-      return;
-    }
-    if (user?.role?.includes("BROKER") && section.id === "baskets") {
-      openBasketsSubmenu();
-      return;
-    }
-
-    setActiveSection(section.id);
-    setIsSubmenuOpen(false);
-
-    if (user?.role?.includes("ADMIN")) {
-      navigate(section.id === "dashboard" ? "/dashboard/admin" : `/dashboard/admin/${section.id}`);
-      return;
-    }
-    if (user?.role?.includes("BROKER")) {
-      navigate(section.id === "dashboard" ? "/dashboard/broker" : `/dashboard/broker/${section.id}`);
-      return;
-    }
-    // FARMER
-    navigate(section.id === "dashboard" ? "/dashboard/farmer" : `/dashboard/farmer/${section.id}`);
-  };
-
-  const handleSubClick = (sub) => {
-    setActiveSubSection(sub.id);
-    if (activeSection === "sales") navigate(`/dashboard/broker/sales/${sub.id}`);
-    if (activeSection === "baskets") navigate(`/dashboard/broker/baskets/${sub.id}`);
-  };
-
-  const currentSubmenu = useMemo(() => {
-    if (activeSection === "sales") return salesSubmenu;
-    if (activeSection === "baskets") return basketsSubmenu;
-    return [];
-  }, [activeSection, salesSubmenu, basketsSubmenu]);
-
-  const roleLabel = user?.role || "—";
+  // Animatsiya yo'nalishini aniqlash
+  const direction = currentView === "main" ? "back" : "forward";
 
   return (
-    <div className="w-64 lg:w-72 bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 h-full shadow-sm">
-      {/* Header */}
-      <div className="p-4 lg:p-6 border-b border-gray-200 bg-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg lg:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Hosilim Tizimi
-            </h2>
-            <div className="flex items-center mt-2">
-              <div
-                className={`w-2 h-2 lg:w-3 lg:h-3 rounded-full mr-2 animate-pulse ${
-                  roleLabel.includes("ADMIN")
-                    ? "bg-red-500"
-                    : roleLabel.includes("BROKER")
-                    ? "bg-blue-500"
-                    : "bg-green-500"
-                }`}
-              />
-              <p className="text-sm lg:text-base text-gray-600 font-medium">{roleLabel}</p>
-            </div>
-          </div>
-
-          {isSubmenuOpen && user?.role?.includes("BROKER") && (
-            <button
-              onClick={handleBack}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
-              title="Orqaga"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          )}
+    // 🟢 ASOSIY O'ZGARISH: fixed -> sticky, left-0 olib tashlandi, z-50 olib tashlandi 🟢
+    <aside className="sticky top-0 h-screen w-[260px] bg-white border-r border-zinc-200 flex flex-col text-[14px] overflow-hidden">
+      
+      {/* 1. Header / Logo */}
+      <div className="flex items-center gap-3 px-5 py-6 mb-2 shrink-0">
+        <div className="w-6 h-6 bg-[#16A34A] rounded-md flex items-center justify-center">
+          <span className="text-white font-bold text-[12px] leading-none">H</span>
         </div>
+        <span className="font-semibold text-zinc-900 tracking-tight text-[15px]">Hosilim</span>
       </div>
 
-      {/* Menu */}
-      <nav className="p-3 lg:p-4 overflow-y-auto" style={{ maxHeight: "calc(100vh - 180px)" }}>
-        {!isSubmenuOpen ? (
-          <>
-            {sections.map((section) => {
-              const hasSubmenu =
-                user?.role?.includes("BROKER") && (section.id === "sales" || section.id === "baskets");
+      {/* 2. Dinamik Navigation Area */}
+      <div className="flex-1 relative">
+        <AnimatePresence initial={false} custom={direction} mode="wait">
+          
+          {/* ASOSIY MENYU */}
+          {currentView === "main" && (
+            <motion.nav
+              key="main"
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="absolute inset-0 px-3 space-y-0.5 overflow-y-auto custom-scrollbar"
+            >
+              {mainItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.to;
 
-              return (
-                <button
-                  key={section.id}
-                  onClick={() => handleMainClick(section)}
-                  className={`w-full flex items-center px-3 lg:px-4 py-2.5 lg:py-3 mb-1 lg:mb-2 rounded-xl text-sm lg:text-base font-medium transition-all text-left group ${
-                    activeSection === section.id
-                      ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md"
-                      : "text-gray-700 hover:bg-white hover:shadow-sm"
-                  }`}
-                >
-                  <section.icon
-                    className={`w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3 flex-shrink-0 ${
-                      activeSection === section.id ? "" : "group-hover:scale-110 transition-transform"
+                if (item.hasSubMenu) {
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setCurrentView(item.id)}
+                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors outline-none text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 font-medium group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon size={18} className="text-zinc-400 group-hover:text-zinc-900 transition-colors" />
+                        <span>{item.label}</span>
+                      </div>
+                      <ChevronRight size={16} className="text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  );
+                }
+
+                return (
+                  <NavLink
+                    key={item.id}
+                    to={item.to}
+                    end={item.id === "dashboard"}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors outline-none ${
+                      isActive 
+                      ? "bg-zinc-100 text-zinc-900 font-medium" 
+                      : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 font-medium"
                     }`}
-                  />
-                  <span className="truncate">{section.name}</span>
+                  >
+                    <Icon size={18} className={isActive ? "text-zinc-900" : "text-zinc-400"} />
+                    <span>{item.label}</span>
+                  </NavLink>
+                );
+              })}
+            </motion.nav>
+          )}
 
-                  {hasSubmenu && (
-                    <ChevronLeft
-                      className={`ml-auto w-4 h-4 transform rotate-180 ${
-                        activeSection === section.id ? "text-white" : "text-gray-400"
-                      }`}
-                    />
-                  )}
-                </button>
-              );
-            })}
-
-            <div className="mt-6 lg:mt-8 pt-3 lg:pt-4 border-t border-gray-200">
+          {/* IKKILAMCHI MENYU (Sotuvlar / Savatlar) */}
+          {currentView !== "main" && (
+            <motion.nav
+              key={currentView}
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="absolute inset-0 flex flex-col px-3"
+            >
+              {/* Orqaga qaytish tugmasi */}
               <button
-                onClick={onLogout}
-                className="w-full flex items-center px-3 lg:px-4 py-2.5 lg:py-3 text-sm lg:text-base font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all group"
+                onClick={() => setCurrentView("main")}
+                className="flex items-center gap-2 px-2 py-2 mb-4 text-[13px] font-medium text-zinc-500 hover:text-zinc-900 transition-colors group"
               >
-                <LogOut className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                Chiqish
+                <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+                <span>Asosiy menyu</span>
               </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="px-3 lg:px-4 py-2.5 lg:py-3 mb-3 flex items-center">
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {activeSection === "sales" ? "Sotuvlar bo'limi" : "Savatlar bo'limi"}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">{currentSubmenu.length} ta bo'lim</p>
+
+              <div className="px-3 mb-3">
+                <h3 className="text-zinc-900 font-semibold text-[15px]">{subMenus[currentView].title}</h3>
               </div>
-            </div>
 
-            {currentSubmenu.map((sub) => (
-              <button
-                key={sub.id}
-                onClick={() => handleSubClick(sub)}
-                className={`w-full flex items-center px-3 lg:px-4 py-2.5 lg:py-3 mb-1 lg:mb-2 rounded-xl text-sm lg:text-base font-medium transition-all text-left group ${
-                  activeSubSection === sub.id
-                    ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md"
-                    : "text-gray-700 hover:bg-white hover:shadow-sm"
-                }`}
-              >
-                <sub.icon
-                  className={`w-4 h-4 mr-3 flex-shrink-0 ${
-                    activeSubSection === sub.id ? "" : "group-hover:scale-110 transition-transform"
-                  }`}
-                />
-                <span className="truncate">{sub.name}</span>
-              </button>
-            ))}
+              <div className="space-y-0.5 overflow-y-auto custom-scrollbar flex-1">
+                {subMenus[currentView].items.map((sub) => {
+                  const SubIcon = sub.icon;
+                  const isSubActive = location.pathname === sub.to;
+                  return (
+                    <NavLink
+                      key={sub.id}
+                      to={sub.to}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors outline-none ${
+                        isSubActive 
+                        ? "bg-zinc-100 text-zinc-900 font-medium" 
+                        : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 font-medium group"
+                      }`}
+                    >
+                      <SubIcon size={18} className={isSubActive ? "text-zinc-900" : "text-zinc-400 group-hover:text-zinc-900"} />
+                      <span>{sub.label}</span>
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </motion.nav>
+          )}
 
-            <div className="mt-6 lg:mt-8 pt-3 lg:pt-4 border-t border-gray-200">
-              <button
-                onClick={onLogout}
-                className="w-full flex items-center px-3 lg:px-4 py-2.5 lg:py-3 text-sm lg:text-base font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all group"
-              >
-                <LogOut className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                Chiqish
-              </button>
-            </div>
-          </>
-        )}
-      </nav>
-    </div>
+        </AnimatePresence>
+      </div>
+
+      {/* 3. Footer / User Profile */}
+      <div className="p-3 mt-auto border-t border-zinc-200 shrink-0 bg-white z-10 relative">
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-zinc-100 cursor-pointer transition-colors group">
+          <div className="w-8 h-8 rounded-full bg-zinc-200/50 flex items-center justify-center text-zinc-700 font-semibold text-[13px]">
+            {user?.name?.charAt(0) || "M"}
+          </div>
+          <div className="flex flex-col flex-1 min-w-0">
+            <span className="text-[13px] font-semibold text-zinc-900 truncate leading-tight">
+              {user?.name || "MOxirbke"}
+            </span>
+            <span className="text-[11px] text-zinc-500 mt-0.5 uppercase tracking-wide truncate">
+              {String(user?.role || "BIG_BROKER").replace('_', ' ')}
+            </span>
+          </div>
+        </div>
+
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center gap-3 px-3 py-2 mt-1 rounded-lg text-zinc-600 hover:text-red-600 hover:bg-red-50 transition-colors font-medium"
+        >
+          <LogOut size={18} className="text-zinc-400 group-hover:text-red-500" />
+          <span>Tizimdan chiqish</span>
+        </button>
+      </div>
+    </aside>
   );
-};
-
-export default Sidebar;
+}

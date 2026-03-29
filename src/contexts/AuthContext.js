@@ -1,15 +1,14 @@
-import {
+import React, {
   createContext,
-  useContext,
   useEffect,
   useMemo,
   useState,
   useCallback,
 } from "react";
-
 import { authService } from "../services/authService";
 import {
   getAccessToken,
+  getRefreshToken,
   clearAuth,
   setTokens,
   getUser,
@@ -22,44 +21,86 @@ export function AuthProvider({ children }) {
   const [user, setUserState] = useState(() => getUser() || null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
+  const boot = useCallback(async () => {
+    const access = getAccessToken();
+    const refresh = getRefreshToken();
 
-    async function boot() {
-      const access = getAccessToken();
-      if (!access) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const user = await authService.me();
-
-        if (!cancelled) {
-          setUser(user);        // localStorage
-          setUserState(user);   // react state
-        }
-      } catch (e) {
-        clearAuth();
-        if (!cancelled) setUserState(null);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+    if (!access && !refresh) {
+      setUserState(null);
+      setLoading(false);
+      return null;
     }
 
-    boot();
-    return () => {
-      cancelled = true;
-    };
+    setLoading(true);
+
+    try {
+      const meResp = await authService.me();
+      const api = meResp?.data ?? meResp;
+      const currentUser = api?.data ?? api;
+
+      setUser(currentUser);
+      setUserState(currentUser);
+      return currentUser;
+    } catch (e) {
+      try {
+        if (!refresh) throw e;
+
+        const refResp = await authService.refresh(refresh);
+        const api = refResp?.data ?? refResp;
+        const tokens = api?.data ?? api;
+
+        const newAccess = tokens?.accessToken;
+        const newRefresh = tokens?.refreshToken;
+
+        if (!newAccess || !newRefresh) throw e;
+
+        setTokens(newAccess, newRefresh);
+
+        const me2 = await authService.me();
+        const api2 = me2?.data ?? me2;
+        const currentUser2 = api2?.data ?? api2;
+
+        setUser(currentUser2);
+        setUserState(currentUser2);
+        return currentUser2;
+      } catch (e2) {
+        clearAuth();
+        setUserState(null);
+        return null;
+      }
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const login = useCallback(async ({ email, password }) => {
+  useEffect(() => {
+    boot();
+  }, [boot]);
 
-    const res = await authService.login({ email, password });
-    setTokens(res.accessToken, res.refreshToken);
-    setUser(res.user);
-    setUserState(res.user);
-    return res.user;
+  const login = useCallback(async ({ email, password, role }) => {
+    setLoading(true);
+    try {
+      const resp = await authService.login({ email, password, role });
+      const api = resp?.data ?? resp;
+      const payload = api?.data ?? api;
+
+      const accessToken = payload?.accessToken;
+      const refreshToken = payload?.refreshToken;
+      const currentUser = payload?.user;
+
+      if (!accessToken || !refreshToken || !currentUser) {
+        console.log("LOGIN RAW:", resp);
+        throw new Error(api?.message || "Login javobi noto‘g‘ri");
+      }
+
+      setTokens(accessToken, refreshToken);
+      setUser(currentUser);
+      setUserState(currentUser);
+
+      return currentUser;
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const logout = useCallback(() => {
@@ -68,15 +109,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, login, logout }),
-    [user, loading, login, logout]
+    () => ({ user, loading, login, logout, boot }),
+    [user, loading, login, logout, boot]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth() must be used inside <AuthProvider>");
-  return ctx;
 }

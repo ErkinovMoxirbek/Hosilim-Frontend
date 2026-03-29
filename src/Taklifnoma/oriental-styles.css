@@ -1,0 +1,327 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Montserrat:wght@300;400;500&display=swap');
+
+:root {
+  --bg-dark: #071510; /* Rasmdagidek juda to'q yashil */
+  --gold-light: #fbe69e;
+  --gold-main: #ceab5d;
+  --gold-dark: #8c7335;
+  --text-light: #e8e8e8;
+  --text-muted: #a0a0a0;
+  
+  --font-title: 'Cinzel', serif;
+  --font-text: 'Montserrat', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.luxury-wrapper {
+  background-color: var(--bg-dark);
+  min-height: 100vh;
+  color: var(--text-light);
+  font-family: var(--font-text);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Fon Nuqtachalari (Grid Pattern) */
+.dot-pattern {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background-image: radial-gradient(rgba(206, 171, 93, 0.15) 1px, transparent 1px);
+  background-size: 30px 30px;
+  z-index: 0; pointer-events: none;
+}
+
+/* Oltin Gradiyent Matn (Rasmdagidek) */
+.gold-text {
+  background: linear-gradient(to right, var(--gold-dark), var(--gold-light), var(--gold-main));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0px 4px 20px rgba(206, 171, 93, 0.2);
+}
+
+/* =========================================
+   TILLAR (O'ng yuqori burchak)
+========================================== */
+.lang-controls {
+  position: fixed; top: 30px; right: 30px; z-index: 10000;
+  display: flex; gap: 15px;
+}
+.lang-circle {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: transparent; border: 1px solid var(--gold-dark);
+  color: var(--gold-main); font-family: var(--font-text); font-size: 0.8rem;
+  cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px);
+}
+.lang-circle.active, .lang-circle:hover {
+  background: var(--gold-main); color: var(--bg-dark);
+  box-shadow: 0 0 15px rgba(206, 171, 93, 0.4); border-color: var(--gold-light);
+}
+
+/* =========================================
+   INTRO (Saroy eshiklari)
+========================================== */
+.gate-container {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; z-index: 9000;
+}
+.gate {
+  width: 50%; height: 100%; background: var(--bg-dark);
+  position: relative; transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1);
+}
+/* O'rtadagi tillarang chiziq va yulduzcha */
+.gate-line { position: absolute; top: 0; width: 2px; height: 100%; background: var(--gold-main); }
+.left-line { right: 0; } .right-line { left: 0; }
+
+.star-icon { position: absolute; top: 40px; color: var(--gold-main); font-size: 1.5rem; }
+.left-star { right: 20px; } .right-star { left: 20px; }
+
+.gate-container.open .gate.left { transform: translateX(-100%); }
+.gate-container.open .gate.right { transform: translateX(100%); }
+
+.intro-center {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  text-align: center; z-index: 10; width: 90%; max-width: 800px;
+  transition: opacity 0.8s ease;
+}
+.intro-center.fade-out { opacity: 0; pointer-events: none; }
+
+.intro-subtitle, .section-subtitle {
+  font-family: var(--font-text); font-size: 0.8rem; letter-spacing: 5px;
+  color: var(--gold-dark); text-transform: uppercase; margin-bottom: 20px;
+}
+.main-names { font-family: var(--font-title); font-size: 4rem; font-weight: 500; letter-spacing: 2px; line-height: 1.2; }
+.intro-date { font-family: var(--font-title); font-size: 1.5rem; color: var(--gold-main); letter-spacing: 8px; margin: 30px 0; }
+
+/* =========================================
+   TUGMALAR (Kapsula shakli - Rasmdagidek)
+========================================== */
+.capsule-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 15px 40px; border-radius: 50px; /* Kapsula shakli */
+  font-family: var(--font-title); font-size: 1rem; letter-spacing: 2px;
+  cursor: pointer; text-decoration: none; transition: all 0.3s ease;
+  position: relative; overflow: hidden;
+}
+
+.capsule-btn.primary {
+  background: var(--bg-dark);
+  border: 2px solid var(--gold-main);
+  color: var(--gold-light);
+  box-shadow: 0 0 20px rgba(206, 171, 93, 0.2);
+}
+.capsule-btn.primary:hover { background: var(--gold-main); color: var(--bg-dark); box-shadow: 0 0 30px rgba(206, 171, 93, 0.5); }
+
+.capsule-btn.outline {
+  background: transparent; border: 2px solid var(--gold-dark); color: var(--gold-main);
+}
+.capsule-btn.outline-dark {
+  background: rgba(0,0,0,0.3); border: 2px solid #333; color: #888;
+}
+
+/* Badge (Boraman sonini ko'rsatish uchun) */
+.count-badge {
+  background: var(--gold-main); color: var(--bg-dark);
+  font-family: var(--font-text); font-size: 0.8rem; font-weight: bold;
+  padding: 2px 8px; border-radius: 12px; margin-left: 10px;
+}
+.capsule-btn.outline-dark .count-badge { background: #444; color: #aaa; }
+.capsule-btn.primary .count-badge { background: var(--bg-dark); color: var(--gold-main); border: 1px solid var(--gold-main);}
+
+/* =========================================
+   ASOSIY SAHIFA VA ANIMATSIYALAR
+========================================== */
+.main-scroll-content {
+  opacity: 0; visibility: hidden; transition: opacity 2s ease;
+  position: relative; z-index: 1; padding-top: 100px;
+}
+.main-scroll-content.show { opacity: 1; visibility: visible; }
+
+section { text-align: center; max-width: 800px; margin: 0 auto 100px; padding: 0 20px; }
+
+.reveal { opacity: 0; transform: translateY(40px); transition: all 1s ease-out; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+.section-title { font-family: var(--font-title); font-size: 2.2rem; color: var(--gold-main); margin-bottom: 40px; letter-spacing: 3px;}
+
+.formal-names { font-family: var(--font-title); font-size: 1.8rem; font-style: italic; color: var(--gold-light); margin-bottom: 20px;}
+.main-lead { font-size: 1rem; line-height: 2; color: var(--text-muted); letter-spacing: 1px; }
+
+/* Taymer (Yonma-yon) */
+.timer-flex { display: flex; justify-content: center; align-items: center; gap: 15px; }
+.time-block { display: flex; flex-direction: column; align-items: center; min-width: 70px; }
+.time-val { font-family: var(--font-title); font-size: 3rem; color: var(--gold-light); }
+.time-lbl { font-size: 0.7rem; letter-spacing: 2px; color: var(--gold-dark); }
+.time-separator { font-family: var(--font-title); font-size: 2.5rem; color: var(--gold-dark); margin-top: -15px;}
+
+/* To'y dasturi */
+.timeline-box { text-align: left; max-width: 500px; margin: 0 auto; border-left: 1px solid var(--gold-dark); padding-left: 30px; }
+.timeline-row { margin-bottom: 30px; position: relative; }
+.timeline-row::before { content: ''; position: absolute; left: -35px; top: 5px; width: 10px; height: 10px; background: var(--gold-main); border-radius: 50%; box-shadow: 0 0 10px var(--gold-main);}
+.tl-time { display: block; font-family: var(--font-title); font-size: 1.5rem; color: var(--gold-light); margin-bottom: 5px;}
+.tl-text { font-size: 1rem; color: var(--text-muted); }
+
+/* Dress Code Colors */
+.dress-colors { display: flex; justify-content: center; gap: 20px; }
+.d-color { width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--gold-main); box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+
+/* RSVP Qismi */
+.capsule-group { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 20px;}
+
+/* Suzib yuruvchi musiqa tugmasi */
+.music-fab {
+  position: fixed; top: 30px; left: 30px; width: 45px; height: 45px; border-radius: 50%;
+  background: rgba(7, 21, 16, 0.8); border: 1px solid var(--gold-dark); color: var(--gold-main);
+  font-size: 1.2rem; cursor: pointer; z-index: 10000; backdrop-filter: blur(5px);
+}
+.music-fab.spin { animation: spin 4s linear infinite; border-color: var(--gold-main); }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Mobil Ekranlar */
+@media (max-width: 600px) {
+  .main-names { font-size: 2.8rem !important; }
+  .lang-controls { top: 20px; right: 20px; }
+  .music-fab { top: 20px; left: 20px; }
+  .timer-flex { gap: 5px; }
+  .time-val { font-size: 2rem; }
+  .time-separator { font-size: 1.5rem; }
+  .capsule-group { flex-direction: column; }
+  .capsule-btn { width: 100%; }
+}
+
+/* =========================================
+   YANGILIK: TILLARANG YULDUZ CHANGI (GOLD DUST)
+========================================== */
+.gold-dust {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, var(--gold-main), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 40px 70px, var(--gold-light), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 50px 160px, var(--gold-dark), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 90px 40px, var(--gold-main), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 130px 80px, var(--gold-light), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 160px 120px, var(--gold-dark), rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  animation: floatDust 40s linear infinite;
+  opacity: 0.4;
+}
+.gold-dust.layer-2 {
+  background-size: 300px 300px;
+  animation: floatDust 60s linear infinite reverse;
+  opacity: 0.2;
+}
+@keyframes floatDust {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-400px) rotate(10deg); }
+}
+
+/* =========================================
+   YANGILIK: FOTOGALEREYA (LOVE STORY)
+========================================== */
+.photo-gallery {
+  display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 20px;
+}
+.photo-frame {
+  width: 200px; height: 300px;
+  border: 1px solid var(--gold-dark);
+  padding: 8px; border-radius: 120px 120px 10px 10px; /* Arkali estetik shakl */
+  position: relative; overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.photo-frame:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(206, 171, 93, 0.3);
+  border-color: var(--gold-light);
+}
+.photo-img {
+  width: 100%; height: 100%;
+  border-radius: 110px 110px 5px 5px;
+  background-color: #111; /* Agar rasm yo'q bo'lsa qora turadi */
+  background-size: cover; background-position: center;
+  filter: grayscale(40%) contrast(1.1); /* Sal "vintej" effekt */
+  transition: filter 0.4s;
+}
+.photo-frame:hover .photo-img { filter: grayscale(0%) contrast(1); }
+
+/* Mobil uchun Galereya */
+@media (max-width: 600px) {
+  .photo-frame { width: 140px; height: 210px; }
+}
+/* =========================================
+   YANGILIK: BANK KARTASI (To'yona uchun)
+========================================== */
+.bank-card {
+  max-width: 380px; margin: 0 auto;
+  background: linear-gradient(135deg, rgba(206, 171, 93, 0.2), rgba(0,0,0,0.8));
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--gold-dark);
+  border-radius: 15px; padding: 30px;
+  text-align: left; position: relative;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+  transition: transform 0.3s;
+}
+.bank-card:hover { transform: translateY(-5px); }
+
+.card-chip {
+  width: 45px; height: 35px;
+  background: linear-gradient(135deg, #d4af37, #fcf6ba);
+  border-radius: 5px; margin-bottom: 20px;
+  opacity: 0.8;
+}
+.card-logo {
+  position: absolute; top: 30px; right: 30px;
+  font-family: var(--font-text); font-style: italic; font-weight: bold;
+  color: var(--gold-light); letter-spacing: 1px;
+}
+.card-number {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.6rem; color: #fff; letter-spacing: 3px;
+  margin-bottom: 15px; text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+.card-name {
+  font-family: var(--font-text); font-size: 0.9rem;
+  color: var(--text-muted); letter-spacing: 2px;
+}
+
+/* Karta ichidagi nusxa olish tugmasi */
+.copy-btn {
+  margin-top: 25px; width: 100%; padding: 12px;
+  background: var(--gold-dark); color: #000;
+  border: none; border-radius: 8px; cursor: pointer;
+  font-family: var(--font-text); font-weight: bold; letter-spacing: 1px;
+  transition: all 0.3s;
+}
+.copy-btn:hover { background: var(--gold-light); }
+.copy-btn.copied { background: #2e7d32; color: #fff; }
+
+/* =========================================
+   YANGILIK: ROMANTIK IQTIBOS VA PULS
+========================================== */
+.quote-box {
+  margin: 60px auto; max-width: 600px; padding: 0 20px;
+}
+.quote-icon {
+  font-family: var(--font-title); font-size: 3rem;
+  color: var(--gold-dark); opacity: 0.5; display: block;
+}
+.romantic-quote {
+  font-family: 'Great Vibes', cursive; /* Agar Great Vibes ulanmagan bo'lsa, Cinzel ga o'zgartiring */
+  font-size: 2.5rem; line-height: 1.3; color: var(--gold-light);
+  margin: -15px 0; text-shadow: 0 0 15px rgba(206, 171, 93, 0.2);
+}
+
+/* Bosh ekrandagi '&' belgisining urib turishi */
+.pulsing-amp {
+  display: inline-block;
+  animation: heartPulse 1.5s infinite alternate;
+}
+@keyframes heartPulse {
+  0% { transform: scale(1); text-shadow: 0 0 10px rgba(206, 171, 93, 0.4); }
+  100% { transform: scale(1.1); text-shadow: 0 0 25px rgba(206, 171, 93, 1); }
+}
+
+@media (max-width: 600px) {
+  .card-number { font-size: 1.3rem; }
+  .romantic-quote { font-size: 2rem; }
+}
