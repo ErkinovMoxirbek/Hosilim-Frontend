@@ -770,7 +770,7 @@ const HosilimLanding = () => {
                 <button 
                   className={`px-6 py-3.5 backdrop-blur-md border font-bold rounded-xl transition-all text-sm sm:text-base whitespace-nowrap w-full max-w-[280px] sm:max-w-none sm:w-auto mx-auto sm:mx-0 flex justify-center hover:-translate-y-1 ${isDark ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-white/50 text-gray-900 border-white/60 hover:bg-white/80'}`}
                 >
-                  +998 90 123 45 67
+                  +998 91 777 01 37
                 </button>
               </div>
               
