@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Users, Truck, Apple, DollarSign, Eye, CheckCircle,
-  AlertTriangle, Clock, MapPin, Bell, Download, Send,
-  Filter, Activity, BarChart3, RefreshCw, X, Search,
-  TrendingUp, TrendingDown, Package, Shield, Calendar,
-  FileText, Settings, Award, Globe
+  Users, Apple, DollarSign, Eye, CheckCircle,
+  AlertTriangle, Clock, MapPin, Download, Send,
+  Activity, BarChart3, RefreshCw, Search,
+  TrendingUp, TrendingDown
 } from 'lucide-react';
 import API_BASE_URL from "../../config";
 
@@ -110,56 +109,7 @@ const AdminDashboard = () => {
 
   const showNotification = (message, type = 'info') => {
     alert(message); // Haqiqiy loyihada toast yoki notification kutubxonasi ishlatilishi mumkin
-  };
-
-  const approveUser = async (id) => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const res = await fetch(`${API_BASE_URL}/admin/users/${id}/approve`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (res.ok) {
-        setUsers(users.map(u => u.id === id ? { ...u, status: 'ACTIVE' } : u));
-        setStats(prev => ({ ...prev, pendingApprovals: prev.pendingApprovals - 1 }));
-        showNotification('Foydalanuvchi tasdiqlandi', 'success');
-      } else {
-        const error = await res.json();
-        showNotification(error.message || 'Tasdiqlashda xatolik', 'error');
-      }
-    } catch (error) {
-      console.error('Approve error:', error);
-      showNotification('Tarmoq xatosi', 'error');
-    }
-  };
-
-  const rejectUser = async (id) => {
-    if (!window.confirm('Foydalanuvchini rad etishga ishonchingiz komilmi?')) return;
-
-    try {
-      const token = localStorage.getItem("authToken");
-      const res = await fetch(`${API_BASE_URL}/admin/users/${id}/reject`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (res.ok) {
-        setUsers(users.filter(u => u.id !== id));
-        setStats(prev => ({ ...prev, pendingApprovals: prev.pendingApprovals - 1 }));
-        showNotification('Foydalanuvchi rad etildi', 'success');
-      }
-    } catch (error) {
-      console.error('Reject error:', error);
-      showNotification('Rad etishda xatolik', 'error');
-    }
-  };
+  };  
 
   const sendNotification = async () => {
     const message = prompt('Barcha foydalanuvchilarga yuborilacak xabarni kiriting:');

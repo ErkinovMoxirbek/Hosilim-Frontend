@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import {
   Home,
@@ -27,11 +27,11 @@ import NewBasketsPage from "../../brokerAndAccountant/TypeBasketsPage";
 import AllBasketsPage from "../../brokerAndAccountant/AllBasketsPage";
 import ReturnedBasketsPage from "../../brokerAndAccountant/ReturnedBasketsPage";
 import BasketDistributionPage from "../../brokerAndAccountant/BasketDistributionPage";
-import AccountantsPage from "../../brokerAndAccountant/AccountantsPage";
+import FarmerPage from "../../brokerAndAccountant/FarmerPage";
 
-const BASE_PATH = "/dashboard/broker";
+const BASE_PATH = "/dashboard/accountant";
 
-const BrokerLayout = () => {
+const AccountantLayout = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -70,8 +70,7 @@ const BrokerLayout = () => {
       return;
     }
 
-    if (path.endsWith("/accountants")) setActiveSection("accountants");
-    else if (path.endsWith("/farmers")) setActiveSection("farmers");
+    if (path.endsWith("/farmers")) setActiveSection("farmers");
     else if (path.endsWith("/inventory")) setActiveSection("inventory");
     else if (path.endsWith("/pricing")) setActiveSection("pricing");
     else if (path.endsWith("/profile")) setActiveSection("profile");
@@ -113,7 +112,6 @@ const BrokerLayout = () => {
       { id: "dashboard", name: "Bosh Sahifa", icon: Home },
       { id: "sales", name: "Sotuvlar", icon: TrendingUp },
       { id: "baskets", name: "Savatlar", icon: ShoppingBasket },
-      { id: "accountants", name: "Xisobchilar", icon: Users },
       { id: "farmers", name: "Fermerlar", icon: Users },
       { id: "inventory", name: "Omborxona", icon: Package },
       { id: "pricing", name: "Narx Belgilash", icon: DollarSign },
@@ -155,7 +153,7 @@ const BrokerLayout = () => {
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30">
         <div>
           <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Hosil Tizimi
+            Hosilim Tizimi
           </h1>
           <p className="text-sm text-gray-600 capitalize">{String(user?.role || "").replace('_', ' ')}</p>
         </div>
@@ -227,7 +225,6 @@ const BrokerLayout = () => {
               <Route path="sales/all" element={<AllSalePage />} />
               <Route path="sales/cancelled" element={<CancelledSalePage />} />
 
-              <Route path="accountants" element={<AccountantsPage />} />
 
               <Route path="baskets" element={<Navigate to="all" replace />} />
               <Route path="baskets/new" element={<NewBasketsPage />} />
@@ -235,7 +232,7 @@ const BrokerLayout = () => {
               <Route path="baskets/returned" element={<ReturnedBasketsPage />} />
               <Route path="baskets/all" element={<AllBasketsPage />} />
 
-              <Route path="farmers" element={<ComingSoon title="Fermerlar" />} />
+              <Route path="farmers" element={<FarmerPage/>} />
               <Route path="inventory" element={<ComingSoon title="Omborxona" />} />
               <Route path="pricing" element={<PricingPage />} />
               <Route path="profile" element={<ComingSoon title="Profil" />} />
@@ -249,4 +246,4 @@ const BrokerLayout = () => {
   );
 };
 
-export default BrokerLayout;
+export default AccountantLayout;

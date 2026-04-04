@@ -24,7 +24,7 @@ function getBasePath(user) {
   const hasRole = (key) => roles.some((r) => String(r).toUpperCase().includes(key));
 
   if (hasRole("ADMIN")) return "/dashboard/admin";
-  if (hasRole("BIG_BROKER")) return "/dashboard/big-broker";
+  if (hasRole("ACCOUNTANT")) return "/dashboard/accountant";
   if (hasRole("BROKER")) return "/dashboard/broker";
   return "/dashboard/farmer";
 }
@@ -32,30 +32,58 @@ function getBasePath(user) {
 export default function Sidebar({ user, onLogout }) {
   const basePath = useMemo(() => getBasePath(user), [user]);
   const location = useLocation();
-  const isBrokerLike = basePath.includes("broker");
-  
-  // "main", "sales" yoki "baskets" holatlarini ushlab turadi
+
+  const isAdmin = basePath.includes("admin");
+  const isAccountant = basePath.includes("accountant");
+  const isBroker = basePath.includes("broker");
+  const isFarmer = basePath.includes("farmer");
+
   const [currentView, setCurrentView] = useState("main");
 
-  // Sahifa yangilanganda kerakli menyuni ochiq qoldirish
   useEffect(() => {
     if (location.pathname.includes("/sales")) setCurrentView("sales");
     else if (location.pathname.includes("/baskets")) setCurrentView("baskets");
     else setCurrentView("main");
-  }, []);
+  }, [location.pathname]);
 
-  const mainItems = [
-    { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
-    ...(isBrokerLike ? [
+  let mainItems = [];
+
+  if (isAdmin) {
+    mainItems = [
+      { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
+      { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
+      { id: "farmers", label: "Fermerlar", icon: Users, to: `${basePath}/farmers` },
+      { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
+      { id: "profile", label: "Profil", icon: Settings, to: `${basePath}/profile` },
+    ];
+  } else if (isAccountant) {
+    mainItems = [
+      { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
       { id: "sales", label: "Sotuvlar", icon: TrendingUp, hasSubMenu: true },
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
-    ] : []),
-    { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
-    { id: "farmers", label: "Fermerlar", icon: Users, to: `${basePath}/farmers` },
-    { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
-    { id: "pricing", label: "Narx belgilash", icon: DollarSign, to: `${basePath}/pricing` },
-    { id: "profile", label: "Profil", icon: Settings, to: `${basePath}/profile` },
-  ];
+      { id: "farmers", label: "Fermerlar", icon: Users, to: `${basePath}/farmers` },
+      { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
+      { id: "pricing", label: "Narx belgilash", icon: DollarSign, to: `${basePath}/pricing` },
+      { id: "profile", label: "Profil", icon: Settings, to: `${basePath}/profile` },
+    ];
+  } else if (isBroker) {
+    mainItems = [
+      { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
+      { id: "sales", label: "Sotuvlar", icon: TrendingUp, hasSubMenu: true },
+      { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
+      { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
+      { id: "farmers", label: "Fermerlar", icon: Users, to: `${basePath}/farmers` },
+      { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
+      { id: "pricing", label: "Narx belgilash", icon: DollarSign, to: `${basePath}/pricing` },
+      { id: "profile", label: "Profil", icon: Settings, to: `${basePath}/profile` },
+    ];
+  } else if (isFarmer) {
+    mainItems = [
+      { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
+      { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
+      { id: "profile", label: "Profil", icon: Settings, to: `${basePath}/profile` },
+    ];
+  }
 
   const subMenus = {
     sales: {
@@ -79,41 +107,36 @@ export default function Sidebar({ user, onLogout }) {
     }
   };
 
-  // Animatsiya sozlamalari (O'ngdan chapga siljish)
   const variants = {
-    enter: (direction) => ({
-      x: direction === "forward" ? 20 : -20,
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction) => ({
-      x: direction === "forward" ? -20 : 20,
-      opacity: 0,
-    }),
+    enter: (direction) => ({ x: direction === "forward" ? 15 : -15, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (direction) => ({ x: direction === "forward" ? -15 : 15, opacity: 0 }),
   };
 
-  // Animatsiya yo'nalishini aniqlash
   const direction = currentView === "main" ? "back" : "forward";
 
   return (
-    // 🟢 ASOSIY O'ZGARISH: fixed -> sticky, left-0 olib tashlandi, z-50 olib tashlandi 🟢
-    <aside className="sticky top-0 h-screen w-[260px] bg-white border-r border-zinc-200 flex flex-col text-[14px] overflow-hidden">
-      
-      {/* 1. Header / Logo */}
-      <div className="flex items-center gap-3 px-5 py-6 mb-2 shrink-0">
-        <div className="w-6 h-6 bg-[#16A34A] rounded-md flex items-center justify-center">
-          <span className="text-white font-bold text-[12px] leading-none">H</span>
+    <aside className="sticky top-0 h-screen w-[270px] bg-white border-r border-gray-100 flex flex-col text-[14px] shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40">
+
+      {/* 1. Header / Logo - Rasmga moslashtirildi */}
+      <div className="flex items-center gap-3 px-6 py-6 shrink-0 border-b border-gray-50 mb-2">
+        <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white shadow-lg">
+          <img src="/logo-white.png" alt="Logo" className="w-6 h-6" />
         </div>
-        <span className="font-semibold text-zinc-900 tracking-tight text-[15px]">Hosilim</span>
+        <div className="flex flex-col">
+          <span className="font-extrabold text-[#0B1A42] tracking-wide text-[20px] leading-none mb-0.5">
+            Hosilim
+          </span>
+          <span className="text-[10px] font-bold text-[#0081C9] tracking-widest uppercase">
+            {String(user?.role || "TIZIMI").replace('_', ' ')} TIZIMI
+          </span>
+        </div>
       </div>
 
-      {/* 2. Dinamik Navigation Area */}
-      <div className="flex-1 relative">
+      {/* 2. Dinamik Navigation Area - Skroll to'g'irlandi */}
+      <div className="flex-1 relative overflow-hidden">
         <AnimatePresence initial={false} custom={direction} mode="wait">
-          
+
           {/* ASOSIY MENYU */}
           {currentView === "main" && (
             <motion.nav
@@ -123,8 +146,8 @@ export default function Sidebar({ user, onLogout }) {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="absolute inset-0 px-3 space-y-0.5 overflow-y-auto custom-scrollbar"
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 px-3 space-y-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             >
               {mainItems.map((item) => {
                 const Icon = item.icon;
@@ -135,13 +158,14 @@ export default function Sidebar({ user, onLogout }) {
                     <button
                       key={item.id}
                       onClick={() => setCurrentView(item.id)}
-                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors outline-none text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 font-medium group"
+                      style={{ textDecoration: 'none' }}
+                      className="w-full flex items-center justify-between px-3 py-3 rounded-xl transition-all outline-none text-gray-600 hover:text-[#0B1A42] hover:bg-gray-50 font-medium group border border-transparent"
                     >
                       <div className="flex items-center gap-3">
-                        <Icon size={18} className="text-zinc-400 group-hover:text-zinc-900 transition-colors" />
+                        <Icon size={20} strokeWidth={isActive ? 2.5 : 2} className="text-gray-400 group-hover:text-[#14A44D]" />
                         <span>{item.label}</span>
                       </div>
-                      <ChevronRight size={16} className="text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
+                      <ChevronRight size={18} className="text-gray-400 group-hover:translate-x-1 transition-transform" />
                     </button>
                   );
                 }
@@ -151,13 +175,13 @@ export default function Sidebar({ user, onLogout }) {
                     key={item.id}
                     to={item.to}
                     end={item.id === "dashboard"}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors outline-none ${
-                      isActive 
-                      ? "bg-zinc-100 text-zinc-900 font-medium" 
-                      : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 font-medium"
-                    }`}
+                    style={{ textDecoration: 'none' }}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all outline-none border ${isActive
+                      ? "bg-[#14A44D]/10 text-[#000] border-[#14A44D]/20 font-bold"
+                      : "text-gray-600 hover:text-[#16a34a] hover:bg-gray-50 font-medium border-transparent"
+                      }`}
                   >
-                    <Icon size={18} className={isActive ? "text-zinc-900" : "text-zinc-400"} />
+                    <Icon size={20} strokeWidth={isActive ? 2.5 : 2} className={isActive ? "text-[#14A44D]" : "text-gray-400"} />
                     <span>{item.label}</span>
                   </NavLink>
                 );
@@ -165,7 +189,7 @@ export default function Sidebar({ user, onLogout }) {
             </motion.nav>
           )}
 
-          {/* IKKILAMCHI MENYU (Sotuvlar / Savatlar) */}
+          {/* IKKILAMCHI MENYU */}
           {currentView !== "main" && (
             <motion.nav
               key={currentView}
@@ -174,23 +198,23 @@ export default function Sidebar({ user, onLogout }) {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.2, ease: "easeInOut" }}
+              transition={{ duration: 0.2 }}
               className="absolute inset-0 flex flex-col px-3"
             >
-              {/* Orqaga qaytish tugmasi */}
               <button
                 onClick={() => setCurrentView("main")}
-                className="flex items-center gap-2 px-2 py-2 mb-4 text-[13px] font-medium text-zinc-500 hover:text-zinc-900 transition-colors group"
+                style={{ textDecoration: 'none' }}
+                className="flex items-center gap-2 px-3 py-2 mb-2 rounded-xl text-[13px] font-medium text-gray-500 hover:text-[#0B1A42] hover:bg-gray-50 transition-colors group w-fit border border-transparent"
               >
-                <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+                <ArrowLeft size={16} className="text-gray-400 group-hover:-translate-x-1 transition-transform" />
                 <span>Asosiy menyu</span>
               </button>
 
-              <div className="px-3 mb-3">
-                <h3 className="text-zinc-900 font-semibold text-[15px]">{subMenus[currentView].title}</h3>
+              <div className="px-3 mb-3 mt-1">
+                <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">{subMenus[currentView].title}</h3>
               </div>
 
-              <div className="space-y-0.5 overflow-y-auto custom-scrollbar flex-1">
+              <div className="space-y-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex-1">
                 {subMenus[currentView].items.map((sub) => {
                   const SubIcon = sub.icon;
                   const isSubActive = location.pathname === sub.to;
@@ -198,13 +222,13 @@ export default function Sidebar({ user, onLogout }) {
                     <NavLink
                       key={sub.id}
                       to={sub.to}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors outline-none ${
-                        isSubActive 
-                        ? "bg-zinc-100 text-zinc-900 font-medium" 
-                        : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 font-medium group"
-                      }`}
+                      style={{ textDecoration: 'none' }}
+                      className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all outline-none border ${isSubActive
+                        ? "bg-[#14A44D]/10 text-[#14A44D] border-[#14A44D]/20 font-bold"
+                        : "text-gray-600 hover:text-[#0B1A42] hover:bg-gray-50 font-medium border-transparent group"
+                        }`}
                     >
-                      <SubIcon size={18} className={isSubActive ? "text-zinc-900" : "text-zinc-400 group-hover:text-zinc-900"} />
+                      <SubIcon size={20} strokeWidth={isSubActive ? 2.5 : 2} className={isSubActive ? "text-[#14A44D]" : "text-gray-400 group-hover:text-[#14A44D]"} />
                       <span>{sub.label}</span>
                     </NavLink>
                   );
@@ -217,26 +241,27 @@ export default function Sidebar({ user, onLogout }) {
       </div>
 
       {/* 3. Footer / User Profile */}
-      <div className="p-3 mt-auto border-t border-zinc-200 shrink-0 bg-white z-10 relative">
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-zinc-100 cursor-pointer transition-colors group">
-          <div className="w-8 h-8 rounded-full bg-zinc-200/50 flex items-center justify-center text-zinc-700 font-semibold text-[13px]">
-            {user?.name?.charAt(0) || "M"}
+      <div className="p-4 mt-auto border-t border-gray-100 shrink-0 bg-white z-10 relative">
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-50/50 border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors mb-2">
+          <div className="w-9 h-9 rounded-lg bg-[#0B1A42] flex items-center justify-center text-white font-bold text-[14px]">
+            {user?.name?.charAt(0) || "U"}
           </div>
           <div className="flex flex-col flex-1 min-w-0">
-            <span className="text-[13px] font-semibold text-zinc-900 truncate leading-tight">
-              {user?.name || "MOxirbke"}
+            <span className="text-[13px] font-bold text-[#0B1A42] truncate leading-tight">
+              {user?.name || "Foydalanuvchi"}
             </span>
-            <span className="text-[11px] text-zinc-500 mt-0.5 uppercase tracking-wide truncate">
-              {String(user?.role || "BIG_BROKER").replace('_', ' ')}
+            <span className="text-[11px] text-[#0081C9] mt-0.5 uppercase tracking-wider truncate font-semibold">
+              {String(user?.role || "GUEST").replace('_', ' ')}
             </span>
           </div>
         </div>
 
         <button
           onClick={onLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 mt-1 rounded-lg text-zinc-600 hover:text-red-600 hover:bg-red-50 transition-colors font-medium"
+          style={{ textDecoration: 'none' }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors font-medium group border border-transparent"
         >
-          <LogOut size={18} className="text-zinc-400 group-hover:text-red-500" />
+          <LogOut size={18} className="text-gray-400 group-hover:text-red-500 transition-colors" />
           <span>Tizimdan chiqish</span>
         </button>
       </div>

@@ -3,7 +3,7 @@ import {
   Plus, Save, X, Edit3, Trash2, Search, ArrowUpDown, CheckCircle2, 
   CircleAlert, Loader2, ChevronLeft, ChevronRight, TrendingUp, TrendingDown,
   DollarSign, Package, AlertTriangle, RefreshCw,
-  Eye, Copy, FileText, BarChart3, Calendar, Clock
+  Eye, FileText, BarChart3, Calendar, Clock
 } from 'lucide-react';
 
 import API_BASE_URL from '../../config';

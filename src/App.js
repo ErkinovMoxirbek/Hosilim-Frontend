@@ -6,13 +6,11 @@ import PublicLayout from "./pages/PublicLayout";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import DashboardRoutes from "./pages/dashboard/DashboardRoutes";
-import Taklifnoma from "./Taklifnoma/Taklifnoma";
 
 export default function App() {
   return (
     <ToastProvider>
       <Routes>
-        <Route path="/taklifnoma" element={<Taklifnoma />} />
         <Route element={<PublicLayout />}>
           <Route path="/" element={<LandingPage />} />
         </Route>

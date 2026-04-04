@@ -41,7 +41,7 @@ const AdminUsersManagement = () => {
   }, [searchText]);
 
   /* ======================= Sorting/Selection/Pagination ======================= */
-  const [sorting, setSorting] = useState({ field: 'createdAt', direction: 'desc' });
+  const [sorting] = useState({ field: 'createdAt', direction: 'desc' });
   const [selectedUsers, setSelectedUsers] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 25, total: 0, totalPages: 0 });

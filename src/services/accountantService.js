@@ -1,10 +1,11 @@
 import axios from "axios";
+import API_BASE_URL from "../config";
+import { getAccessToken } from "../utils/tokenManager";
 
-// Bu sizning haqiqiy backend yo'lingiz bo'lishi kerak
-const API_URL = "http://localhost:8080/api/v1/accountants"; 
+const API_URL = `${API_BASE_URL}/accountants`;
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem("token"); 
+  const token = getAccessToken();
   return {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -14,31 +15,31 @@ const getAuthHeaders = () => {
 };
 
 export const accountantService = {
-  // 1. O'qish (Read)
-  getAll: async (page = 0, size = 10, filterBrokerId = null) => {
-    let url = `${API_URL}?page=${page}&size=${size}`;
-    if (filterBrokerId) {
-      url += `&filterBrokerId=${filterBrokerId}`;
-    }
-    const response = await axios.get(url, getAuthHeaders());
-    // Bizning Spring Boot API Response'da: response.data.data.content bo'lib keladi (Page obyekti)
+  getAll: async (page = 0, size = 100) => {
+    const response = await axios.get(`${API_URL}?page=${page}&size=${size}`, getAuthHeaders());
     return response.data?.data || response.data;
   },
 
-  // 2. Yaratish (Create)
-  create: async (payload) => {
-    // payload = { userId: 123, brokerId: 456 } shaklida bo'ladi
-    const response = await axios.post(API_URL, payload, getAuthHeaders());
+  sendOtp: async (phone) => {
+    // phone bu yerda "+998901234567" formatida keladi
+    return await axios.post(`${API_URL}/send-otp`, { phone }, getAuthHeaders());
+  },
+
+  verifyOtp: async (phone, otp) => {
+    return await axios.post(`${API_URL}/verify-otp`, { phone, otp }, getAuthHeaders());
+  },
+
+  create: async (data) => {
+    const response = await axios.post(API_URL, data, getAuthHeaders());
     return response.data?.data || response.data;
   },
 
-  // 3. Tahrirlash (Update)
-  update: async (id, payload) => {
-    const response = await axios.put(`${API_URL}/${id}`, payload, getAuthHeaders());
+  update: async (id, data) => {
+    // data ichida fullName, address, phone va STATUS ham bor.
+    const response = await axios.put(`${API_URL}/${id}`, data, getAuthHeaders());
     return response.data?.data || response.data;
   },
 
-  // 4. O'chirish (Delete)
   delete: async (id) => {
     const response = await axios.delete(`${API_URL}/${id}`, getAuthHeaders());
     return response.data;

@@ -4,6 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 
 import AdminLayout from "./layouts/AdminLayout";
 import BrokerLayout from "./layouts/BrokerLayout";
+import AccountantLayout from "./layouts/AccountantLayout";
 import FarmerLayout from "./layouts/FarmerLayout";
 
 export default function DashboardRoutes() {
@@ -28,7 +29,7 @@ export default function DashboardRoutes() {
 
   const defaultRoute = () => {
     if (hasRole("ADMIN")) return "/dashboard/admin";
-    if (hasRole("BIG_BROKER")) return "/dashboard/big-broker";
+    if (hasRole("ACCOUNTANT")) return "/dashboard/accountant";
     if (hasRole("BROKER")) return "/dashboard/broker";
     return "/dashboard/farmer";
   };
@@ -66,6 +67,17 @@ export default function DashboardRoutes() {
         element={
           hasRole("BROKER") ? (
             <BrokerLayout />
+          ) : (
+            <Navigate to={defaultRoute()} replace />
+          )
+        }
+      />
+      
+      <Route
+        path="/accountant/*"
+        element={
+          hasRole("ACCOUNTANT") ? (
+            <AccountantLayout />
           ) : (
             <Navigate to={defaultRoute()} replace />
           )

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  ShoppingCart, Users, Package, DollarSign, Plus, 
-  Eye, Check, X, Star, TrendingUp 
+  ShoppingCart, Users, Package, DollarSign, Plus, Check, X  
 } from 'lucide-react';
 import API_BASE_URL from "../../config";
 

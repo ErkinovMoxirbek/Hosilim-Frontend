@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   MapPin, Search, Plus, MoreVertical, Eye, Edit2,
-  Trash2, RefreshCw, ChevronDown, Download,
+  Trash2, RefreshCw,
   AlertTriangle, CheckCircle, DollarSign, Save, X,
-  Users, Briefcase, TrendingUp, Building2, Navigation,
-  UserCheck, Clock, Star
+  Users, TrendingUp, Building2, Navigation,
+  UserCheck, Clock
 } from 'lucide-react';
 
 const CollectionPointsManagement = () => {
