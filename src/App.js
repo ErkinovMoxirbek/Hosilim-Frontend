@@ -3,8 +3,8 @@ import { ToastProvider } from "./components/shared/toast/ToastProvider";
 import PrivateRoute from "./components/PrivateRoute";
 
 import PublicLayout from "./pages/PublicLayout";
-import LandingPage from "./pages/LandingPage";
-import AuthPage from "./pages/AuthPage";
+import LandingPage from "./pages/LandingPage2";
+import AuthPage from "./pages/AuthPage2";
 import DashboardRoutes from "./pages/dashboard/DashboardRoutes";
 
 export default function App() {
