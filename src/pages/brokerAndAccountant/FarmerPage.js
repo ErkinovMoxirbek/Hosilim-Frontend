@@ -9,7 +9,8 @@ import {
   CheckCircle2, 
   MoreVertical, 
   X, 
-  Loader2 
+  Loader2,
+  ShoppingBasket // Savat qarzi uchun yangi ikonka
 } from 'lucide-react';
 
 export default function FarmerPage() {
@@ -32,7 +33,7 @@ export default function FarmerPage() {
     try {
       const data = await farmerService.getAllFarmers();
       
-      // XATOLIKNING YECHIMI: Backenddan kelgan ma'lumotni xavfsiz massivga o'g'irish
+      // Backenddan kelgan ma'lumotni xavfsiz massivga o'g'irish
       const farmersArray = Array.isArray(data) ? data : (data?.content || []);
       setFarmers(farmersArray);
       
@@ -75,7 +76,7 @@ export default function FarmerPage() {
     }
   };
 
-  // Xavfsiz qidiruv filtri (farmers massiv ekanligiga ishonch hosil qilib)
+  // Xavfsiz qidiruv filtri
   const filteredFarmers = (Array.isArray(farmers) ? farmers : []).filter(f => 
     f.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     f.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -87,13 +88,13 @@ export default function FarmerPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#0B1A42]">Fermerlar</h1>
-          <p className="text-sm text-gray-500 mt-1">Tizimdagi barcha fermerlar va ularning statusi</p>
+          <h1 className="text-2xl font-bold text-[#0B1A42]">Mening fermerlarim</h1>
+          <p className="text-sm text-gray-500 mt-1">Sizning punktga biriktirilgan fermerlar va ularning hisob-kitoblari</p>
         </div>
         
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#14A44D] text-white rounded-xl font-medium hover:bg-[#118f43] transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#14A44D] text-white rounded-xl font-medium hover:bg-[#118f43] transition-colors shadow-sm"
         >
           <Plus size={20} />
           <span>Yangi fermer (Tezkor)</span>
@@ -128,14 +129,17 @@ export default function FarmerPage() {
                 <tr className="bg-gray-50/50 border-b border-gray-100 text-[13px] uppercase tracking-wider text-gray-500 font-semibold">
                   <th className="px-6 py-4">Fermer</th>
                   <th className="px-6 py-4">Telefon raqam</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Balans</th>
+                  <th className="px-6 py-4">Holati va Tarixi</th>
+                  <th className="px-6 py-4">Lokal Balans</th>
+                  <th className="px-6 py-4">Savat Qarzi</th>
                   <th className="px-6 py-4 text-right">Amallar</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-[14px]">
                 {filteredFarmers.map((farmer) => (
                   <tr key={farmer.id} className="hover:bg-gray-50/50 transition-colors">
+                    
+                    {/* 1. Fermer Asosiy Ma'lumotlari */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-[#0B1A42]/5 flex items-center justify-center text-[#0B1A42] font-bold">
@@ -147,30 +151,58 @@ export default function FarmerPage() {
                         </div>
                       </div>
                     </td>
+
+                    {/* 2. Telefon Raqam */}
                     <td className="px-6 py-4 text-gray-600 font-medium">
                       <div className="flex items-center gap-2">
                         <Phone size={16} className="text-gray-400" />
                         {farmer.phoneNumber || farmer.phone}
                       </div>
                     </td>
+
+                    {/* 3. Holati va Kim tomonidan qo'shilgani */}
                     <td className="px-6 py-4">
-                      {farmer.isShadow ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-[12px] font-semibold border border-amber-200/50">
-                          <AlertCircle size={14} />
-                          Tasdiqlanmagan
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-green-50 text-green-700 text-[12px] font-semibold border border-green-200/50">
-                          <CheckCircle2 size={14} />
-                          Tasdiqlangan
-                        </span>
-                      )}
+                      <div className="flex flex-col gap-1.5">
+                        {farmer.isShadow ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-[11px] font-bold border border-amber-200/50 w-max">
+                            <AlertCircle size={12} /> TASDIQLANMAGAN
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-green-50 text-green-700 text-[11px] font-bold border border-green-200/50 w-max">
+                            <CheckCircle2 size={12} /> TASDIQLANGAN
+                          </span>
+                        )}
+                        <div className="text-[11px] text-gray-400 mt-1 leading-tight">
+                          <span className="block text-gray-600">Qo'shdi: <span className="font-medium">{farmer.addedByName}</span></span>
+                          <span className="block">Punkt: {farmer.addedByCollectionPointName || 'Noma\'lum'}</span>
+                        </div>
+                      </div>
                     </td>
+
+                    {/* 4. Lokal Balans (Aynan shu punkt uchun) */}
                     <td className="px-6 py-4">
-                      <span className={`font-semibold ${farmer.balanceAmount < 0 ? 'text-red-600' : 'text-gray-700'}`}>
-                        {farmer.balanceAmount?.toLocaleString() || 0} UZS
+                      {/* Qarz bo'lsa qizil, Haqdor bo'lsa yashil, 0 bo'lsa kulrang */}
+                      <span className={`font-semibold ${
+                        farmer.pointBalance < 0 ? 'text-red-600' : 
+                        farmer.pointBalance > 0 ? 'text-green-600' : 'text-gray-600'
+                      }`}>
+                        {farmer.pointBalance?.toLocaleString() || 0} UZS
                       </span>
                     </td>
+
+                    {/* 5. Savat qarzi */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className={`p-1.5 rounded-lg ${farmer.basketDebt > 0 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'}`}>
+                          <ShoppingBasket size={16} />
+                        </div>
+                        <span className={`font-semibold ${farmer.basketDebt > 0 ? 'text-orange-600' : 'text-gray-500'}`}>
+                          {farmer.basketDebt || 0} dona
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* 6. Amallar */}
                     <td className="px-6 py-4 text-right">
                       <button className="p-2 text-gray-400 hover:text-[#0B1A42] hover:bg-gray-100 rounded-lg transition-colors">
                         <MoreVertical size={20} />
@@ -181,7 +213,7 @@ export default function FarmerPage() {
                 
                 {filteredFarmers.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
                       Fermer topilmadi.
                     </td>
                   </tr>
