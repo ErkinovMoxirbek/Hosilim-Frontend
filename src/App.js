@@ -10,9 +10,9 @@ export default function App() {
   return (
     <ToastProvider>
       <Routes>
-        <Route element={<PublicLayout />}>
+        
           <Route path="/" element={<AuthPage />} />
-        </Route>
+      
 
     
 
