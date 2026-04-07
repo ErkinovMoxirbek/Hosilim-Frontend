@@ -23,7 +23,7 @@ import NewSalePage from "../../brokerAndAccountant/NewSalePage";
 import CancelledSalePage from "../../brokerAndAccountant/CancelledSalePage";
 import AllSalePage from "../../brokerAndAccountant/AllSalePage";
 import PricingPage from "../../brokerAndAccountant/PricingPage";
-import NewBasketsPage from "../../brokerAndAccountant/TypeBasketsPage";
+import BasketCatalogPage from "../../brokerAndAccountant/BasketCatalogPage";
 import AllBasketsPage from "../../brokerAndAccountant/AllBasketsPage";
 import ReturnedBasketsPage from "../../brokerAndAccountant/ReturnedBasketsPage";
 import BasketDistributionPage from "../../brokerAndAccountant/BasketDistributionPage";
@@ -63,7 +63,7 @@ const BrokerLayout = () => {
       setActiveSection("baskets");
       setIsSubmenuOpen(true);
 
-      if (path.endsWith("/new")) setActiveSubSection("new");
+      if (path.endsWith("/catalog")) setActiveSubSection("catalog");
       else if (path.endsWith("/distribution")) setActiveSubSection("distribution");
       else if (path.endsWith("/returned")) setActiveSubSection("returned");
       else setActiveSubSection("all");
@@ -133,7 +133,7 @@ const BrokerLayout = () => {
 
   const basketsSubmenu = useMemo(
     () => [
-      { id: "new", name: "Savat turlari", icon: PackagePlus },
+      { id: "catalog", name: "Savat turlari", icon: PackagePlus },
       { id: "distribution", name: "Savat tarqatish", icon: ArrowRightLeft },
       { id: "returned", name: "Qaytarilgan savatlar", icon: RotateCcw },
       { id: "all", name: "Savatlar hammasi", icon: List },
@@ -230,7 +230,7 @@ const BrokerLayout = () => {
               <Route path="accountants" element={<AccountantsPage />} />
 
               <Route path="baskets" element={<Navigate to="all" replace />} />
-              <Route path="baskets/new" element={<NewBasketsPage />} />
+              <Route path="baskets/catalog" element={<BasketCatalogPage />} />
               <Route path="baskets/distribution" element={<BasketDistributionPage />} />
               <Route path="baskets/returned" element={<ReturnedBasketsPage />} />
               <Route path="baskets/all" element={<AllBasketsPage />} />

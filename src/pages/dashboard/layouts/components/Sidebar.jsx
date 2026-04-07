@@ -99,7 +99,7 @@ export default function Sidebar({ user, onLogout }) {
       title: "Savatlar",
       icon: ShoppingBasket,
       items: [
-        { id: "new", label: "Savat turlari", icon: PackagePlus, to: `${basePath}/baskets/new` },
+        { id: "catalog", label: "Savat turlari", icon: PackagePlus, to: `${basePath}/baskets/catalog` },
         { id: "distribution", label: "Savat tarqatish", icon: ArrowRightLeft, to: `${basePath}/baskets/distribution` },
         { id: "returned", label: "Qaytarilgan savatlar", icon: RotateCcw, to: `${basePath}/baskets/returned` },
         { id: "all", label: "Barchasi", icon: List, to: `${basePath}/baskets/all` },
