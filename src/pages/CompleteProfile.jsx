@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { completeUserProfile } from "../services/profileService";
 import { useAuth } from "../hooks/useAuth";
-import { Loader2, User, MapPin, CheckCircle2, Home, ChevronDown, Map } from "lucide-react";
+import { Loader2, User, MapPin, CheckCircle2, Home, ChevronDown, Map, ArrowLeft } from "lucide-react";
 
 const regionsData = {
   "Andijon": ["Andijon", "Asaka", "Baliqchi", "Bo'ston", "Buloqboshi", "Izboskan", "Jalaquduq", "Marxamat", "Oltinko'l", "Paxtaobod", "Qo'rg'ontepa", "Shahrixon", "Ulug'nor", "Xo'jaobod"],
@@ -36,26 +36,18 @@ export default function CompleteProfile() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [activeDropdown, setActiveDropdown] = useState(null); 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🚀 MUHIM TUZATISH: Hodisani ushlab qolish (e.stopPropagation) qo'shildi
-  const handleRegionSelect = (e, regionName) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setFormData(prev => ({ ...prev, region: regionName, district: "" }));
-    setActiveDropdown(null); 
-  };
-
-  const handleDistrictSelect = (e, districtName) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setFormData(prev => ({ ...prev, district: districtName }));
-    setActiveDropdown(null); 
+  const handleRegionChange = (e) => {
+    const selectedRegion = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      region: selectedRegion,
+      district: "" // Viloyat o'zgarganda tumanni tozalash
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -96,7 +88,6 @@ export default function CompleteProfile() {
       className="min-h-screen flex flex-col font-sans relative bg-cover bg-center bg-no-repeat bg-fixed text-gray-100"
       style={{ backgroundImage: "url('/assets/peach.jpg')" }}
     >
-      {/* 🚀 Chrome Autofill va qora matn yozilishini o'ldirish */}
       <style>{`
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
@@ -106,26 +97,24 @@ export default function CompleteProfile() {
             -webkit-text-fill-color: #ffffff !important;
             transition: background-color 5000s ease-in-out 0s;
         }
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(34,197,94,0.4); border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(34,197,94,0.8); }
       `}</style>
 
       {/* Orqa qora parda */}
       <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm z-0 pointer-events-none"></div>
 
-      {/* DROPDOWN yopuvchi parda */}
-      {activeDropdown && (
-        <div 
-          className="fixed inset-0 z-30" 
-          onClick={() => setActiveDropdown(null)}
-        ></div>
-      )}
-
       {/* HEADER */}
       <header className="relative z-10 bg-black/20 backdrop-blur-md border-b border-white/10 py-4">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 flex items-center">
+          
+          {/* Orqaga qaytish tugmasi */}
+          <button 
+            onClick={() => navigate(-1)} 
+            className="mr-4 w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:text-green-400 transition-all duration-300"
+            title="Orqaga qaytish"
+          >
+            <ArrowLeft size={20} />
+          </button>
+
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-green-500/30">
               <img src="/logo-white.png" alt="Logo" className="w-6 h-6" />
@@ -160,7 +149,7 @@ export default function CompleteProfile() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5 relative z-40">
+          <form onSubmit={handleSubmit} className="space-y-5">
             
             {/* 1. ISM */}
             <div className="relative group">
@@ -203,89 +192,61 @@ export default function CompleteProfile() {
             </div>
 
             {/* 3. VILOYAT */}
-            <div className="relative z-50">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block transition-colors duration-300">
+            <div className="relative group">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block transition-colors duration-300 group-focus-within:text-green-400">
                 Viloyat
               </label>
-              <div 
-                onClick={(e) => { e.stopPropagation(); if (!loading) setActiveDropdown(activeDropdown === 'region' ? null : 'region'); }}
-                className={`flex items-center justify-between w-full bg-black/60 border rounded-xl overflow-hidden cursor-pointer transition-all duration-300 ${activeDropdown === 'region' ? 'border-green-500 bg-black/80' : 'border-white/10 hover:border-white/30'}`}
-              >
-                <div className="flex items-center w-full">
-                  <div className="px-4 text-gray-500"><Map size={18} /></div>
-                  <div className="w-full py-4 pr-4">
-                    {formData.region ? (
-                      <span className="text-white text-base font-bold">{formData.region}</span>
-                    ) : (
-                      <span className="text-gray-600 text-base font-medium">Viloyatni tanlang</span>
-                    )}
-                  </div>
+              <div className="flex items-center w-full bg-black/60 border border-white/10 rounded-xl overflow-hidden focus-within:border-green-500 focus-within:bg-black/80 transition-all duration-300 relative">
+                <div className="px-4 text-gray-500"><Map size={18} /></div>
+                <select
+                  name="region"
+                  value={formData.region}
+                  onChange={handleRegionChange}
+                  disabled={loading}
+                  className="w-full bg-transparent border-none outline-none text-white text-base font-bold py-4 pr-10 appearance-none cursor-pointer disabled:opacity-50"
+                >
+                  <option value="" className="bg-gray-900 text-gray-400">Viloyatni tanlang</option>
+                  {Object.keys(regionsData).map((region, idx) => (
+                    <option key={idx} value={region} className="bg-gray-900 text-white">
+                      {region}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-4 pointer-events-none text-gray-500">
+                  <ChevronDown size={20} />
                 </div>
-                <ChevronDown size={20} className={`text-gray-500 mr-4 transition-transform duration-300 ${activeDropdown === 'region' ? 'rotate-180' : ''}`} />
               </div>
-
-              {/* Viloyatlar menyusi */}
-              {activeDropdown === 'region' && (
-                <div className="absolute top-[105%] left-0 w-full bg-gray-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden flex flex-col z-50">
-                  <div className="max-h-[220px] overflow-y-auto custom-scroll">
-                    {Object.keys(regionsData).map((region, idx) => (
-                      <div 
-                        key={idx} 
-                        onClick={(e) => handleRegionSelect(e, region)}
-                        className="px-5 py-3.5 hover:bg-green-500/20 text-white font-medium cursor-pointer border-b border-white/5 last:border-0 transition-colors"
-                      >
-                        {region}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* 4. TUMAN */}
-            {formData.region && (
-              <div className="relative z-40 animate-in fade-in slide-in-from-top-2 duration-300">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block transition-colors duration-300">
-                  Tuman (Shahar)
-                </label>
-                <div 
-                  onClick={(e) => { e.stopPropagation(); if (!loading) setActiveDropdown(activeDropdown === 'district' ? null : 'district'); }}
-                  className={`flex items-center justify-between w-full bg-black/60 border rounded-xl overflow-hidden cursor-pointer transition-all duration-300 ${activeDropdown === 'district' ? 'border-green-500 bg-black/80' : 'border-white/10 hover:border-white/30'}`}
+            <div className={`relative group transition-opacity duration-300 ${!formData.region ? 'opacity-50' : 'opacity-100'}`}>
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block transition-colors duration-300 group-focus-within:text-green-400">
+                Tuman (Shahar)
+              </label>
+              <div className="flex items-center w-full bg-black/60 border border-white/10 rounded-xl overflow-hidden focus-within:border-green-500 focus-within:bg-black/80 transition-all duration-300 relative">
+                <div className="px-4 text-gray-500"><MapPin size={18} /></div>
+                <select
+                  name="district"
+                  value={formData.district}
+                  onChange={handleChange}
+                  disabled={!formData.region || loading}
+                  className="w-full bg-transparent border-none outline-none text-white text-base font-bold py-4 pr-10 appearance-none cursor-pointer disabled:cursor-not-allowed"
                 >
-                  <div className="flex items-center w-full">
-                    <div className="px-4 text-gray-500"><MapPin size={18} /></div>
-                    <div className="w-full py-4 pr-4">
-                      {formData.district ? (
-                        <span className="text-white text-base font-bold">{formData.district}</span>
-                      ) : (
-                        <span className="text-gray-600 text-base font-medium">Tumanni tanlang</span>
-                      )}
-                    </div>
-                  </div>
-                  <ChevronDown size={20} className={`text-gray-500 mr-4 transition-transform duration-300 ${activeDropdown === 'district' ? 'rotate-180' : ''}`} />
+                  <option value="" className="bg-gray-900 text-gray-400">Tumanni tanlang</option>
+                  {formData.region && regionsData[formData.region].map((district, idx) => (
+                    <option key={idx} value={district} className="bg-gray-900 text-white">
+                      {district}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-4 pointer-events-none text-gray-500">
+                  <ChevronDown size={20} />
                 </div>
-
-                {/* Tumanlar menyusi */}
-                {activeDropdown === 'district' && (
-                  <div className="absolute top-[105%] left-0 w-full bg-gray-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden flex flex-col z-50">
-                    <div className="max-h-[220px] overflow-y-auto custom-scroll">
-                      {regionsData[formData.region].map((district, idx) => (
-                        <div 
-                          key={idx} 
-                          onClick={(e) => handleDistrictSelect(e, district)}
-                          className="px-5 py-3.5 hover:bg-green-500/20 text-white font-medium cursor-pointer border-b border-white/5 last:border-0 transition-colors"
-                        >
-                          {district}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
-            )}
+            </div>
 
             {/* 5. QISHLOQ */}
-            <div className="relative group z-20">
+            <div className="relative group">
               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block transition-colors duration-300 group-focus-within:text-green-400">
                 Qishloq (MFY) yoki Ko'cha nomi
               </label>
@@ -305,7 +266,7 @@ export default function CompleteProfile() {
             </div>
 
             {/* TUGMA */}
-            <div className="pt-4 z-10 relative">
+            <div className="pt-4 relative">
               <button
                 type="submit"
                 disabled={loading}
