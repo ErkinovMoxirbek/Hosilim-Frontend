@@ -102,7 +102,7 @@ export default function Sidebar({ user, onLogout }) {
         { id: "catalog", label: "Savat turlari", icon: PackagePlus, to: `${basePath}/baskets/catalog` },
         { id: "distribution", label: "Savat tarqatish", icon: ArrowRightLeft, to: `${basePath}/baskets/distribution` },
         { id: "returned", label: "Qaytarilgan savatlar", icon: RotateCcw, to: `${basePath}/baskets/returned` },
-        { id: "all", label: "Barchasi", icon: List, to: `${basePath}/baskets/all` },
+        { id: "history", label: "Savatlar tarixi", icon: List, to: `${basePath}/baskets/history` },
       ]
     }
   };
@@ -116,9 +116,10 @@ export default function Sidebar({ user, onLogout }) {
   const direction = currentView === "main" ? "back" : "forward";
 
   return (
-    <aside className="sticky top-0 h-screen w-[270px] bg-white border-r border-gray-100 flex flex-col text-[14px] shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40">
+    // 🚀 MUHIM O'ZGARISH: `sticky top-0` o'rniga `fixed top-0 left-0` ishlatildi
+    <aside className="fixed top-0 left-0 h-screen w-[270px] bg-white border-r border-gray-100 flex flex-col text-[14px] shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40">
 
-      {/* 1. Header / Logo - Rasmga moslashtirildi */}
+      {/* 1. Header / Logo */}
       <div className="flex items-center gap-3 px-6 py-6 shrink-0 border-b border-gray-50 mb-2">
         <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white shadow-lg">
           <img src="/logo-white.png" alt="Logo" className="w-6 h-6" />
@@ -133,7 +134,7 @@ export default function Sidebar({ user, onLogout }) {
         </div>
       </div>
 
-      {/* 2. Dinamik Navigation Area - Skroll to'g'irlandi */}
+      {/* 2. Dinamik Navigation Area */}
       <div className="flex-1 relative overflow-hidden">
         <AnimatePresence initial={false} custom={direction} mode="wait">
 

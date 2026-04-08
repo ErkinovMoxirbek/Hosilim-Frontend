@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import basketService from '../../services/basketService';
 import { useAuth } from '../../hooks/useAuth'; 
 import { 
@@ -21,7 +21,8 @@ export default function BasketCatalogPage() {
   const [selectedBasketForStock, setSelectedBasketForStock] = useState(null);
   
   const [newBasket, setNewBasket] = useState({
-    name: '', material: '', weight: '', dimensions: '', description: '', quantity: '', price: ''     
+    name: '', material: '', weight: '', dimensions: '', description: '', quantity: '', price: '',
+    isActive: true
   });
   const [stockForm, setStockForm] = useState({ quantity: '', price: '' });
 
@@ -57,13 +58,27 @@ export default function BasketCatalogPage() {
 
   const handleAddNewClick = () => {
     setEditingId(null);
-    setNewBasket({ name: '', material: materials.length > 0 ? materials[0].code : '', weight: '', dimensions: '', description: '', quantity: '', price: '' });
+    setNewBasket({ 
+      name: '', 
+      material: materials.length > 0 ? materials[0].code : '', 
+      weight: '', 
+      dimensions: '', 
+      description: '', 
+      quantity: '', 
+      price: '',
+      isActive: true 
+    });
     setIsModalOpen(true);
   };
 
   const handleEditClick = (basket) => {
     setEditingId(basket.id);
-    setNewBasket({ ...basket, dimensions: basket.dimensions || '', description: basket.description || '' });
+    setNewBasket({ 
+      ...basket, 
+      dimensions: basket.dimensions || '', 
+      description: basket.description || '',
+      isActive: basket.isActive // 🚀 YANGI: Bazadan o'qiydi
+    });
     setIsModalOpen(true);
   };
 
@@ -184,7 +199,6 @@ export default function BasketCatalogPage() {
                         </span>
                       </td>
 
-                      {/* 🚀 BU YERDA BACKENDDAN KELGAN totalPrice ISHLATILYAPTI */}
                       <td className="px-6 py-4 text-right">
                         <span className="font-extrabold text-emerald-600">
                           {Number(basket.totalPrice || 0).toLocaleString('ru-RU')} <span className="text-slate-400 font-medium ml-0.5">UZS</span>
@@ -326,6 +340,35 @@ export default function BasketCatalogPage() {
                       disabled={isSubmitting}
                     />
                   </div>
+                  
+                  {/* 🚀 STATUS TOGGLE: Faqat tahrirlashda ko'rinadi */}
+                  {editingId && (
+                    <div className="pt-2">
+                      <label className="block text-[12px] font-bold text-slate-700 uppercase tracking-wider mb-3">
+                        Savat Holati
+                      </label>
+                      <label className="flex items-center cursor-pointer w-max group">
+                        <div className="relative">
+                          <input 
+                            type="checkbox" 
+                            className="sr-only" 
+                            checked={newBasket.isActive} 
+                            onChange={(e) => setNewBasket({...newBasket, isActive: e.target.checked})} 
+                            disabled={isSubmitting}
+                          />
+                          <div className={`block w-12 h-7 rounded-full transition-colors duration-300 ease-in-out ${newBasket.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
+                          <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform duration-300 ease-in-out shadow-sm ${newBasket.isActive ? 'transform translate-x-5' : ''}`}></div>
+                        </div>
+                        <div className="ml-3 text-[14px] font-bold text-slate-700 select-none">
+                          {newBasket.isActive ? (
+                            <span className="text-emerald-600 transition-colors">Faol (Ishlatilmoqda)</span>
+                          ) : (
+                            <span className="text-slate-500 transition-colors">Nofaol (To'xtatilgan)</span>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+                  )}
 
                 </div>
 
