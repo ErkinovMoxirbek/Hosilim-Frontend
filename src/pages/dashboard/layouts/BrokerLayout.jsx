@@ -24,10 +24,10 @@ import CancelledSalePage from "../../brokerAndAccountant/CancelledSalePage";
 import AllSalePage from "../../brokerAndAccountant/AllSalePage";
 import PricingPage from "../../brokerAndAccountant/PricingPage";
 import BasketCatalogPage from "../../brokerAndAccountant/BasketCatalogPage";
-import AllBasketsPage from "../../brokerAndAccountant/AllBasketsPage";
 import ReturnedBasketsPage from "../../brokerAndAccountant/ReturnedBasketsPage";
 import BasketDistributionPage from "../../brokerAndAccountant/BasketDistributionPage";
 import AccountantsPage from "../../brokerAndAccountant/AccountantsPage";
+import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";
 
 const BASE_PATH = "/dashboard/broker";
 
@@ -66,7 +66,7 @@ const BrokerLayout = () => {
       if (path.endsWith("/catalog")) setActiveSubSection("catalog");
       else if (path.endsWith("/distribution")) setActiveSubSection("distribution");
       else if (path.endsWith("/returned")) setActiveSubSection("returned");
-      else setActiveSubSection("all");
+      else setActiveSubSection("history");
       return;
     }
 
@@ -136,7 +136,7 @@ const BrokerLayout = () => {
       { id: "catalog", name: "Savat turlari", icon: PackagePlus },
       { id: "distribution", name: "Savat tarqatish", icon: ArrowRightLeft },
       { id: "returned", name: "Qaytarilgan savatlar", icon: RotateCcw },
-      { id: "all", name: "Savatlar hammasi", icon: List },
+      { id: "history", name: "Savatlar tarixi", icon: List },
     ],
     []
   );
@@ -233,7 +233,7 @@ const BrokerLayout = () => {
               <Route path="baskets/catalog" element={<BasketCatalogPage />} />
               <Route path="baskets/distribution" element={<BasketDistributionPage />} />
               <Route path="baskets/returned" element={<ReturnedBasketsPage />} />
-              <Route path="baskets/all" element={<AllBasketsPage />} />
+              <Route path="baskets/history" element={<BasketHistoryPage />} />
 
               <Route path="farmers" element={<ComingSoon title="Fermerlar" />} />
               <Route path="inventory" element={<ComingSoon title="Omborxona" />} />

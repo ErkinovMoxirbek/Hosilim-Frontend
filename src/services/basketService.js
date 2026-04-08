@@ -67,7 +67,9 @@ const basketService = {
     }
   },
 
-  // 🚀 YANGI: Tahrirlash (Edit)
+  /**
+   * Savatni tahrirlash (Edit)
+   */
   updateBasket: async (id, basketData) => {
     try {
       const payload = {
@@ -77,7 +79,8 @@ const basketService = {
         dimensions: basketData.dimensions,
         weight: parseFloat(basketData.weight),
         quantity: parseInt(basketData.quantity, 10),
-        price: parseFloat(basketData.price)
+        price: parseFloat(basketData.price),
+        isActive: basketData.isActive
       };
 
       const response = await axios.put(`${API_URL}/${id}`, payload, getAuthHeaders());
@@ -87,13 +90,33 @@ const basketService = {
       throw error;
     }
   },
+
+  /**
+   * Savatni o'chirish (Delete)
+   */
+  deleteBasket: async (id) => {
+    try {
+      const response = await axios.delete(`${API_URL}/${id}`, getAuthHeaders());
+      return response.data;
+    } catch (error) {
+      console.error("Savatni o'chirishda xatolik:", error);
+      throw error;
+    }
+  },
+
+  // ==========================================================
+  // 🚀 YANGI AYLANMA VA TARIX (INVENTORY & HISTORY) API'LARI
+  // ==========================================================
+
+  /**
+   * 1. OMBORGA SOTIB OLINGANDA (KIRIM)
+   */
   addStock: async (id, stockData) => {
     try {
       const payload = {
         quantity: parseInt(stockData.quantity, 10),
-        price: parseFloat(stockData.price)
+        price: stockData.price ? parseFloat(stockData.price) : null
       };
-      // Backendda PUT /api/v1/basket/{id}/add-stock API bo'lishi kerak
       const response = await axios.put(`${API_URL}/${id}/add-stock`, payload, getAuthHeaders());
       return response.data?.data || response.data;
     } catch (error) {
@@ -102,13 +125,60 @@ const basketService = {
     }
   },
 
-  // 🚀 YANGI: O'chirish (Delete)
-  deleteBasket: async (id) => {
+  /**
+   * 2. FERMERGA TARQATILGANDA (CHIQIM)
+   */
+  giveToFarmer: async (id, distributeData) => {
     try {
-      const response = await axios.delete(`${API_URL}/${id}`, getAuthHeaders());
-      return response.data;
+      const payload = {
+        quantity: parseInt(distributeData.quantity, 10),
+        farmerId: parseInt(distributeData.farmerId, 10)
+      };
+      const response = await axios.put(`${API_URL}/${id}/give-to-farmer`, payload, getAuthHeaders());
+      return response.data?.data || response.data;
     } catch (error) {
-      console.error("Savatni o'chirishda xatolik:", error);
+      console.error("Fermerga tarqatishda xatolik:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * 3. FERMERDAN QAYTIB KELGANDA (KIRIM)
+   */
+  returnFromFarmer: async (id, returnData) => {
+    try {
+      const payload = {
+        quantity: parseInt(returnData.quantity, 10),
+        farmerId: parseInt(returnData.farmerId, 10)
+      };
+      const response = await axios.put(`${API_URL}/${id}/return-from-farmer`, payload, getAuthHeaders());
+      return response.data?.data || response.data;
+    } catch (error) {
+      console.error("Fermerdan qabul qilishda xatolik:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * 4. BARCHASI (TARIXNI OLISH)
+   */
+  getHistory: async (id, page = 0, size = 20) => {
+    try {
+      const response = await axios.get(`${API_URL}/${id}/history?page=${page}&size=${size}`, getAuthHeaders());
+      // Endi bu yerda response.data.data ichida pagination obyekti kelyapti. 
+      return response.data?.data || response.data;
+    } catch (error) {
+      console.error("Savat tarixini olishda xatolik:", error);
+      throw error;
+    }
+  },
+
+  getAllHistory: async (page = 0, size = 20) => {
+    try {
+      const response = await axios.get(`${API_URL}/history?page=${page}&size=${size}`, getAuthHeaders());
+      return response.data?.data || response.data;
+    } catch (error) {
+      console.error("Barcha tarixni olishda xatolik:", error);
       throw error;
     }
   }
