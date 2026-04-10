@@ -1,18 +1,8 @@
-import axios from "axios";
-import API_BASE_URL from "../config";
-import { getAccessToken } from "../utils/tokenManager";
+import api from "../api/Axios";  // api.js fayli joylashgan to'g'ri manzilni yozing (masalan: "../services/api")
 
-const API_URL = `${API_BASE_URL}/farmers`;
-
-const getAuthHeaders = () => {
-  const token = getAccessToken();
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  };
-};
+// api.js ichida baseURL (API_BASE_URL) allaqachon sozlangan, 
+// shuning uchun bu yerda faqat manzilning davomini yozamiz:
+const API_URL = "/farmers";
 
 const farmerService = {
   /**
@@ -22,10 +12,9 @@ const farmerService = {
     // Qidiruv so'zini URL ga qo'shish uchun xavfsiz formatga o'tkazamiz
     const query = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
     
-    const response = await axios.get(
-      `${API_URL}?page=${page}&size=${size}${query}`, 
-      getAuthHeaders()
-    );
+    // 1. axios.get o'rniga api.get ishlatildi
+    // 2. getAuthHeaders() olib tashlandi, chunki api.js buni o'zi avtomatik qo'shadi
+    const response = await api.get(`${API_URL}?page=${page}&size=${size}${query}`);
     
     return response.data?.data || response.data;
   },
@@ -42,7 +31,10 @@ const farmerService = {
       status: 'INITIAL' // Boshlang'ich status
     };
 
-    const response = await axios.post(`${API_URL}/quick-add`, payload, getAuthHeaders());
+    // 1. axios.post o'rniga api.post ishlatildi
+    // 2. getAuthHeaders() olib tashlandi
+    const response = await api.post(`${API_URL}/quick-add`, payload);
+    
     return response.data?.data || response.data;
   }
 };

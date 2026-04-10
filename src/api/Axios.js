@@ -1,5 +1,6 @@
 import axios from "axios";
-import API_BASE_URL from "../config"; // sizda bor
+import API_BASE_URL from "../config";
+import { clearAuth, getAccessToken, getRefreshToken, setTokens } from "../utils/tokenManager";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -7,7 +8,7 @@ const api = axios.create({
 
 // Request oldidan token qo‘yish
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -18,23 +19,49 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response && error.response.status === 401) {
-      // Access token expired → refresh qilamiz
-      const refreshToken = localStorage.getItem("refreshToken");
+    const originalRequest = error.config;
+
+    // 401 xatolik va bu so'rov birinchi marta fail bo'lishi (_retry yo'q)
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true; // Cheksiz siklga tushmasligi uchun
+
+      const refreshToken = getRefreshToken();
+
+      // 1-QADAM: Refresh token bormi o'zi?
+      if (!refreshToken) {
+        console.warn("Refresh token topilmadi, loginga yo'naltirilmoqda.");
+        window.location.href = "/";
+        return Promise.reject(error);
+      }
+
       try {
+        console.log("Refresh token orqali yangi token so'ralmoqda...");
+        
         const res = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-          refreshToken,
+          refreshToken: refreshToken,
         });
 
-        localStorage.setItem("accessToken", res.data.accessToken);
-        localStorage.setItem("refreshToken", res.data.refreshToken);
+        console.log("Yangi tokenlar muvaffaqiyatli olindi!");
+        setTokens(res.data.accessToken, res.data.refreshToken);
 
         // eski requestni qayta yuborish
-        error.config.headers.Authorization = `Bearer ${res.data.accessToken}`;
-        return api(error.config);
+        originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
+        return api(originalRequest);
+        
       } catch (err) {
-        // Refresh ham eskirgan → login sahifaga qaytarish
-        window.location.href = "/login";
+        // 2-QADAM: Asl xatolikni ko'rish
+        console.error("Refresh token so'rovida xatolik yuz berdi:", err);
+        
+        // Agar backend xatoni batafsil qaytargan bo'lsa
+        if (err.response) {
+            console.error("Backend javobi:", err.response.data);
+        }
+
+        // Refresh ham eskirgan yoki xato ishlagan → login sahifaga qaytarish
+        clearAuth();
+        window.location.href = "/";
+        
+        return Promise.reject(err);
       }
     }
     return Promise.reject(error);

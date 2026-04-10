@@ -28,6 +28,7 @@ import ReturnedBasketsPage from "../../brokerAndAccountant/ReturnedBasketsPage";
 import BasketDistributionPage from "../../brokerAndAccountant/BasketDistributionPage";
 import AccountantsPage from "../../brokerAndAccountant/AccountantsPage";
 import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";
+import FarmerPage from "../../brokerAndAccountant/FarmerPage";
 
 const BASE_PATH = "/dashboard/broker";
 
@@ -216,9 +217,8 @@ const BrokerLayout = () => {
           />
         </div>
 
-        {/* 🟢 Bu yerdan ham w-full olib tashlandi 🟢 */}
         <div className="flex-1 min-h-screen bg-zinc-50 relative">
-          <main className="p-4 lg:p-8">
+          <main className="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6 lg:p-8">
             <Routes>
               <Route index element={<BrokerDashboard />} />
 
@@ -235,7 +235,7 @@ const BrokerLayout = () => {
               <Route path="baskets/returned" element={<ReturnedBasketsPage />} />
               <Route path="baskets/history" element={<BasketHistoryPage />} />
 
-              <Route path="farmers" element={<ComingSoon title="Fermerlar" />} />
+              <Route path="farmers" element={<FarmerPage />} />
               <Route path="inventory" element={<ComingSoon title="Omborxona" />} />
               <Route path="pricing" element={<PricingPage />} />
               <Route path="profile" element={<ComingSoon title="Profil" />} />

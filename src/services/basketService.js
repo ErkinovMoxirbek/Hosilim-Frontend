@@ -1,18 +1,7 @@
-import axios from "axios";
-import API_BASE_URL from "../config";
-import { getAccessToken } from "../utils/tokenManager";
+import api from "../api/Axios";  // api.js fayli turgan to'g'ri manzilni ko'rsating (masalan: "../services/api")
 
-const API_URL = `${API_BASE_URL}/basket`;
-
-const getAuthHeaders = () => {
-  const token = getAccessToken();
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  };
-};
+// api.js ichida baseURL mavjud, shuning uchun faqat endpointni yozamiz:
+const API_URL = "/basket";
 
 const basketService = {
   /**
@@ -20,10 +9,7 @@ const basketService = {
    */
   getBaskets: async (page = 0, size = 50) => {
     try {
-      const response = await axios.get(
-        `${API_URL}?page=${page}&size=${size}`,
-        getAuthHeaders()
-      );
+      const response = await api.get(`${API_URL}?page=${page}&size=${size}`);
       return response.data?.data || response.data;
     } catch (error) {
       console.error("Savatlarni olishda xatolik:", error);
@@ -36,7 +22,7 @@ const basketService = {
    */
   getMaterials: async () => {
     try {
-      const response = await axios.get(`${API_URL}/materials`, getAuthHeaders());
+      const response = await api.get(`${API_URL}/materials`);
       return response.data?.data || response.data; 
     } catch (error) {
       console.error("Materiallarni olishda xatolik:", error);
@@ -59,7 +45,7 @@ const basketService = {
         price: parseFloat(basketData.price)
       };
 
-      const response = await axios.post(API_URL, payload, getAuthHeaders());
+      const response = await api.post(API_URL, payload);
       return response.data?.data || response.data;
     } catch (error) {
       console.error("Savat yaratishda xatolik:", error);
@@ -83,7 +69,7 @@ const basketService = {
         isActive: basketData.isActive
       };
 
-      const response = await axios.put(`${API_URL}/${id}`, payload, getAuthHeaders());
+      const response = await api.put(`${API_URL}/${id}`, payload);
       return response.data?.data || response.data;
     } catch (error) {
       console.error("Savatni yangilashda xatolik:", error);
@@ -96,7 +82,7 @@ const basketService = {
    */
   deleteBasket: async (id) => {
     try {
-      const response = await axios.delete(`${API_URL}/${id}`, getAuthHeaders());
+      const response = await api.delete(`${API_URL}/${id}`);
       return response.data;
     } catch (error) {
       console.error("Savatni o'chirishda xatolik:", error);
@@ -117,7 +103,7 @@ const basketService = {
         quantity: parseInt(stockData.quantity, 10),
         price: stockData.price ? parseFloat(stockData.price) : null
       };
-      const response = await axios.put(`${API_URL}/${id}/add-stock`, payload, getAuthHeaders());
+      const response = await api.put(`${API_URL}/${id}/add-stock`, payload);
       return response.data?.data || response.data;
     } catch (error) {
       console.error("Kirim qilishda xatolik:", error);
@@ -134,7 +120,7 @@ const basketService = {
         quantity: parseInt(distributeData.quantity, 10),
         farmerId: parseInt(distributeData.farmerId, 10)
       };
-      const response = await axios.put(`${API_URL}/${id}/give-to-farmer`, payload, getAuthHeaders());
+      const response = await api.put(`${API_URL}/${id}/give-to-farmer`, payload);
       return response.data?.data || response.data;
     } catch (error) {
       console.error("Fermerga tarqatishda xatolik:", error);
@@ -151,7 +137,7 @@ const basketService = {
         quantity: parseInt(returnData.quantity, 10),
         farmerId: parseInt(returnData.farmerId, 10)
       };
-      const response = await axios.put(`${API_URL}/${id}/return-from-farmer`, payload, getAuthHeaders());
+      const response = await api.put(`${API_URL}/${id}/return-from-farmer`, payload);
       return response.data?.data || response.data;
     } catch (error) {
       console.error("Fermerdan qabul qilishda xatolik:", error);
@@ -164,7 +150,7 @@ const basketService = {
    */
   getHistory: async (id, page = 0, size = 20) => {
     try {
-      const response = await axios.get(`${API_URL}/${id}/history?page=${page}&size=${size}`, getAuthHeaders());
+      const response = await api.get(`${API_URL}/${id}/history?page=${page}&size=${size}`);
       // Endi bu yerda response.data.data ichida pagination obyekti kelyapti. 
       return response.data?.data || response.data;
     } catch (error) {
@@ -175,7 +161,7 @@ const basketService = {
 
   getAllHistory: async (page = 0, size = 20) => {
     try {
-      const response = await axios.get(`${API_URL}/history?page=${page}&size=${size}`, getAuthHeaders());
+      const response = await api.get(`${API_URL}/history?page=${page}&size=${size}`);
       return response.data?.data || response.data;
     } catch (error) {
       console.error("Barcha tarixni olishda xatolik:", error);
