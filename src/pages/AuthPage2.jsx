@@ -144,7 +144,7 @@ export default function AuthPage() {
             <div className="flex flex-col leading-none">
               <span className="text-xl font-bold text-white drop-shadow-md">Hosilim</span>
               <span className="text-[10px] uppercase font-bold text-green-400 tracking-wider mt-1">
-                Broker tizimi
+                 Hosilim platformasi
               </span>
             </div>
           </div>
