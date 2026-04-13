@@ -1,7 +1,8 @@
 // src/services/adminUsersService.js
-import API_BASE_URL from "../config";
-import { getAccessToken } from "../utils/tokenManager";
+import api from "../api/Axios";  // api.js fayli turgan manzilni to'g'rilab yozing (masalan: "./api" yoki "../services/api")
 
+// UI (Frontend) qismida ushbu xatolik klassi ishlatilgan bo'lishi mumkin, 
+// shuning uchun uni saqlab qolamiz.
 export class ApiError extends Error {
   constructor(message, status, payload) {
     super(message);
@@ -11,101 +12,19 @@ export class ApiError extends Error {
   }
 }
 
-
-
-function authHeaders(extra = {}) {
-  const token = getAccessToken();
-  const headers = {
-    "Content-Type": "application/json",
-    ...extra,
-  };
-  if (token) headers.Authorization = `Bearer ${token}`;
-  return headers;
-}
-
-function buildQuery(params = {}) {
-  const qs = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => {
-    if (v === undefined || v === null) return;
-    if (v === "") return;
-    if (v === "ALL") return;
-    qs.append(k, String(v));
-  });
-  const s = qs.toString();
-  return s ? `?${s}` : "";
-}
-
-async function parseResponse(res) {
-  const contentType = res.headers.get("content-type") || "";
-  const isJson = contentType.includes("application/json");
-
-  if (res.ok) {
-    if (isJson) return res.json();
-    const text = await res.text();
-    return text ? { raw: text } : {};
+// Axios xatolarini ApiError formatiga o'tkazib beruvchi yordamchi funksiya
+const handleApiError = (error) => {
+  if (error.response) {
+    const payload = error.response.data;
+    const message = payload?.message || payload?.error || error.response.statusText || "Request failed";
+    throw new ApiError(message, error.response.status, payload);
   }
-
-  let payload = null;
-  let message = res.statusText || "Request failed";
-
-  try {
-    if (isJson) {
-      payload = await res.json();
-      message = payload?.message || payload?.error || message;
-    } else {
-      const text = await res.text();
-      message = text || message;
-      payload = text ? { raw: text } : null;
-    }
-  } catch {
-    // ignore parse errors
-  }
-
-  throw new ApiError(message, res.status, payload);
-}
-
-async function get(path, params) {
-  const res = await fetch(`${API_BASE_URL}${path}${buildQuery(params)}`, {
-    method: "GET",
-    headers: authHeaders(),
-  });
-  return parseResponse(res);
-}
-
-async function post(path, body) {
-  const isForm = typeof FormData !== "undefined" && body instanceof FormData;
-  const headers = authHeaders();
-  if (isForm) delete headers["Content-Type"];
-
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: "POST",
-    headers,
-    body: isForm ? body : JSON.stringify(body ?? {}),
-  });
-  return parseResponse(res);
-}
-
-async function patch(path, body) {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: "PATCH",
-    headers: authHeaders(),
-    body: JSON.stringify(body ?? {}),
-  });
-  return parseResponse(res);
-}
-
-async function del(path) {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: "DELETE",
-    headers: authHeaders(),
-  });
-  return parseResponse(res);
-}
+  throw error; // Network error bo'lsa
+};
 
 export const adminUsersService = {
   /**
-   * LIST: GET /admin/users
-   * Backendingizda sortBy bo‘lmasligi mumkin, shuning uchun sort / sortBy ikkalasini ham yuboramiz.
+   * LIST: GET /admin/users yoki /users
    */
   async list(params = {}) {
     const sortOrder =
@@ -117,54 +36,90 @@ export const adminUsersService = {
 
     const finalParams = {
       ...params,
-      sortOrder, // backend ko‘pincha DESC/ASC kutadi
+      sortOrder, 
       sort: params.sort ?? params.sortBy,
       sortBy: params.sortBy ?? params.sort,
     };
 
-    return get("/users", finalParams);
+    try {
+      // Axios URL paramlarni (query string) avtomat o'zi yasab oladi
+      const res = await api.get("/users", { params: finalParams });
+      return res.data?.data || res.data;
+    } catch (err) {
+      handleApiError(err);
+    }
   },
 
   // CRUD
   async create(data) {
-    return post("/admin/users", data);
+    try {
+      const res = await api.post("/admin/users", data);
+      return res.data?.data || res.data;
+    } catch (err) { handleApiError(err); }
   },
 
   async update(userId, data) {
-    return patch(`/admin/users/${userId}`, data);
+    try {
+      const res = await api.patch(`/admin/users/${userId}`, data);
+      return res.data?.data || res.data;
+    } catch (err) { handleApiError(err); }
   },
 
   async remove(userId) {
-    return del(`/admin/users/${userId}`);
+    try {
+      const res = await api.delete(`/admin/users/${userId}`);
+      return res.data?.data || res.data;
+    } catch (err) { handleApiError(err); }
   },
 
   // actions
   async approve(userId) {
-    return post(`/admin/users/${userId}/approve`, {});
+    try {
+      const res = await api.post(`/admin/users/${userId}/approve`);
+      return res.data?.data || res.data;
+    } catch (err) { handleApiError(err); }
   },
 
   async block(userId) {
-    return post(`/admin/users/${userId}/block`, {});
+    try {
+      const res = await api.post(`/admin/users/${userId}/block`);
+      return res.data?.data || res.data;
+    } catch (err) { handleApiError(err); }
   },
 
   async unblock(userId) {
-    return post(`/admin/users/${userId}/unblock`, {});
+    try {
+      const res = await api.post(`/admin/users/${userId}/unblock`);
+      return res.data?.data || res.data;
+    } catch (err) { handleApiError(err); }
   },
 
   async verify(userId) {
-    return post(`/admin/users/${userId}/verify`, {});
+    try {
+      const res = await api.post(`/admin/users/${userId}/verify`);
+      return res.data?.data || res.data;
+    } catch (err) { handleApiError(err); }
   },
 
   async resetPassword(userId) {
-    return post(`/admin/users/${userId}/reset-password`, {});
+    try {
+      const res = await api.post(`/admin/users/${userId}/reset-password`);
+      return res.data?.data || res.data;
+    } catch (err) { handleApiError(err); }
   },
 
-  async notify(userId, data) {
-    return post(`/admin/users/${userId}/notify`, data ?? {});
+  async notify(userId, data = {}) {
+    try {
+      const res = await api.post(`/admin/users/${userId}/notify`, data);
+      return res.data?.data || res.data;
+    } catch (err) { handleApiError(err); }
   },
 
   // bulk
   async bulk(action, ids) {
-    return post("/admin/users/bulk", { action, ids });
+    try {
+      const res = await api.post("/admin/users/bulk", { action, ids });
+      return res.data?.data || res.data;
+    } catch (err) { handleApiError(err); }
   },
 };

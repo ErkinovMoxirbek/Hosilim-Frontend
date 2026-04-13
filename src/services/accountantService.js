@@ -1,47 +1,39 @@
-import axios from "axios";
-import API_BASE_URL from "../config";
-import { getAccessToken } from "../utils/tokenManager";
+import api from "../api/Axios";  // api.js fayli turgan to'g'ri manzilni ko'rsating (masalan: "../services/api")
 
-const API_URL = `${API_BASE_URL}/accountants`;
-
-const getAuthHeaders = () => {
-  const token = getAccessToken();
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  };
-};
+// api.js o'zida baseURL ni saqlagani uchun faqat manzilning davomini yozamiz:
+const API_URL = "/accountants";
 
 export const accountantService = {
   getAll: async (page = 0, size = 100) => {
-    const response = await axios.get(`${API_URL}?page=${page}&size=${size}`, getAuthHeaders());
+    // getAuthHeaders KERAK EMAS, api.js o'zi token qo'shadi
+    const response = await api.get(`${API_URL}?page=${page}&size=${size}`);
     return response.data?.data || response.data;
   },
 
   sendOtp: async (phone) => {
     // phone bu yerda "+998901234567" formatida keladi
-    return await axios.post(`${API_URL}/send-otp`, { phone }, getAuthHeaders());
+    const response = await api.post(`${API_URL}/send-otp`, { phone });
+    return response.data?.data || response.data;
   },
 
   verifyOtp: async (phone, otp) => {
-    return await axios.post(`${API_URL}/verify-otp`, { phone, otp }, getAuthHeaders());
+    const response = await api.post(`${API_URL}/verify-otp`, { phone, otp });
+    return response.data?.data || response.data;
   },
 
   create: async (data) => {
-    const response = await axios.post(API_URL, data, getAuthHeaders());
+    const response = await api.post(API_URL, data);
     return response.data?.data || response.data;
   },
 
   update: async (id, data) => {
     // data ichida fullName, address, phone va STATUS ham bor.
-    const response = await axios.put(`${API_URL}/${id}`, data, getAuthHeaders());
+    const response = await api.put(`${API_URL}/${id}`, data);
     return response.data?.data || response.data;
   },
 
   delete: async (id) => {
-    const response = await axios.delete(`${API_URL}/${id}`, getAuthHeaders());
+    const response = await api.delete(`${API_URL}/${id}`);
     return response.data;
   }
 };
