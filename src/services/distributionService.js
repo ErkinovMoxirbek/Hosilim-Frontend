@@ -5,7 +5,18 @@ const BASE_URL = "/basket-transactions";
 const distributionService = {
   
   // Barcha tarqatilgan savatlar tarixini olish (Faqat Shu Punkt bo'yicha)
-  getGivenHistory: async (page = 0, size = 50) => {
+  getAllTransactions: async (page = 0, size = 50) => {
+    try {
+      const response = await api.get(`${BASE_URL}/history`, {
+        params: { page, size }
+      });
+      // Backend ApiResponse dan "data.content" ichida ro'yxatni beradi
+      return response.data?.data?.content || [];
+    } catch (error) {
+      console.error("Tarqatish tarixini olishda xatolik:", error);
+      return []; // UI qotib qolmasligi uchun xato paytida bo'sh array qaytaramiz
+    }
+  },getGivenMiniHistory: async (page = 0, size = 10) => {
     try {
       const response = await api.get(`${BASE_URL}/history`, {
         params: { page, size }

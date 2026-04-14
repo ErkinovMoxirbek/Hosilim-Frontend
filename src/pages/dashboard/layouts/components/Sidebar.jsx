@@ -2,21 +2,10 @@ import { useMemo, useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ChevronRight,
-  LogOut,
-  TrendingUp,
-  ShoppingBasket,
-  Users,
-  Package,
-  DollarSign,
-  Settings,
-  List,
-  X,
-  PackagePlus,
-  ArrowRightLeft,
-  RotateCcw,
-  LayoutGrid,
-  ArrowLeft
+  ChevronRight, LogOut, TrendingUp, ShoppingBasket, Users, 
+  Package, DollarSign, Settings, List, X, PackagePlus, 
+  ArrowRightLeft, RotateCcw, LayoutGrid, ArrowLeft,
+  Database, Truck, Apple, BarChart3, MapPin, Bell // 🟢 Bell (Qo'ng'iroqcha) iconi qo'shildi
 } from "lucide-react";
 
 function getBasePath(user) {
@@ -41,25 +30,32 @@ export default function Sidebar({ user, onLogout }) {
   const [currentView, setCurrentView] = useState("main");
 
   useEffect(() => {
-    if (location.pathname.includes("/sales")) setCurrentView("sales");
+    if (location.pathname.includes("/receive")) setCurrentView("receive");
     else if (location.pathname.includes("/baskets")) setCurrentView("baskets");
     else setCurrentView("main");
   }, [location.pathname]);
 
   let mainItems = [];
 
+  // 🟢 Barcha rollarga "E'lonlar" qo'shildi
   if (isAdmin) {
     mainItems = [
       { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
-      { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
-      { id: "farmers", label: "Fermerlar", icon: Users, to: `${basePath}/farmers` },
-      { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
-      { id: "profile", label: "Profil", icon: Settings, to: `${basePath}/profile` },
+      { id: "announcements", label: "E'lonlar", icon: Bell, to: `${basePath}/announcements` }, // 🟢
+      { id: "fruit-types", label: "Meva Katalogi", icon: Database, to: `${basePath}/fruit-types` },
+      { id: "collection-points", label: "Yig'ish Punktlari", icon: MapPin, to: `${basePath}/collection-points` },
+      { id: "users", label: "Foydalanuvchilar", icon: Users, to: `${basePath}/users` },
+      { id: "brokers", label: "Brokerlar", icon: Truck, to: `${basePath}/brokers` },
+      { id: "farmers", label: "Fermerlar", icon: Apple, to: `${basePath}/farmers` },
+      { id: "transactions", label: "Moliyaviy Hisobot", icon: DollarSign, to: `${basePath}/transactions` },
+      { id: "analytics", label: "Statistika", icon: BarChart3, to: `${basePath}/analytics` },
+      { id: "settings", label: "Sozlamalar", icon: Settings, to: `${basePath}/settings` },
     ];
   } else if (isAccountant) {
     mainItems = [
       { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
-      { id: "sales", label: "Sotuvlar", icon: TrendingUp, hasSubMenu: true },
+      { id: "announcements", label: "E'lonlar", icon: Bell, to: `${basePath}/announcements` }, // 🟢
+      { id: "receive", label: "Qabullar", icon: TrendingUp, hasSubMenu: true },
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
       { id: "farmers", label: "Fermerlar", icon: Users, to: `${basePath}/farmers` },
       { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
@@ -69,7 +65,8 @@ export default function Sidebar({ user, onLogout }) {
   } else if (isBroker) {
     mainItems = [
       { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
-      { id: "sales", label: "Sotuvlar", icon: TrendingUp, hasSubMenu: true },
+      { id: "announcements", label: "E'lonlar", icon: Bell, to: `${basePath}/announcements` }, // 🟢
+      { id: "receive", label: "Qabullar", icon: TrendingUp, hasSubMenu: true },
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
       { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
       { id: "farmers", label: "Fermerlar", icon: Users, to: `${basePath}/farmers` },
@@ -80,19 +77,20 @@ export default function Sidebar({ user, onLogout }) {
   } else if (isFarmer) {
     mainItems = [
       { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
+      { id: "announcements", label: "E'lonlar", icon: Bell, to: `${basePath}/announcements` }, // 🟢
       { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
       { id: "profile", label: "Profil", icon: Settings, to: `${basePath}/profile` },
     ];
   }
 
   const subMenus = {
-    sales: {
-      title: "Sotuvlar",
+    receive: {
+      title: "Qabullar",
       icon: TrendingUp,
       items: [
-        { id: "new", label: "Yangi sotuv", icon: PackagePlus, to: `${basePath}/sales/new` },
-        { id: "all", label: "Barcha sotuvlar", icon: List, to: `${basePath}/sales/all` },
-        { id: "cancelled", label: "Bekor qilingan", icon: X, to: `${basePath}/sales/cancelled` },
+        { id: "new", label: "Yangi qabul", icon: PackagePlus, to: `${basePath}/receive/new` },
+        { id: "all", label: "Barcha qabullar", icon: List, to: `${basePath}/receive/all` },
+        { id: "cancelled", label: "Bekor qilingan", icon: X, to: `${basePath}/receive/cancelled` },
       ]
     },
     baskets: {
@@ -101,7 +99,7 @@ export default function Sidebar({ user, onLogout }) {
       items: [
         { id: "catalog", label: "Savat turlari", icon: PackagePlus, to: `${basePath}/baskets/catalog` },
         { id: "distribution", label: "Savat tarqatish", icon: ArrowRightLeft, to: `${basePath}/baskets/distribution` },
-        { id: "returned", label: "Qaytarilgan savatlar", icon: RotateCcw, to: `${basePath}/baskets/returned` },
+        { id: "transaction-baskets", label: "Savat tranzaksiyalari", icon: RotateCcw, to: `${basePath}/baskets/transaction-baskets` },
         { id: "history", label: "Savatlar tarixi", icon: List, to: `${basePath}/baskets/history` },
       ]
     }
@@ -116,9 +114,7 @@ export default function Sidebar({ user, onLogout }) {
   const direction = currentView === "main" ? "back" : "forward";
 
   return (
-    // 🚀 MUHIM O'ZGARISH: `sticky top-0` o'rniga `fixed top-0 left-0` ishlatildi
     <aside className="fixed top-0 left-0 h-screen w-[270px] bg-white border-r border-gray-100 flex flex-col text-[14px] shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40">
-
       {/* 1. Header / Logo */}
       <div className="flex items-center gap-3 px-6 py-6 shrink-0 border-b border-gray-50 mb-2">
         <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white shadow-lg">
@@ -137,7 +133,6 @@ export default function Sidebar({ user, onLogout }) {
       {/* 2. Dinamik Navigation Area */}
       <div className="flex-1 relative overflow-hidden">
         <AnimatePresence initial={false} custom={direction} mode="wait">
-
           {/* ASOSIY MENYU */}
           {currentView === "main" && (
             <motion.nav
@@ -152,7 +147,7 @@ export default function Sidebar({ user, onLogout }) {
             >
               {mainItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.to;
+                const isActive = location.pathname === item.to || (item.to !== basePath && location.pathname.startsWith(item.to));
 
                 if (item.hasSubMenu) {
                   return (
@@ -237,7 +232,6 @@ export default function Sidebar({ user, onLogout }) {
               </div>
             </motion.nav>
           )}
-
         </AnimatePresence>
       </div>
 
