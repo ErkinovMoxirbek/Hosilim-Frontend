@@ -4,28 +4,52 @@ const BASE_URL = "/basket-transactions";
 
 const distributionService = {
   
-  // Barcha tarqatilgan savatlar tarixini olish (Faqat Shu Punkt bo'yicha)
+  // Barcha tarqatilgan savatlar tarixini olish
   getAllTransactions: async (page = 0, size = 50) => {
     try {
       const response = await api.get(`${BASE_URL}/history`, {
         params: { page, size }
       });
-      // Backend ApiResponse dan "data.content" ichida ro'yxatni beradi
       return response.data?.data?.content || [];
     } catch (error) {
       console.error("Tarqatish tarixini olishda xatolik:", error);
-      return []; // UI qotib qolmasligi uchun xato paytida bo'sh array qaytaramiz
+      return []; 
     }
-  },getGivenMiniHistory: async (page = 0, size = 10) => {
+  },
+
+  getGivenMiniHistory: async (page = 0, size = 10) => {
     try {
       const response = await api.get(`${BASE_URL}/history`, {
         params: { page, size }
       });
-      // Backend ApiResponse dan "data.content" ichida ro'yxatni beradi
       return response.data?.data?.content || [];
     } catch (error) {
       console.error("Tarqatish tarixini olishda xatolik:", error);
-      return []; // UI qotib qolmasligi uchun xato paytida bo'sh array qaytaramiz
+      return [];
+    }
+  },
+
+ // Barcha fermerlarni umumiy qarzi
+  getFarmerBalancesSummary: async (page = 0, size = 10) => {
+    try {
+      const response = await api.get(`${BASE_URL}/balances/summary`, {
+        params: { page, size }
+      });
+      return response.data?.data?.content || [];
+    } catch (error) {
+      console.error("Balans xulosalarini olishda xatolik:", error);
+      return [];
+    }
+  },
+
+  // Bitta fermerni bosganda, savatlarini olib kelish
+  getFarmerBalanceDetails: async (farmerId) => {
+    try {
+      const response = await api.get(`${BASE_URL}/balances/details/${farmerId}`);
+      return response.data?.data || null; // Backenddan shu fermerning detayllari keladi
+    } catch (error) {
+      console.error("Fermer detallarini olishda xatolik:", error);
+      return null;
     }
   },
 
@@ -39,11 +63,10 @@ const distributionService = {
       };
 
       const response = await api.post(`${BASE_URL}/give`, payload);
-      // Backenddan bitta tranzaksiya obyekti qaytadi (response.data.data)
       return response.data?.data || null;
     } catch (error) {
       console.error("Savat tarqatishda xatolik:", error);
-      throw error; // Xatolik UI dagi Try/Catch ga borishi kerak
+      throw error; 
     }
   },
 
@@ -53,7 +76,6 @@ const distributionService = {
       const response = await api.get(`/farmers/search`, { 
         params: { q: keyword } 
       });
-      // Backend ApiResponse orqali Topilgan fermerlar Listini beradi
       return response.data?.data || [];
     } catch (error) {
       console.error("Fermerlarni qidirishda xatolik:", error);
