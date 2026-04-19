@@ -2,18 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import distributionService from '../../services/distributionService';
 import basketService from '../../services/basketService';
 import { useAuth } from '../../hooks/useAuth'; 
-import { Loader2, Search, X, Check } from 'lucide-react';
+import { Loader2, Search, X, Check, Package, Clock } from 'lucide-react';
 
 export default function BasketDistributionPage() {
   const [distributions, setDistributions] = useState([]);
   const [baskets, setBaskets] = useState([]);
-  const [farmers, setFarmers] = useState([]); 
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { user } = useAuth();
-  const canDistribute = user?.role?.includes('BROKER') || user?.role?.includes('ACCOUNTANT') || user?.role === 'BROKER' || user?.role === 'ACCOUNTANT';
+  const canDistribute = user?.role?.includes('BROKER') || user?.role?.includes('ACCOUNTANT');
 
   const [formData, setFormData] = useState({
     farmerId: '',
@@ -23,8 +22,10 @@ export default function BasketDistributionPage() {
 
   const [selectedBasketStock, setSelectedBasketStock] = useState(0);
 
-  // FERMER QIDIRUV STATE'LARI
+  // Qidiruv State'lari
   const [farmerSearch, setFarmerSearch] = useState('');
+  const [searchResults, setSearchResults] = useState([]); 
+  const [isSearchingFarmer, setIsSearchingFarmer] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedFarmer, setSelectedFarmer] = useState(null);
   
@@ -43,20 +44,43 @@ export default function BasketDistributionPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Debounce effekti (Fermer qidirish)
+  useEffect(() => {
+    if (farmerSearch.trim().length < 2) {
+      setSearchResults([]);
+      setIsSearchingFarmer(false);
+      return;
+    }
+
+    setIsSearchingFarmer(true);
+
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const results = await distributionService.searchFarmers(farmerSearch.trim());
+        setSearchResults(Array.isArray(results) ? results : []);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsSearchingFarmer(false);
+        setIsDropdownOpen(true);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [farmerSearch]);
+
   const fetchInitialData = async () => {
     setIsLoading(true);
     try {
-      const [distData, basketsData, farmersData] = await Promise.all([
-        distributionService.getDistributions().catch(() => ({ content: [] })), 
-        basketService.getBaskets(),
-        distributionService.getFarmers()
+      const [distData, basketsData] = await Promise.all([
+        distributionService.getGivenHistory(), 
+        basketService.getBaskets()
       ]);
 
-      setDistributions(Array.isArray(distData?.content) ? distData.content : []);
+      setDistributions(Array.isArray(distData) ? distData : []);
       
       const availableBaskets = Array.isArray(basketsData?.content) ? basketsData.content.filter(b => b.isActive) : [];
       setBaskets(availableBaskets);
-      setFarmers(Array.isArray(farmersData) ? farmersData : []);
       
       if (availableBaskets.length > 0) {
         setFormData(prev => ({ ...prev, basketId: availableBaskets[0].id.toString() }));
@@ -66,7 +90,6 @@ export default function BasketDistributionPage() {
       console.error("Xatolik:", error);
     } finally {
       setIsLoading(false);
-      setTimeout(() => document.getElementById('farmerSearchInput')?.focus(), 100);
     }
   };
 
@@ -77,14 +100,11 @@ export default function BasketDistributionPage() {
     setSelectedBasketStock(selected ? selected.quantity : 0);
   };
 
-  const filteredFarmers = farmers.filter(f => 
-    `${f.name} ${f.surname} ${f.phone}`.toLowerCase().includes(farmerSearch.toLowerCase())
-  );
-
   const handleSelectFarmer = (farmer) => {
     setSelectedFarmer(farmer);
     setFormData({ ...formData, farmerId: farmer.id });
     setFarmerSearch('');
+    setSearchResults([]);
     setIsDropdownOpen(false);
     
     setTimeout(() => {
@@ -95,7 +115,6 @@ export default function BasketDistributionPage() {
   const handleClearFarmer = () => {
     setSelectedFarmer(null);
     setFormData({ ...formData, farmerId: '' });
-    setTimeout(() => document.getElementById('farmerSearchInput')?.focus(), 10);
   };
 
   const handleSubmit = async (e) => {
@@ -109,114 +128,130 @@ export default function BasketDistributionPage() {
 
     setIsSubmitting(true);
     try {
-      const payload = {
-        ...formData,
-        distributedDate: new Date().toISOString().split('T')[0] 
-      };
-
-      const newDistribution = await distributionService.distributeBasket(payload);
+      const newDistribution = await distributionService.distributeBasket(formData);
       
-      // Yangisini boshiga qo'shamiz
-      setDistributions(prev => [newDistribution, ...prev]);
-      
-      const updatedQuantity = selectedBasketStock - parseInt(formData.quantity);
-      setBaskets(prev => prev.map(b => b.id.toString() === formData.basketId ? { ...b, quantity: updatedQuantity } : b));
-      setSelectedBasketStock(updatedQuantity);
+      if (newDistribution) {
+        // Yangi tranzaksiyani UI'ning boshiga qo'shamiz
+        setDistributions(prev => [newDistribution, ...prev]);
+        
+        // Ombordagi savat qoldig'ini yangilaymiz
+        const updatedQuantity = selectedBasketStock - parseInt(formData.quantity);
+        setBaskets(prev => prev.map(b => b.id.toString() === formData.basketId ? { ...b, quantity: updatedQuantity } : b));
+        setSelectedBasketStock(updatedQuantity);
 
-      setFormData(prev => ({ ...prev, farmerId: '', quantity: '' }));
-      setSelectedFarmer(null); 
+        // Formani tozalash
+        setFormData(prev => ({ ...prev, farmerId: '', quantity: '' }));
+        setSelectedFarmer(null);
+      }
       
     } catch (error) { 
-      alert("Xatolik yuz berdi. Qayta urinib ko'ring."); 
+      // API xato bersa, masalan savat yetarli emas deb, ogohlantirish beriladi
+      alert(error?.response?.data?.message || "Xatolik yuz berdi. Qayta urinib ko'ring."); 
     } finally { 
       setIsSubmitting(false); 
-      setTimeout(() => document.getElementById('farmerSearchInput')?.focus(), 100);
     }
   };
 
+  // Helper funksiya sanani chiroyli ko'rsatish uchun
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+  };
+
   if (!canDistribute) {
-    return <div className="p-10 text-center text-slate-500">Sizda bu sahifaga kirish huquqi yo'q.</div>;
+    return <div className="p-8 text-center text-red-500 font-medium bg-red-50 rounded-lg m-6">Sizda bu sahifaga kirish huquqi yo'q.</div>;
   }
 
   return (
-    // 🎨 Oq fon, minimalist layout
-    <div className="min-h-screen bg-white p-6 sm:p-12 font-sans text-slate-900">
+    <div className="p-4 sm:p-6 bg-slate-50 text-slate-900 w-full min-h-screen">
       <div className="max-w-6xl mx-auto">
         
-        {/* Sarlavha - Katta va toza */}
-        <div className="mb-12">
-          <h1 className="text-3xl sm:text-4xl font-light tracking-tight text-slate-900">Savat tarqatish</h1>
-          <p className="text-slate-500 mt-2 text-sm font-medium">Ombordan fermerlarga tara biriktirish paneli</p>
+        {/* Sarlavha */}
+        <div className="mb-6 flex items-center gap-3">
+          <div className="p-3 bg-blue-600 rounded-lg text-white">
+            <Package size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Savat tarqatish</h1>
+            <p className="text-slate-500 text-sm mt-1">Ombordan fermerlarga tara biriktirish formasi</p>
+          </div>
         </div>
 
         {isLoading ? (
-          <div className="flex items-center gap-3 text-slate-400 py-20">
-            <Loader2 className="animate-spin" size={24} />
-            <span>Yuklanmoqda...</span>
+          <div className="flex flex-col items-center justify-center gap-3 text-slate-400 py-32 bg-white rounded-xl shadow-sm border border-slate-200">
+            <Loader2 className="animate-spin text-blue-600" size={32} />
+            <span className="font-medium">Ma'lumotlar yuklanmoqda...</span>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             
-            {/* ========================================================= */}
-            {/* CHAP TOMON: ASOSIY FORMA (7 column)                       */}
-            {/* ========================================================= */}
-            <div className="lg:col-span-7 w-full">
-              <form onSubmit={handleSubmit} className="space-y-8">
+            {/* CHAP TOMON: ASOSIY FORMA */}
+            <div className="lg:col-span-2 w-full bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 
-                {/* 1. FERMER QIDIRUV */}
+                {/* 1. API ORQALI FERMER QIDIRUV */}
                 <div className="relative" ref={dropdownRef}>
-                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-                    Fermer
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Fermerni tanlang <span className="text-red-500">*</span>
                   </label>
                   
                   {selectedFarmer ? (
-                    // Tanlangan fermer (Toza ko'rinish)
-                    <div className="flex items-center justify-between px-6 py-5 bg-slate-50 rounded-2xl transition-all">
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-slate-900 text-lg">{selectedFarmer.name} {selectedFarmer.surname}</span>
-                        <span className="text-sm text-slate-500 mt-0.5">{selectedFarmer.phone}</span>
+                    <div className="flex items-center justify-between px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div>
+                        <span className="font-semibold text-blue-900 block">{selectedFarmer.name} {selectedFarmer.surname}</span>
+                        <span className="text-sm text-blue-700">{selectedFarmer.phone}</span>
                       </div>
                       <button 
                         type="button" 
                         onClick={handleClearFarmer}
-                        className="p-2 text-slate-400 hover:text-slate-800 transition-colors"
+                        className="p-1.5 bg-white text-slate-400 hover:text-red-500 rounded-md shadow-sm border border-blue-100 transition-colors"
+                        title="Boshqa fermer tanlash"
                       >
-                        <X size={20} strokeWidth={2}/>
+                        <X size={18} strokeWidth={2.5}/>
                       </button>
                     </div>
                   ) : (
-                    // Qidiruv inputi
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                        <Search size={20} className="text-slate-400" strokeWidth={2} />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        {isSearchingFarmer ? (
+                          <Loader2 size={18} className="text-blue-500 animate-spin" />
+                        ) : (
+                          <Search size={18} className="text-slate-400" />
+                        )}
                       </div>
                       <input 
                         id="farmerSearchInput"
                         type="text" 
                         autoComplete="off"
                         value={farmerSearch}
-                        onChange={(e) => {
-                          setFarmerSearch(e.target.value);
-                          setIsDropdownOpen(true);
-                        }}
-                        onFocus={() => setIsDropdownOpen(true)}
-                        placeholder="Fermer ismini yozing..." 
-                        className="w-full pl-14 pr-6 py-5 bg-slate-50 hover:bg-slate-100 focus:bg-slate-100 rounded-2xl font-medium text-slate-900 text-lg outline-none transition-colors placeholder:text-slate-400"
+                        onChange={(e) => setFarmerSearch(e.target.value)}
+                        onFocus={() => { if (farmerSearch.length >= 2) setIsDropdownOpen(true); }}
+                        placeholder="Kamida 2 ta harf yoki raqam yozing..." 
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-lg text-slate-900 outline-none transition-all"
                       />
                       
                       {/* Qidiruv natijalari dropdown */}
-                      {isDropdownOpen && farmerSearch && (
-                        <div className="absolute z-50 w-full mt-2 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-slate-100 max-h-[300px] overflow-y-auto py-2">
-                          {filteredFarmers.length === 0 ? (
-                            <div className="p-6 text-center text-slate-400 text-sm">Fermer topilmadi.</div>
+                      {isDropdownOpen && farmerSearch.length >= 2 && (
+                        <div className="absolute z-50 w-full mt-1 bg-white rounded-lg shadow-lg border border-slate-200 max-h-60 overflow-y-auto">
+                          {isSearchingFarmer ? (
+                            <div className="p-4 text-center text-slate-500 text-sm flex items-center justify-center gap-2">
+                              <Loader2 size={16} className="animate-spin text-blue-500"/>
+                              Bazada izlanmoqda...
+                            </div>
+                          ) : searchResults.length === 0 ? (
+                            <div className="p-4 text-center text-slate-500 text-sm">Fermer topilmadi. Ismni to'g'ri yozing.</div>
                           ) : (
-                            filteredFarmers.map((f) => (
+                            searchResults.map((f) => (
                               <div 
                                 key={f.id} 
-                                onClick={() => handleSelectFarmer(f)}
-                                className="flex flex-col px-6 py-3 hover:bg-slate-50 cursor-pointer transition-colors"
+                                onMouseDown={(e) => {
+                                  e.preventDefault(); 
+                                  handleSelectFarmer(f);
+                                }}
+                                className="flex flex-col px-4 py-3 hover:bg-slate-50 border-b border-slate-100 last:border-0 cursor-pointer transition-colors"
                               >
-                                <span className="font-semibold text-slate-900 text-base">{f.name} {f.surname}</span>
+                                <span className="font-medium text-slate-800">{f.name} {f.surname}</span>
                                 <span className="text-sm text-slate-500">{f.phone}</span>
                               </div>
                             ))
@@ -227,94 +262,99 @@ export default function BasketDistributionPage() {
                   )}
                 </div>
 
-                {/* 2. TARA TURINI TANLASH */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Tara turi</label>
-                    <span className="text-[12px] font-medium text-slate-500">
-                      Qoldiq: <span className={`font-bold ${selectedBasketStock < 50 ? 'text-red-500' : 'text-slate-900'}`}>{selectedBasketStock} ta</span>
-                    </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* 2. TARA TURINI TANLASH */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-semibold text-slate-700">
+                        Tara turi <span className="text-red-500">*</span>
+                      </label>
+                      <span className="text-xs font-medium px-2 py-1 bg-slate-100 rounded text-slate-600">
+                        Omborda: <span className={`font-bold ${selectedBasketStock < 50 ? 'text-red-600' : 'text-green-600'}`}>{selectedBasketStock}</span>
+                      </span>
+                    </div>
+                    
+                    <select 
+                      required 
+                      value={formData.basketId} 
+                      onChange={handleBasketChange} 
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-lg text-slate-900 outline-none transition-all cursor-pointer" 
+                      disabled={isSubmitting || baskets.length === 0}
+                    >
+                      {baskets.map((b) => (
+                        <option key={b.id} value={b.id}>{b.name}</option>
+                      ))}
+                    </select>
                   </div>
-                  
-                  <select 
-                    required 
-                    value={formData.basketId} 
-                    onChange={handleBasketChange} 
-                    className="w-full px-6 py-5 bg-slate-50 hover:bg-slate-100 focus:bg-slate-100 rounded-2xl font-medium text-slate-900 text-lg outline-none transition-colors appearance-none cursor-pointer" 
-                    disabled={isSubmitting || baskets.length === 0}
+
+                  {/* 3. SONI */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Berilayotgan soni <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input 
+                        ref={quantityInputRef}
+                        type="number" min="1" max={selectedBasketStock || 999999} required 
+                        value={formData.quantity} 
+                        onChange={(e) => setFormData({...formData, quantity: e.target.value})} 
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-lg text-slate-900 outline-none transition-all font-medium" 
+                        placeholder="Masalan: 100" 
+                        disabled={isSubmitting || !formData.basketId || !selectedFarmer}
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium pointer-events-none">
+                        ta
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* TASDIQLASH TUGMASI */}
+                <div className="pt-4 border-t border-slate-100 mt-6">
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting || !selectedFarmer || !formData.quantity} 
+                    className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:ring-4 focus:ring-blue-500/30 disabled:opacity-50 disabled:hover:bg-blue-600 transition-all flex justify-center items-center gap-2"
                   >
-                    {baskets.map((b) => (
-                      <option key={b.id} value={b.id}>{b.name}</option>
-                    ))}
-                  </select>
+                    {isSubmitting ? (
+                      <Loader2 size={20} className="animate-spin" />
+                    ) : (
+                      <Check size={20} strokeWidth={2.5} />
+                    )}
+                    Jarayonni tasdiqlash
+                  </button>
                 </div>
-
-                {/* 3. SONI (GIGANT INPUT) */}
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-                    Berilayotgan soni
-                  </label>
-                  <div className="relative">
-                    <input 
-                      ref={quantityInputRef}
-                      type="number" min="1" max={selectedBasketStock || 999999} required 
-                      value={formData.quantity} 
-                      onChange={(e) => setFormData({...formData, quantity: e.target.value})} 
-                      className="w-full px-6 py-6 bg-slate-50 focus:bg-slate-100 rounded-2xl font-light text-5xl text-slate-900 outline-none transition-colors" 
-                      placeholder="0" 
-                      disabled={isSubmitting || !formData.basketId || !selectedFarmer}
-                    />
-                    <span className="absolute right-8 top-1/2 -translate-y-1/2 text-slate-300 font-light text-3xl pointer-events-none">
-                      ta
-                    </span>
-                  </div>
-                </div>
-
-                {/* TASDIQLASH TUGMASI (QORA) */}
-                <button 
-                  type="submit" 
-                  disabled={isSubmitting || !selectedFarmer || !formData.quantity} 
-                  className="w-full mt-4 py-5 bg-slate-900 text-white rounded-2xl font-medium hover:bg-slate-800 disabled:opacity-40 disabled:hover:bg-slate-900 transition-all flex justify-center items-center gap-3 text-lg"
-                >
-                  {isSubmitting ? (
-                    <Loader2 size={24} className="animate-spin" />
-                  ) : (
-                    <>
-                      <Check size={24} strokeWidth={2} />
-                      Tasdiqlash
-                    </>
-                  )}
-                </button>
               </form>
             </div>
 
-            {/* ========================================================= */}
-            {/* O'NG TOMON: OXIRGI 5 TA TARIX (5 column)                  */}
-            {/* ========================================================= */}
-            <div className="lg:col-span-5 w-full">
-              <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-6 pt-2">
-                Oxirgi operatsiyalar
-              </h3>
+            {/* O'NG TOMON: OXIRGI 5 TA TARIX */}
+            <div className="lg:col-span-1 w-full bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
+                <Clock size={20} className="text-slate-400" />
+                <h3 className="font-bold text-slate-800">
+                  Oxirgi tarqatilganlar
+                </h3>
+              </div>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {distributions.length === 0 ? (
-                  <p className="text-slate-400 text-sm">Tarix bo'sh.</p>
+                  <div className="text-center py-8 text-slate-400 text-sm">
+                    Hozircha hech qanday tara tarqatilmagan.
+                  </div>
                 ) : (
-                  // Faqat oxirgi 5 tasini ko'rsatamiz
                   distributions.slice(0, 5).map((dist) => (
-                    <div key={dist.id} className="group flex items-start justify-between p-4 rounded-2xl hover:bg-slate-50 transition-colors">
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-slate-900 text-[15px]">{dist.farmerName || "Ism familiya"}</span>
-                        <span className="text-slate-500 text-[13px] mt-1 flex items-center gap-2">
-                          {dist.basketName}
-                          <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                          {dist.distributedDate}
+                    <div key={dist.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50 hover:bg-slate-100/80 transition-colors">
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="font-semibold text-slate-800 text-sm truncate" title={dist.farmerFullName}>
+                          {dist.farmerFullName || "Noma'lum fermer"}
+                        </span>
+                        <span className="text-slate-500 text-xs mt-0.5">
+                          {dist.basketName} • {formatDate(dist.date)}
                         </span>
                       </div>
-                      
-                      <div className="flex flex-col items-end">
-                        <span className="font-bold text-slate-900 text-base">
-                          +{dist.quantity} <span className="text-xs font-normal text-slate-500">ta</span>
+                      <div className="ml-3 pl-3 border-l border-slate-200">
+                        <span className="font-bold text-blue-600 text-sm whitespace-nowrap">
+                          {dist.quantity} ta
                         </span>
                       </div>
                     </div>
@@ -323,9 +363,9 @@ export default function BasketDistributionPage() {
               </div>
               
               {distributions.length > 5 && (
-                 <div className="mt-6 pt-6 border-t border-slate-100">
-                    <button className="text-sm font-medium text-slate-400 hover:text-slate-900 transition-colors">
-                      Barcha tarixni ko'rish →
+                 <div className="mt-4 pt-4 border-t border-slate-100 text-center">
+                    <button className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+                      Barcha tarixni ko'rish &rarr;
                     </button>
                  </div>
               )}

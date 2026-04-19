@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { ToastProvider } from "./components/shared/toast/ToastProvider";
 import PrivateRoute from "./components/PrivateRoute";
 
-import PublicLayout from "./pages/PublicLayout";
 import AuthPage from "./pages/AuthPage2";
 import DashboardRoutes from "./pages/dashboard/DashboardRoutes";
 
