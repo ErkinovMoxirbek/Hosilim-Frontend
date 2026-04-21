@@ -13,6 +13,7 @@ import {
   PackagePlus,
   ArrowRightLeft,
   RotateCcw,
+  Briefcase,
 } from "lucide-react";
 
 import { useAuth } from "../../../hooks/useAuth";
@@ -30,6 +31,7 @@ import AccountantsPage from "../../brokerAndAccountant/AccountantsPage";
 import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";
 import FarmerPage from "../../brokerAndAccountant/FarmerPage";
 import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
+import FarmerBalancesPage from "../../brokerAndAccountant/FarmerBalancesPage";
 
 const BASE_PATH = "/dashboard/broker";
 
@@ -137,6 +139,7 @@ const BrokerLayout = () => {
       { id: "distribution", name: "Savat tarqatish", icon: ArrowRightLeft },
       { id: "transaction-baskets", name: "Savat tranzaksiyalari", icon: RotateCcw },
       { id: "history", name: "Savatlar tarixi", icon: List },
+      { id: "balances", name: "Fermerlar balansi", icon: Briefcase },
     ],
     []
   );
@@ -238,6 +241,7 @@ const BrokerLayout = () => {
               <Route path="baskets/distribution" element={<BasketDistributionPage />} />
               <Route path="baskets/transaction-baskets" element={<TransactionBasketsPage />} />
               <Route path="baskets/history" element={<BasketHistoryPage />} />
+              <Route path="baskets/balances" element={<FarmerBalancesPage />} />
 
               <Route path="farmers" element={<FarmerPage />} />
               <Route path="inventory" element={<ComingSoon title="Omborxona" />} />

@@ -5,7 +5,7 @@ import {
   ChevronRight, LogOut, TrendingUp, ShoppingBasket, Users, 
   Package, DollarSign, Settings, List, X, PackagePlus, 
   ArrowRightLeft, RotateCcw, LayoutGrid, ArrowLeft,
-  Database, Truck, Apple, BarChart3, MapPin, Bell // 🟢 Bell (Qo'ng'iroqcha) iconi qo'shildi
+  Database, Truck, Apple, BarChart3, MapPin, Bell ,Briefcase
 } from "lucide-react";
 
 function getBasePath(user) {
@@ -101,6 +101,8 @@ export default function Sidebar({ user, onLogout }) {
         { id: "distribution", label: "Savat tarqatish", icon: ArrowRightLeft, to: `${basePath}/baskets/distribution` },
         { id: "transaction-baskets", label: "Savat tranzaksiyalari", icon: RotateCcw, to: `${basePath}/baskets/transaction-baskets` },
         { id: "history", label: "Savatlar tarixi", icon: List, to: `${basePath}/baskets/history` },
+        
+        { id: "balances", label: "Fermerlar balansi", icon: Briefcase, to: `${basePath}/baskets/balances` },
       ]
     }
   };
