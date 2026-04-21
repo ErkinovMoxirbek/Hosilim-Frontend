@@ -19,16 +19,17 @@ import { useAuth } from "../../../hooks/useAuth";
 import Sidebar from "./components/Sidebar";
 
 import BrokerDashboard from "../../brokerAndAccountant/BrokerDashboard";
-import NewSalePage from "../../brokerAndAccountant/NewSalePage";
+import ReceiveCropPage from "../../brokerAndAccountant/ReceiveCropPage";
 import CancelledSalePage from "../../brokerAndAccountant/CancelledSalePage";
 import AllSalePage from "../../brokerAndAccountant/AllSalePage";
-import PricingPage from "../../brokerAndAccountant/PricingPage";
+import PricingPage from "../../brokerAndAccountant/PriceManagerPage";
 import BasketCatalogPage from "../../brokerAndAccountant/BasketCatalogPage";
-import ReturnedBasketsPage from "../../brokerAndAccountant/ReturnedBasketsPage";
+import TransactionBasketsPage from "../../brokerAndAccountant/TransanctionBasketsPage";
 import BasketDistributionPage from "../../brokerAndAccountant/BasketDistributionPage";
 import AccountantsPage from "../../brokerAndAccountant/AccountantsPage";
 import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";
 import FarmerPage from "../../brokerAndAccountant/FarmerPage";
+import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
 
 const BASE_PATH = "/dashboard/broker";
 
@@ -50,8 +51,8 @@ const BrokerLayout = () => {
       return;
     }
 
-    if (path.includes("/sales/")) {
-      setActiveSection("sales");
+    if (path.includes("/receive/")) {
+      setActiveSection("receive");
       setIsSubmenuOpen(true);
 
       if (path.endsWith("/new")) setActiveSubSection("new");
@@ -83,9 +84,9 @@ const BrokerLayout = () => {
 
     if (sectionId === "dashboard") {
       navigate(BASE_PATH);
-    } else if (sectionId === "sales") {
+    } else if (sectionId === "receive") {
       setIsSubmenuOpen(true);
-      navigate(`${BASE_PATH}/sales/all`);
+      navigate(`${BASE_PATH}/receive/all`);
     } else if (sectionId === "baskets") {
       setIsSubmenuOpen(true);
       navigate(`${BASE_PATH}/baskets/all`);
@@ -93,7 +94,6 @@ const BrokerLayout = () => {
       navigate(`${BASE_PATH}/${sectionId}`);
     }
     
-    // Mobil menyudan bosilganda uni yopish
     if (isMobileMenuOpen) {
       setIsMobileMenuOpen(false);
     }
@@ -103,7 +103,6 @@ const BrokerLayout = () => {
     setActiveSubSection(subSectionId);
     navigate(`${BASE_PATH}/${activeSection}/${subSectionId}`);
     
-    // Mobil menyudan bosilganda uni yopish
     if (isMobileMenuOpen) {
       setIsMobileMenuOpen(false);
     }
@@ -112,7 +111,7 @@ const BrokerLayout = () => {
   const sections = useMemo(
     () => [
       { id: "dashboard", name: "Bosh Sahifa", icon: Home },
-      { id: "sales", name: "Sotuvlar", icon: TrendingUp },
+      { id: "receive", name: "Qabulllar", icon: TrendingUp },
       { id: "baskets", name: "Savatlar", icon: ShoppingBasket },
       { id: "accountants", name: "Xisobchilar", icon: Users },
       { id: "farmers", name: "Fermerlar", icon: Users },
@@ -123,10 +122,10 @@ const BrokerLayout = () => {
     []
   );
 
-  const salesSubmenu = useMemo(
+  const receiveSubmenu = useMemo(
     () => [
-      { id: "new", name: "Yangi sotuv", icon: PackagePlus },
-      { id: "all", name: "Barcha sotuvlar", icon: List },
+      { id: "new", name: "Yangi qabul", icon: PackagePlus },
+      { id: "all", name: "Barcha qabullar", icon: List },
       { id: "cancelled", name: "Bekor qilingan", icon: X },
     ],
     []
@@ -136,7 +135,7 @@ const BrokerLayout = () => {
     () => [
       { id: "catalog", name: "Savat turlari", icon: PackagePlus },
       { id: "distribution", name: "Savat tarqatish", icon: ArrowRightLeft },
-      { id: "returned", name: "Qaytarilgan savatlar", icon: RotateCcw },
+      { id: "transaction-baskets", name: "Savat tranzaksiyalari", icon: RotateCcw },
       { id: "history", name: "Savatlar tarixi", icon: List },
     ],
     []
@@ -150,10 +149,11 @@ const BrokerLayout = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col lg:block relative">
+    // 1-TUZATISH: h-screen va overflow-hidden orqali butun ekran qotirildi
+    <div className="h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col overflow-hidden">
       
       {/* Mobil uchun Header */}
-      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30">
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm shrink-0 z-30">
         <div>
           <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Hosil Tizimi
@@ -176,11 +176,11 @@ const BrokerLayout = () => {
         />
       )}
 
-      {/* 🟢 Bu yerdan w-full olib tashlandi 🟢 */}
-      <div className="flex flex-1 relative">
+      {/* 2-TUZATISH: flex-1 va overflow-hidden qo'shildi */}
+      <div className="flex flex-1 relative overflow-hidden">
         
         {/* Desktop Sidebar */}
-        <div className="hidden lg:block w-[260px] shrink-0">
+        <div className="hidden lg:block w-[260px] shrink-0 h-full">
           <Sidebar
             user={user}
             sections={sections}
@@ -191,7 +191,7 @@ const BrokerLayout = () => {
             setIsSubmenuOpen={setIsSubmenuOpen}
             activeSubSection={activeSubSection}
             setActiveSubSection={handleSubSectionClick}
-            salesSubmenu={salesSubmenu}
+            receiveSubmenu={receiveSubmenu}
             basketsSubmenu={basketsSubmenu}
           />
         </div>
@@ -212,38 +212,44 @@ const BrokerLayout = () => {
             setIsSubmenuOpen={setIsSubmenuOpen}
             activeSubSection={activeSubSection}
             setActiveSubSection={handleSubSectionClick}
-            salesSubmenu={salesSubmenu}
+            receiveSubmenu={receiveSubmenu}
             basketsSubmenu={basketsSubmenu}
           />
         </div>
 
-        <div className="flex-1 min-h-screen bg-zinc-50 relative">
-          <main className="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6 lg:p-8">
+        {/* 3-TUZATISH: flex-col va h-full qo'shildi. 
+            Bu yerda overflow-hidden bo'lishi shart, shunda faqat ichkaridagi main scroll bo'ladi */}
+        <div className="flex-1 flex flex-col h-full bg-zinc-50 relative overflow-hidden">
+          
+          {/* Asosiy Scroll aylanadigan joy mana shu <main> hisoblanadi */}
+          <main className="flex-1 overflow-y-auto bg-gray-50 p-2 sm:p-4 lg:p-0">
             <Routes>
               <Route index element={<BrokerDashboard />} />
 
-              <Route path="sales" element={<Navigate to="all" replace />} />
-              <Route path="sales/new" element={<NewSalePage />} />
-              <Route path="sales/all" element={<AllSalePage />} />
-              <Route path="sales/cancelled" element={<CancelledSalePage />} />
+              <Route path="receive" element={<Navigate to="all" replace />} />
+              <Route path="receive/new" element={<ReceiveCropPage />} />
+              <Route path="receive/all" element={<AllSalePage />} />
+              <Route path="receive/cancelled" element={<CancelledSalePage />} />
 
               <Route path="accountants" element={<AccountantsPage />} />
 
               <Route path="baskets" element={<Navigate to="all" replace />} />
               <Route path="baskets/catalog" element={<BasketCatalogPage />} />
               <Route path="baskets/distribution" element={<BasketDistributionPage />} />
-              <Route path="baskets/returned" element={<ReturnedBasketsPage />} />
+              <Route path="baskets/transaction-baskets" element={<TransactionBasketsPage />} />
               <Route path="baskets/history" element={<BasketHistoryPage />} />
 
               <Route path="farmers" element={<FarmerPage />} />
               <Route path="inventory" element={<ComingSoon title="Omborxona" />} />
               <Route path="pricing" element={<PricingPage />} />
+              <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="profile" element={<ComingSoon title="Profil" />} />
 
               <Route path="*" element={<Navigate to="." replace />} />
             </Routes>
           </main>
         </div>
+
       </div>
     </div>
   );

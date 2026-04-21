@@ -13,21 +13,23 @@ import {
   PackagePlus,
   ArrowRightLeft,
   RotateCcw,
+  Bell,
 } from "lucide-react";
 
 import { useAuth } from "../../../hooks/useAuth";
 import Sidebar from "./components/Sidebar";
 
 import BrokerDashboard from "../../brokerAndAccountant/BrokerDashboard";
-import NewSalePage from "../../brokerAndAccountant/NewSalePage";
+import ReceiveCropPage from "../../brokerAndAccountant/ReceiveCropPage";
 import CancelledSalePage from "../../brokerAndAccountant/CancelledSalePage";
 import AllSalePage from "../../brokerAndAccountant/AllSalePage";
-import PricingPage from "../../brokerAndAccountant/PricingPage";
+import PricingPage from "../../brokerAndAccountant/PriceManagerPage";
 import BasketCatalogPage from "../../brokerAndAccountant/BasketCatalogPage";
-import ReturnedBasketsPage from "../../brokerAndAccountant/ReturnedBasketsPage";
+import TransactionBasketsPage from "../../brokerAndAccountant/TransanctionBasketsPage";
 import BasketDistributionPage from "../../brokerAndAccountant/BasketDistributionPage";
 import FarmerPage from "../../brokerAndAccountant/FarmerPage";
-import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";  
+import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";
+import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
 
 const BASE_PATH = "/dashboard/accountant";
 
@@ -49,8 +51,13 @@ const AccountantLayout = () => {
       return;
     }
 
-    if (path.includes("/sales/")) {
-      setActiveSection("sales");
+    if (path.endsWith("/announcements")) {
+      setActiveSection("announcements");
+      return;
+    }
+
+    if (path.includes("/receive/")) {
+      setActiveSection("receive");
       setIsSubmenuOpen(true);
 
       if (path.endsWith("/new")) setActiveSubSection("new");
@@ -81,9 +88,9 @@ const AccountantLayout = () => {
 
     if (sectionId === "dashboard") {
       navigate(BASE_PATH);
-    } else if (sectionId === "sales") {
+    } else if (sectionId === "receive") {
       setIsSubmenuOpen(true);
-      navigate(`${BASE_PATH}/sales/all`);
+      navigate(`${BASE_PATH}/receive/all`);
     } else if (sectionId === "baskets") {
       setIsSubmenuOpen(true);
       navigate(`${BASE_PATH}/baskets/all`);
@@ -110,6 +117,7 @@ const AccountantLayout = () => {
   const sections = useMemo(
     () => [
       { id: "dashboard", name: "Bosh Sahifa", icon: Home },
+      { id: "announcements", name: "E'lonlar", icon: Bell }, // 🟢 3. Menyular ro'yxatiga E'lonlar qo'shildi
       { id: "sales", name: "Sotuvlar", icon: TrendingUp },
       { id: "baskets", name: "Savatlar", icon: ShoppingBasket },
       { id: "farmers", name: "Fermerlar", icon: Users },
@@ -120,10 +128,10 @@ const AccountantLayout = () => {
     []
   );
 
-  const salesSubmenu = useMemo(
+  const receiveSubmenu = useMemo(
     () => [
-      { id: "new", name: "Yangi sotuv", icon: PackagePlus },
-      { id: "all", name: "Barcha sotuvlar", icon: List },
+      { id: "new", name: "Yangi qabul", icon: PackagePlus },
+      { id: "all", name: "Barcha qabullar", icon: List },
       { id: "cancelled", name: "Bekor qilingan", icon: X },
     ],
     []
@@ -133,7 +141,7 @@ const AccountantLayout = () => {
     () => [
       { id: "catalog", name: "Savat turlari", icon: PackagePlus },
       { id: "distribution", name: "Savat tarqatish", icon: ArrowRightLeft },
-      { id: "returned", name: "Qaytarilgan savatlar", icon: RotateCcw },
+      { id: "transaction-baskets", name: "Savat tranzaksiyalari", icon: RotateCcw },
       { id: "history", name: "Savatlar tarixi", icon: List },
     ],
     []
@@ -188,7 +196,7 @@ const AccountantLayout = () => {
             setIsSubmenuOpen={setIsSubmenuOpen}
             activeSubSection={activeSubSection}
             setActiveSubSection={handleSubSectionClick}
-            salesSubmenu={salesSubmenu}
+            receiveSubmenu={receiveSubmenu}
             basketsSubmenu={basketsSubmenu}
           />
         </div>
@@ -209,7 +217,7 @@ const AccountantLayout = () => {
             setIsSubmenuOpen={setIsSubmenuOpen}
             activeSubSection={activeSubSection}
             setActiveSubSection={handleSubSectionClick}
-            salesSubmenu={salesSubmenu}
+            receiveSubmenu={receiveSubmenu}
             basketsSubmenu={basketsSubmenu}
           />
         </div>
@@ -219,17 +227,18 @@ const AccountantLayout = () => {
           <main className="p-4 lg:p-8">
             <Routes>
               <Route index element={<BrokerDashboard />} />
+              
+              <Route path="announcements" element={<AnnouncementsPage />} />
 
-              <Route path="sales" element={<Navigate to="all" replace />} />
-              <Route path="sales/new" element={<NewSalePage />} />
-              <Route path="sales/all" element={<AllSalePage />} />
-              <Route path="sales/cancelled" element={<CancelledSalePage />} />
-
+              <Route path="receive" element={<Navigate to="all" replace />} />
+              <Route path="receive/new" element={<ReceiveCropPage />} />
+              <Route path="receive/all" element={<AllSalePage />} />
+              <Route path="receive/cancelled" element={<CancelledSalePage />} />
 
               <Route path="baskets" element={<Navigate to="all" replace />} />
               <Route path="baskets/catalog" element={<BasketCatalogPage />} />
               <Route path="baskets/distribution" element={<BasketDistributionPage />} />
-              <Route path="baskets/returned" element={<ReturnedBasketsPage />} />
+              <Route path="baskets/transaction-baskets" element={<TransactionBasketsPage />} />
               <Route path="baskets/history" element={<BasketHistoryPage />} />
 
               <Route path="farmers" element={<FarmerPage/>} />

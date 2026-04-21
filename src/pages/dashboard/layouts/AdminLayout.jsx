@@ -1,12 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { Home, Users, Truck, Apple, DollarSign, BarChart3, Settings, MapPin } from "lucide-react";
 import { useAuth } from "../../../hooks/useAuth";
 import Sidebar from "./components/Sidebar";
 
+// Sahifalar
 import AdminDashboard from "../../admin/AdminDashboard";
 import CollectionPointsPage from "../../admin/CollectionPointsPage";
 import AdminUsersManagement from "../../admin/AdminUsersManagement";
+import AdminFruitCatalogPage from "../../admin/FruitCatalogPage";
+import AdminAnnouncementsPage from "../../admin/AnnouncementsPage";
 
 const AdminLayout = () => {
   const { user, logout } = useAuth();
@@ -16,22 +18,8 @@ const AdminLayout = () => {
   const [activeSubSection, setActiveSubSection] = useState("all");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const sections = useMemo(
-    () => [
-      { id: "dashboard", name: "Bosh Sahifa", icon: Home },
-      { id: "users", name: "Foydalanuvchilar", icon: Users },
-      { id: "collection-points", name: "Yig'ish punktlari", icon: MapPin },
-      { id: "brokers", name: "Brokerlar", icon: Truck },
-      { id: "farmers", name: "Fermerlar", icon: Apple },
-      { id: "transactions", name: "Moliyaviy Hisobotlar", icon: DollarSign },
-      { id: "analytics", name: "Tahlil va Statistika", icon: BarChart3 },
-      { id: "settings", name: "Tizim Sozlamalari", icon: Settings },
-    ],
-    []
-  );
-
   const ComingSoon = ({ title }) => (
-    <div className="p-4 lg:p-8 bg-white rounded-lg lg:rounded-xl border border-gray-200">
+    <div className="p-4 lg:p-8 bg-white rounded-lg lg:rounded-xl border border-gray-200 text-center py-20">
       <h2 className="text-lg lg:text-xl font-bold text-gray-900">{title}</h2>
       <p className="text-gray-600 mt-2">Bu sahifa tez orada ishlab chiqiladi...</p>
     </div>
@@ -40,10 +28,10 @@ const AdminLayout = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm">
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30">
         <div>
           <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Hosil Tizimi
+            Hosilim Tizimi
           </h1>
           <p className="text-sm text-gray-600">{user?.role}</p>
         </div>
@@ -60,43 +48,33 @@ const AdminLayout = () => {
       )}
 
       <div className="flex">
+        {/* Desktop Sidebar */}
         <div className="hidden lg:block">
           <Sidebar
             user={user}
-            sections={sections}
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
             onLogout={logout}
-            isSubmenuOpen={isSubmenuOpen}
-            setIsSubmenuOpen={setIsSubmenuOpen}
-            activeSubSection={activeSubSection}
-            setActiveSubSection={setActiveSubSection}
           />
         </div>
 
+        {/* Mobile Sidebar */}
         <div className={`lg:hidden fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
           <Sidebar
             user={user}
-            sections={sections}
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
             onLogout={logout}
-            isSubmenuOpen={isSubmenuOpen}
-            setIsSubmenuOpen={setIsSubmenuOpen}
-            activeSubSection={activeSubSection}
-            setActiveSubSection={setActiveSubSection}
           />
         </div>
 
-        <div className="flex-1 min-w-0">
-          <main className="p-3 lg:p-8">
+        <div className="flex-1 min-w-0 lg:ml-[270px]">
+          <main className="p-4 lg:p-8">
             <Routes>
               <Route path="/" element={<AdminDashboard />} />
-              <Route path="/users" element={<AdminUsersManagement />} />
+              <Route path="/announcements" element={<AdminAnnouncementsPage />} />
+              <Route path="/fruit-types" element={<AdminFruitCatalogPage />} />
               <Route path="/collection-points" element={<CollectionPointsPage />} />
-
-              <Route path="/brokers" element={<ComingSoon title="Brokerlar" />} />
-              <Route path="/farmers" element={<ComingSoon title="Fermerlar" />} />
+              <Route path="/users" element={<AdminUsersManagement />} />
+              
+              <Route path="/brokers" element={<ComingSoon title="Brokerlarni Boshqarish" />} />
+              <Route path="/farmers" element={<ComingSoon title="Fermerlar Bazasi" />} />
               <Route path="/transactions" element={<ComingSoon title="Moliyaviy Hisobotlar" />} />
               <Route path="/analytics" element={<ComingSoon title="Tahlil va Statistika" />} />
               <Route path="/settings" element={<ComingSoon title="Tizim Sozlamalari" />} />
