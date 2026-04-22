@@ -3,8 +3,8 @@ import { NavLink, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight, LogOut, TrendingUp, ShoppingBasket, Users, 
-  Package, DollarSign, Settings, List, X, PackagePlus, 
-  ArrowRightLeft, RotateCcw, LayoutGrid, ArrowLeft,
+  Package, DollarSign, Settings, List, PackagePlus, 
+  ArrowRightLeft, LayoutGrid, ArrowLeft,Download, History,RefreshCcw,XCircle,
   Database, Truck, Apple, BarChart3, MapPin, Bell ,Briefcase
 } from "lucide-react";
 
@@ -85,24 +85,24 @@ export default function Sidebar({ user, onLogout }) {
 
   const subMenus = {
     receive: {
-      title: "Qabullar",
-      icon: TrendingUp,
+      title: "Hosil Qabuli",
+      icon: Download,
       items: [
-        { id: "new", label: "Yangi qabul", icon: PackagePlus, to: `${basePath}/receive/new` },
-        { id: "all", label: "Barcha qabullar", icon: List, to: `${basePath}/receive/all` },
-        { id: "cancelled", label: "Bekor qilingan", icon: X, to: `${basePath}/receive/cancelled` },
+        { id: "new", label: "Yangi Qabul", icon: PackagePlus, to: `${basePath}/receive/new` },
+        { id: "all", label: "Kirimlar Tarixi", icon: List, to: `${basePath}/receive/all` },
+        { id: "daily-report", label: "Kunlik Hisobot", icon: BarChart3, to: `${basePath}/receive/daily-report` },
+        { id: "cancelled", label: "Bekor Qilinganlar", icon: XCircle, to: `${basePath}/receive/cancelled` },
       ]
     },
     baskets: {
-      title: "Savatlar",
+      title: "Savatlar Aylanmasi",
       icon: ShoppingBasket,
       items: [
-        { id: "catalog", label: "Savat turlari", icon: PackagePlus, to: `${basePath}/baskets/catalog` },
-        { id: "distribution", label: "Savat tarqatish", icon: ArrowRightLeft, to: `${basePath}/baskets/distribution` },
-        { id: "transaction-baskets", label: "Savat tranzaksiyalari", icon: RotateCcw, to: `${basePath}/baskets/transaction-baskets` },
-        { id: "history", label: "Savatlar tarixi", icon: List, to: `${basePath}/baskets/history` },
-        
-        { id: "balances", label: "Fermerlar balansi", icon: Briefcase, to: `${basePath}/baskets/balances` },
+        { id: "catalog", label: "Ombor (Savat turlari)", icon: Package, to: `${basePath}/baskets/catalog` },
+        { id: "distribution", label: "Savat Tarqatish", icon: ArrowRightLeft, to: `${basePath}/baskets/distribution` },
+        { id: "balances", label: "Fermerlar Qarzi", icon: Briefcase, to: `${basePath}/baskets/balances` }, 
+        { id: "returned-history", label: "Qaytarilgan Savatlar", icon: RefreshCcw, to: `${basePath}/baskets/returned-history` }, 
+        { id: "history", label: "Umumiy Tarix", icon: History, to: `${basePath}/baskets/history` },
       ]
     }
   };

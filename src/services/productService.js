@@ -23,6 +23,19 @@ const cropService = {
       console.error("Qabul qilishda xatolik:", error);
       throw error;
     }
+  },
+
+  // 3. Barcha qabul qilingan hosillar tarixini yuklash
+  getReceiveHistory: async (page = 0, size = 15) => {
+    try {
+      const response = await api.get(`${BASE_URL}/history`, {
+        params: { page, size }
+      });
+      return response.data?.data || { content: [], totalPages: 0 };
+    } catch (error) {
+      console.error("Tarixni yuklashda xatolik:", error);
+      return { content: [], totalPages: 0 };
+    }
   }
 };
 

@@ -167,7 +167,9 @@ const basketService = {
       console.error("Barcha tarixni olishda xatolik:", error);
       throw error;
     }
-  }
+  },
+
+  
 };
 
 export default basketService;
