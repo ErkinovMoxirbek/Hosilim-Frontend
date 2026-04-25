@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Search, Edit2, Trash2, X, User, Phone, MapPin, ShieldCheck, CheckCircle2, Ban } from "lucide-react";
+import { Plus, Search, Edit2, Trash2, X, User, Phone, MapPin, ShieldCheck, CheckCircle2, Ban, MoreVertical, Calendar } from "lucide-react";
 import { accountantService } from "../../services/accountantService";
 
 export default function AccountantsPage() {
@@ -18,12 +18,12 @@ export default function AccountantsPage() {
 
   // Forma ma'lumotlari
   const [formData, setFormData] = useState({
-    phone: "", // Faqat 9 xonali qismi saqlanadi
+    phone: "", 
     otp: "",
     fullName: "",
     address: "",
     brokerId: "", 
-    status: "ACTIVE" // Yangi status maydoni
+    status: "ACTIVE" 
   });
 
   // Telefon raqamni formatlash (bo'shliqlar bilan)
@@ -83,7 +83,6 @@ export default function AccountantsPage() {
 
   const openEditModal = (acc) => {
     setEditingId(acc.id);
-    // Backenddan kelgan raqamdan +998 ni olib tashlab formatlaymiz
     const cleanPhone = acc.phone ? acc.phone.replace("+998", "") : "";
     setFormData({ 
       phone: formatPhoneUI(cleanPhone), 
@@ -170,7 +169,6 @@ export default function AccountantsPage() {
 
       if (editingId) {
         await accountantService.update(editingId, payload);
-        alert("Hisobchi ma'lumotlari muvaffaqiyatli yangilandi!");
       }
 
       closeModal();
@@ -198,114 +196,148 @@ export default function AccountantsPage() {
     return name.trim().split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
   };
 
+  // 🚀 XATOLIK TO'G'RILANDI: Statusni toza va chiroyli qilib qaytaruvchi funksiya
+  const renderStatusBadge = (status) => {
+    if (status === 'ACTIVE') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          Faol
+        </span>
+      );
+    }
+    if (status === 'BLOCKED') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+          Bloklangan
+        </span>
+      );
+    }
+    if (status === 'INACTIVE') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+          Faol emas
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-gray-50 text-gray-700 border border-gray-200 shadow-sm">
+        Noma'lum
+      </span>
+    );
+  };
+
   if (loading && accountants.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+          <p className="text-gray-500 font-medium">Ma'lumotlar yuklanmoqda...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* HEADER QISMI */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8 pb-8">
+      {/* HEADER QISMI (Premium dizayn) */}
+      <div className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Hisobchilar</h1>
-          <p className="text-gray-500 text-sm mt-1">Tizimdagi barcha hisobchilar ro'yxati</p>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">Hisobchilar</h1>
+          <p className="text-gray-500 text-sm mt-1.5 font-medium">Tizimdagi barcha xodimlar va ularning ruxsatlari</p>
         </div>
         
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-72">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
               type="text" 
               placeholder="Qidirish..." 
-              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-medium text-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all"
             />
           </div>
           <button 
             onClick={openAddModal}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-sm whitespace-nowrap"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-5 py-2.5 rounded-xl transition-all font-bold shadow-md shadow-blue-600/20 whitespace-nowrap hover:-translate-y-0.5"
           >
-            <Plus size={18} />
-            <span className="hidden sm:inline">Yangi qo'shish</span>
+            <Plus size={18} strokeWidth={3} />
+            <span className="hidden sm:inline">Qo'shish</span>
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 text-red-600 rounded-lg border border-red-100 flex items-center gap-2">
-          <ShieldCheck size={20} /> {error}
+        <div className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 flex items-center gap-3 font-medium">
+          <ShieldCheck size={20} className="text-red-500" /> {error}
         </div>
       )}
 
       {/* JADVAL QISMI */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white border border-gray-100 rounded-[1.5rem] shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600">
-            <thead className="bg-gray-50/80 text-gray-700 font-medium border-b border-gray-200">
+            <thead className="bg-gray-50/80 text-gray-500 font-bold uppercase tracking-wider text-[11px] border-b border-gray-100">
               <tr>
-                <th className="px-6 py-4">F.I.O. va Telefon</th>
-                <th className="px-6 py-4">Manzil</th>
-                <th className="px-6 py-4">Qo'shilgan sana</th>
-                <th className="px-6 py-4">Holati</th>
-                <th className="px-6 py-4 text-right">Amallar</th>
+                <th className="px-6 py-5">Xodim (F.I.O / Telefon)</th>
+                <th className="px-6 py-5">Manzil</th>
+                <th className="px-6 py-5">Sana</th>
+                <th className="px-6 py-5">Holati</th>
+                <th className="px-6 py-5 text-right">Harakatlar</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-50">
               {accountants.length > 0 ? (
                 accountants.map((acc) => (
-                  <tr key={acc.id} className="hover:bg-blue-50/50 transition-colors">
+                  <tr key={acc.id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-100 to-blue-50 text-blue-600 flex items-center justify-center font-bold shadow-inner">
+                      <div className="flex items-center gap-4">
+                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-100 to-blue-50 text-blue-700 flex items-center justify-center font-black shadow-inner border border-blue-200/50">
                           {getInitials(acc.fullName)}
                         </div>
                         <div>
-                          <div className="font-semibold text-gray-900">{acc.fullName || "Noma'lum"}</div>
-                          <div className="text-gray-500 text-xs mt-0.5">{acc.phone}</div>
+                          <div className="font-bold text-gray-900 text-base">{acc.fullName || "Noma'lum"}</div>
+                          <div className="text-gray-500 text-xs mt-0.5 font-medium flex items-center gap-1">
+                            <Phone size={12} /> {acc.phone}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5 text-gray-600 max-w-[200px] truncate" title={acc.address}>
-                        <MapPin size={16} className="text-gray-400 flex-shrink-0" />
-                        <span className="truncate">{acc.address || "-"}</span>
+                      <div className="flex items-center gap-2 text-gray-600 max-w-[220px]" title={acc.address}>
+                        <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100 flex-shrink-0">
+                          <MapPin size={14} className="text-gray-400" />
+                        </div>
+                        <span className="truncate font-medium">{acc.address || "Ko'rsatilmagan"}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-500">
-                      {new Date(acc.createdAt).toLocaleDateString("ru-RU", { 
-                        day: '2-digit', month: '2-digit', year: 'numeric' 
-                      })}
+                    <td className="px-6 py-4">
+                       <div className="flex items-center gap-2 text-gray-500 font-medium">
+                         <Calendar size={14} className="text-gray-400" />
+                         {new Date(acc.createdAt).toLocaleDateString("ru-RU", { 
+                          day: '2-digit', month: '2-digit', year: 'numeric' 
+                         })}
+                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 inline-flex items-center gap-1.5 rounded-full text-xs font-medium border ${
-                        acc.status === 'ACTIVE' 
-                          ? 'bg-green-50 text-green-700 border-green-200' 
-                          : 'bg-red-50 text-red-700 border-red-200'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${acc.status === 'ACTIVE' ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                        <span className={`w-1.5 h-1.5 rounded-full ${acc.status === 'INACTIVE' ? 'bg-yellow-500' : 'bg-yellow-500'}`}></span>
-                        {acc.status === 'ACTIVE' ? 'Faol' : 'Nomalum'}
-                        {acc.status === 'INACTIVE' ? 'Faol emas' : 'Nomalum'}
-                      </span>
-                      
-                      
+                      {renderStatusBadge(acc.status)}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => openEditModal(acc)}
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all border border-transparent hover:border-blue-100"
+                          title="Tahrirlash"
                         >
-                          <Edit2 size={18} />
+                          <Edit2 size={16} />
                         </button>
                         <button 
                           onClick={() => handleDelete(acc.id)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100"
+                          title="O'chirish"
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>
@@ -313,13 +345,15 @@ export default function AccountantsPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-16 text-center text-gray-500">
-                    <div className="flex flex-col items-center justify-center">
-                      <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                  <td colSpan="5" className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center justify-center max-w-sm mx-auto">
+                      <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100 shadow-sm">
                         <User size={32} className="text-gray-400" />
                       </div>
-                      <p className="text-base font-medium text-gray-900">Hisobchilar topilmadi</p>
-                      <p className="text-sm mt-1">Hozircha tizimga hech qanday hisobchi qo'shilmagan.</p>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">Hisobchilar topilmadi</h3>
+                      <p className="text-sm text-gray-500 font-medium text-center">
+                        Hozircha tizimga hech qanday hisobchi qo'shilmagan. Yangi qo'shish uchun yuqoridagi tugmadan foydalaning.
+                      </p>
                     </div>
                   </td>
                 </tr>
@@ -329,47 +363,50 @@ export default function AccountantsPage() {
         </div>
       </div>
 
-      {/* MODAL QISMI */}
+      {/* MODAL QISMI (Premium dizayn) */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
+          {/* Orqa fon pardasi */}
+          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={closeModal}></div>
+          
+          <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-[440px] overflow-hidden animate-in zoom-in-95 duration-200">
             
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+            <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100 bg-white">
               <div className="flex flex-col">
-                <h2 className="text-lg font-bold text-gray-900">
-                  {editingId ? "Hisobchini tahrirlash" : "Yangi hisobchi qo'shish"}
+                <h2 className="text-xl font-black text-gray-900">
+                  {editingId ? "Tahrirlash" : "Yangi qo'shish"}
                 </h2>
                 {!editingId && (
-                  <p className="text-xs text-gray-500 font-medium mt-0.5">
+                  <p className="text-xs text-blue-600 font-bold mt-1 uppercase tracking-wider">
                     Qadam {modalStep} / 2
                   </p>
                 )}
               </div>
               <button 
                 onClick={closeModal}
-                className="p-2 -mr-2 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-full transition-colors"
+                className="w-10 h-10 flex items-center justify-center bg-gray-50 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors border border-gray-200"
                 disabled={isSubmitting}
               >
-                <X size={20} />
+                <X size={18} strokeWidth={2.5} />
               </button>
             </div>
             
-            <div className="p-6">
+            <div className="p-8">
               {/* QADAM 1: TELEFON RAQAM */}
               {modalStep === 1 && (
-                <form onSubmit={handleSendOtp} className="space-y-5">
-                  <div className="text-center mb-6">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Phone size={24} />
+                <form onSubmit={handleSendOtp} className="space-y-6">
+                  <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-100 shadow-sm">
+                      <Phone size={28} />
                     </div>
-                    <h3 className="text-gray-900 font-medium">Telefon raqamni kiriting</h3>
-                    <p className="text-sm text-gray-500 mt-1">Ushbu raqamga tasdiqlash kodi yuboriladi</p>
+                    <h3 className="text-gray-900 font-bold text-lg">Telefon raqam</h3>
+                    <p className="text-sm text-gray-500 mt-1.5 font-medium">Ushbu raqamga tasdiqlash kodi yuboriladi</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefon raqam</label>
-                    <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 bg-gray-50 transition-shadow">
-                      <div className="px-4 py-3 bg-gray-100 text-gray-600 font-medium border-r border-gray-200">
+                    <label className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">Raqamni kiriting</label>
+                    <div className="flex items-center border-2 border-gray-100 rounded-2xl overflow-hidden focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 bg-gray-50 transition-all">
+                      <div className="px-5 py-4 bg-gray-100/50 text-gray-500 font-bold border-r-2 border-gray-100 text-lg">
                         +998
                       </div>
                       <input 
@@ -379,7 +416,7 @@ export default function AccountantsPage() {
                         value={formData.phone}
                         onChange={handlePhoneChange}
                         placeholder="90 123 45 67" 
-                        className="w-full px-4 py-3 bg-transparent focus:outline-none text-lg tracking-wide placeholder-gray-300"
+                        className="w-full px-5 py-4 bg-transparent focus:outline-none text-lg font-bold tracking-wide placeholder-gray-300 text-gray-900"
                       />
                     </div>
                   </div>
@@ -387,23 +424,23 @@ export default function AccountantsPage() {
                   <button 
                     type="submit"
                     disabled={isSubmitting || formData.phone.replace(/\s+/g, "").length < 9}
-                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors disabled:opacity-70 flex justify-center"
+                    className="w-full py-4 mt-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-2xl font-bold text-lg transition-all shadow-lg shadow-blue-600/30 disabled:opacity-50 disabled:shadow-none flex justify-center"
                   >
-                    {isSubmitting ? "Yuborilmoqda..." : "Kodni olish"}
+                    {isSubmitting ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Kodni olish"}
                   </button>
                 </form>
               )}
 
               {/* QADAM 2: OTP */}
               {modalStep === 2 && (
-                <form onSubmit={handleVerifyOtp} className="space-y-5 animate-in slide-in-from-right-4">
-                  <div className="text-center mb-6">
-                    <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <ShieldCheck size={24} />
+                <form onSubmit={handleVerifyOtp} className="space-y-6 animate-in slide-in-from-right-4">
+                  <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-100 shadow-sm">
+                      <ShieldCheck size={28} />
                     </div>
-                    <h3 className="text-gray-900 font-medium">Kodni tasdiqlang</h3>
-                    <p className="text-sm text-gray-500 mt-1">
-                      +998 {formData.phone} raqamiga yuborilgan 4 xonali kodni kiriting.
+                    <h3 className="text-gray-900 font-bold text-lg">Kodni tasdiqlang</h3>
+                    <p className="text-sm text-gray-500 mt-1.5 font-medium px-4">
+                      <span className="font-bold text-gray-900">+998 {formData.phone}</span> raqamiga yuborilgan 4 xonali kodni kiriting.
                     </p>
                   </div>
 
@@ -415,30 +452,30 @@ export default function AccountantsPage() {
                       maxLength={4}
                       value={formData.otp}
                       onChange={handleChange}
-                      placeholder="• • • •" 
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white text-center text-2xl tracking-[1em]"
+                      placeholder="0 0 0 0" 
+                      className="w-full px-4 py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500 focus:bg-white text-center text-3xl font-black tracking-[1em] text-gray-900 transition-all placeholder:text-gray-300"
                     />
                   </div>
                   
                   <button 
                     type="submit"
                     disabled={isSubmitting || formData.otp.length !== 4}
-                    className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-colors disabled:opacity-70 flex justify-center"
+                    className="w-full py-4 mt-2 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white rounded-2xl font-bold text-lg transition-all shadow-lg shadow-green-600/30 disabled:opacity-50 disabled:shadow-none flex justify-center"
                   >
-                    {isSubmitting ? "Tekshirilmoqda..." : "Tasdiqlash va Qo'shish"}
+                    {isSubmitting ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Tasdiqlash"}
                   </button>
 
-                  <div className="flex flex-col items-center gap-2 pt-2">
+                  <div className="flex flex-col items-center gap-3 pt-4 border-t border-gray-100">
                     {timer > 0 ? (
                       <p className="text-sm text-gray-500 font-medium">
-                        Kodni qayta so'rash: <span className="text-blue-600">00:{timer < 10 ? `0${timer}` : timer}</span>
+                        Qayta so'rash: <span className="text-blue-600 font-bold">00:{timer < 10 ? `0${timer}` : timer}</span>
                       </p>
                     ) : (
                       <button 
                         type="button"
                         onClick={handleResendOtp}
                         disabled={isSubmitting}
-                        className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                        className="text-sm text-blue-600 hover:text-blue-800 font-bold transition-colors"
                       >
                         Kodni qayta yuborish
                       </button>
@@ -447,7 +484,7 @@ export default function AccountantsPage() {
                     <button 
                       type="button"
                       onClick={() => setModalStep(1)}
-                      className="w-full py-2 mt-2 text-gray-500 hover:text-gray-800 text-sm font-medium"
+                      className="text-sm text-gray-400 hover:text-gray-700 font-medium transition-colors"
                     >
                       Raqamni o'zgartirish
                     </button>
@@ -455,31 +492,31 @@ export default function AccountantsPage() {
                 </form>
               )}
 
-              {/* QADAM 3: TAHRIRLASH */}
+              {/* QADAM 3: TAHRIRLASH (Edit Details) */}
               {modalStep === 3 && (
-                <form onSubmit={handleSubmitEditDetails} className="space-y-5 animate-in slide-in-from-right-4">
+                <form onSubmit={handleSubmitEditDetails} className="space-y-6 animate-in slide-in-from-right-4">
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="col-span-1 sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">F.I.O. (Ism va Familiya)</label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">F.I.O. (Ism va Familiya)</label>
+                      <div className="relative group">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
                         <input 
                           type="text" 
                           name="fullName"
                           required
                           value={formData.fullName}
                           onChange={handleChange}
-                          placeholder="Masalan: Sardor Rahimov" 
-                          className="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+                          placeholder="Sardor Rahimov" 
+                          className="pl-11 w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-bold text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all placeholder:font-medium placeholder:text-gray-300"
                         />
                       </div>
                     </div>
 
-                    <div className="col-span-1 sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefon raqami (Tahrirlash mumkin)</label>
-                      <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 bg-gray-50 transition-shadow">
-                        <div className="px-4 py-2.5 bg-gray-100 text-gray-600 font-medium border-r border-gray-200">
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">Telefon raqami</label>
+                      <div className="flex items-center border-2 border-gray-100 rounded-2xl overflow-hidden focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 bg-gray-50 transition-all">
+                        <div className="px-4 py-3.5 bg-gray-100/50 text-gray-500 font-bold border-r-2 border-gray-100">
                           +998
                         </div>
                         <input 
@@ -489,75 +526,75 @@ export default function AccountantsPage() {
                           value={formData.phone}
                           onChange={handlePhoneChange}
                           placeholder="90 123 45 67" 
-                          className="w-full px-3 py-2.5 bg-transparent focus:outline-none tracking-wide"
+                          className="w-full px-4 py-3.5 bg-transparent focus:outline-none tracking-wide font-bold text-gray-900"
                         />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">Yashash manzili</label>
+                      <div className="relative group">
+                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+                        <input 
+                          type="text" 
+                          name="address"
+                          required
+                          value={formData.address}
+                          onChange={handleChange}
+                          placeholder="Viloyat, tuman, ko'cha..." 
+                          className="pl-11 w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-bold text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all placeholder:font-medium placeholder:text-gray-300"
+                        />
+                      </div>
+                    </div>
+
+                    {/* STATUS TANLASH (ZAMONAVIY TOGGLE) */}
+                    <div className="pt-2">
+                      <label className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-3">Hisob holati</label>
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, status: "ACTIVE" })}
+                          className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold border-2 transition-all ${
+                            formData.status === "ACTIVE" 
+                              ? "bg-green-50 border-green-500 text-green-700 shadow-md shadow-green-500/10" 
+                              : "bg-gray-50 border-gray-100 text-gray-400 hover:border-gray-300 hover:bg-gray-100"
+                          }`}
+                        >
+                          <CheckCircle2 size={18} className={formData.status === "ACTIVE" ? "text-green-600" : "text-gray-400"} />
+                          Faol
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, status: "BLOCKED" })}
+                          className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold border-2 transition-all ${
+                            formData.status === "BLOCKED" 
+                              ? "bg-red-50 border-red-500 text-red-700 shadow-md shadow-red-500/10" 
+                              : "bg-gray-50 border-gray-100 text-gray-400 hover:border-gray-300 hover:bg-gray-100"
+                          }`}
+                        >
+                          <Ban size={18} className={formData.status === "BLOCKED" ? "text-red-600" : "text-gray-400"} />
+                          Bloklangan
+                        </button>
                       </div>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Yashash manzili</label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                      <input 
-                        type="text" 
-                        name="address"
-                        required
-                        value={formData.address}
-                        onChange={handleChange}
-                        placeholder="Viloyat, tuman, ko'cha..." 
-                        className="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
-                      />
-                    </div>
-                  </div>
-
-                  {/* STATUS TANLASH (ZAMONAVIY TOGGLE) */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Hisob holati</label>
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, status: "ACTIVE" })}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-medium border-2 transition-all ${
-                          formData.status === "ACTIVE" 
-                            ? "bg-green-50 border-green-500 text-green-700 shadow-sm" 
-                            : "bg-white border-gray-200 text-gray-500 hover:border-green-200"
-                        }`}
-                      >
-                        <CheckCircle2 size={18} className={formData.status === "ACTIVE" ? "text-green-600" : "text-gray-400"} />
-                        Faol (Active)
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, status: "BLOCKED" })}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-medium border-2 transition-all ${
-                          formData.status === "BLOCKED" 
-                            ? "bg-red-50 border-red-500 text-red-700 shadow-sm" 
-                            : "bg-white border-gray-200 text-gray-500 hover:border-red-200"
-                        }`}
-                      >
-                        <Ban size={18} className={formData.status === "BLOCKED" ? "text-red-600" : "text-gray-400"} />
-                        Bloklangan
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-3 mt-6 pt-5 border-t border-gray-100">
+                  <div className="pt-6 mt-2 border-t border-gray-100 flex gap-3">
                     <button 
                       type="button"
                       onClick={closeModal}
                       disabled={isSubmitting}
-                      className="px-5 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl font-medium transition-colors"
+                      className="flex-1 py-4 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-2xl font-bold transition-colors border border-gray-200"
                     >
                       Bekor qilish
                     </button>
                     <button 
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors flex items-center gap-2"
+                      className="flex-1 py-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/30 flex justify-center items-center gap-2"
                     >
-                      {isSubmitting && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                      {isSubmitting && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                       {isSubmitting ? "Saqlanmoqda..." : "Saqlash"}
                     </button>
                   </div>
