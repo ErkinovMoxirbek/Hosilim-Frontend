@@ -81,6 +81,30 @@ const distributionService = {
       console.error("Fermerlarni qidirishda xatolik:", error);
       return []; 
     }
+  },
+  // Fermerning qo'lidagi mavjud savatlarini olish
+  getFarmerBalances: async (farmerId) => {
+    try {
+      const response = await api.get(`${BASE_URL}/balances/farmer/${farmerId}`);
+      return response.data?.data || [];
+    } catch (error) {
+      console.error("Fermer savatlarini olishda xatolik", error);
+      return [];
+    }
+  },
+
+  // Bo'sh savatlar qaytish tarixini olish
+  getReturnedEmptyHistory: async (page = 0, size = 50) => {
+    try {
+      const response = await api.get(`${BASE_URL}/history/returned-empty`, {
+        params: { page, size }
+      });
+      // Pagination ma'lumotlarini to'liq qaytaramiz (content, totalPages, va hokazo)
+      return response.data?.data || { content: [], totalPages: 0 }; 
+    } catch (error) {
+      console.error("Tarixni yuklashda xato:", error);
+      return { content: [], totalPages: 0 };
+    }
   }
 };
 
