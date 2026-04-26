@@ -95,13 +95,13 @@ export default function Sidebar({ user, onLogout }) {
       ]
     },
     baskets: {
-      title: "Savatlar Aylanmasi",
+      title: "Savatlar",
       icon: ShoppingBasket,
       items: [
         { id: "catalog", label: "Ombor (Savat turlari)", icon: Package, to: `${basePath}/baskets/catalog` },
         { id: "distribution", label: "Savat Tarqatish", icon: ArrowRightLeft, to: `${basePath}/baskets/distribution` },
         { id: "balances", label: "Fermerlar Qarzi", icon: Briefcase, to: `${basePath}/baskets/balances` }, 
-        { id: "returned-history", label: "Qaytarilgan Savatlar", icon: RefreshCcw, to: `${basePath}/baskets/returned-history` }, 
+        { id: "transaction", label: "Savatlar Aylanmasi", icon: RefreshCcw, to: `${basePath}/baskets/transaction` }, 
         { id: "history", label: "Umumiy Tarix", icon: History, to: `${basePath}/baskets/history` },
       ]
     }

@@ -27,7 +27,7 @@ import Sidebar from "./components/Sidebar";
 import BrokerDashboard from "../../brokerAndAccountant/BrokerDashboard";
 import ReceiveCropPage from "../../brokerAndAccountant/ReceiveCropPage";
 import CancelledSalePage from "../../brokerAndAccountant/CancelledSalePage";
-import AllSalePage from "../../brokerAndAccountant/AllSalePage";
+import ReceiveHistoryPage from "../../brokerAndAccountant/ReceiveHistoryPage";
 import PricingPage from "../../brokerAndAccountant/PriceManagerPage";
 import BasketCatalogPage from "../../brokerAndAccountant/BasketCatalogPage";
 import TransactionBasketsPage from "../../brokerAndAccountant/TransanctionBasketsPage";
@@ -37,7 +37,6 @@ import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";
 import FarmerPage from "../../brokerAndAccountant/FarmerPage";
 import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
 import FarmerBalancesPage from "../../brokerAndAccountant/FarmerBalancesPage";
-import ReturnedBasketsHistoryPage from "../../brokerAndAccountant/ReturnedBasketsHistoryPage";
 
 const BASE_PATH = "/dashboard/broker";
 
@@ -76,7 +75,7 @@ const BrokerLayout = () => {
       if (path.endsWith("/catalog")) setActiveSubSection("catalog");
       else if (path.endsWith("/distribution")) setActiveSubSection("distribution");
       else if (path.endsWith("/balances")) setActiveSubSection("balances");
-      else if (path.endsWith("/returned-history")) setActiveSubSection("returned-history");
+      else if (path.endsWith("/transaction")) setActiveSubSection("transaction");
       else setActiveSubSection("history");
       return;
     }
@@ -98,7 +97,7 @@ const BrokerLayout = () => {
       navigate(`${BASE_PATH}/receive/all`);
     } else if (sectionId === "baskets") {
       setIsSubmenuOpen(true);
-      navigate(`${BASE_PATH}/baskets/balances`); // Savatlarga bosganda to'g'ridan-to'g'ri Qarzlar oynasini ochish ham yaxshi UX
+      navigate(`${BASE_PATH}/baskets/distribution`); // Savatlarga bosganda to'g'ridan-to'g'ri Qarzlar oynasini ochish ham yaxshi UX
     } else {
       navigate(`${BASE_PATH}/${sectionId}`);
     }
@@ -149,7 +148,7 @@ const BrokerLayout = () => {
       { id: "catalog", name: "Ombor (Savat turlari)", icon: Package },
       { id: "distribution", name: "Savat Tarqatish", icon: ArrowRightLeft },
       { id: "balances", name: "Fermerlar Qarzi", icon: Briefcase },
-      { id: "returned-history", name: "Qaytarilgan Savatlar", icon: RefreshCcw },
+      { id: "transaction", name: "Savatlar aylanmasi", icon: RefreshCcw },
       { id: "history", name: "Umumiy Tarix", icon: History },
     ],
     []
@@ -238,7 +237,7 @@ const BrokerLayout = () => {
               {/* HOSIL QABULI YO'LLARI */}
               <Route path="receive" element={<Navigate to="all" replace />} />
               <Route path="receive/new" element={<ReceiveCropPage />} />
-              <Route path="receive/all" element={<AllSalePage />} />
+              <Route path="receive/all" element={<ReceiveHistoryPage />} />
               <Route path="receive/daily-report" element={<ComingSoon title="Kunlik Hisobot" />} />
               <Route path="receive/cancelled" element={<CancelledSalePage />} />
 
@@ -247,10 +246,8 @@ const BrokerLayout = () => {
               <Route path="baskets/catalog" element={<BasketCatalogPage />} />
               <Route path="baskets/distribution" element={<BasketDistributionPage />} />
               <Route path="baskets/balances" element={<FarmerBalancesPage />} />
-              <Route path="baskets/returned-history" element={<ReturnedBasketsHistoryPage />} />
+              <Route path="baskets/transaction" element={<TransactionBasketsPage />} />
               <Route path="baskets/history" element={<BasketHistoryPage />} />
-              {/* Eski marshrut ishlamay qolmasligi uchun uni ham qoldirdim */}
-              <Route path="baskets/transaction-baskets" element={<TransactionBasketsPage />} />
 
               {/* BOSHQA YO'LLAR */}
               <Route path="accountants" element={<AccountantsPage />} />

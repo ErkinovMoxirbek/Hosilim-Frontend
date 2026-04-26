@@ -1,2 +1,2 @@
-const API_BASE_URL = "https://e19b3e46c0dd35.lhr.life/api/v1";//https://tasty-rats-add.loca.lt
+const API_BASE_URL = "https://api.hosilim.uz/api/v1";
 export default API_BASE_URL;

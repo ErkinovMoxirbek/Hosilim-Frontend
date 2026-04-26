@@ -1,25 +1,25 @@
-import api from "../api/Axios"; 
+import api from "../api/Axios";
 
 const BASE_URL = "/basket-transactions";
 
 const distributionService = {
-  
+
   // Barcha tarqatilgan savatlar tarixini olish
-  getAllTransactions: async (page = 0, size = 50) => {
+  getAllTransactions: async (page = 0, size = 15) => {
     try {
-      const response = await api.get(`${BASE_URL}/history`, {
+      const response = await api.get(`${BASE_URL}/history/all`, {
         params: { page, size }
       });
-      return response.data?.data?.content || [];
+      return response.data?.data || { content: [], totalPages: 1 };
     } catch (error) {
-      console.error("Tarqatish tarixini olishda xatolik:", error);
-      return []; 
+      console.error("Transaksiyalar tarixini olishda xatolik:", error);
+      return { content: [], totalPages: 1 };
     }
   },
 
   getGivenMiniHistory: async (page = 0, size = 10) => {
     try {
-      const response = await api.get(`${BASE_URL}/history`, {
+      const response = await api.get(`${BASE_URL}/history/mini`, {
         params: { page, size }
       });
       return response.data?.data?.content || [];
@@ -29,7 +29,7 @@ const distributionService = {
     }
   },
 
- // Barcha fermerlarni umumiy qarzi
+  // Barcha fermerlarni umumiy qarzi
   getFarmerBalancesSummary: async (page = 0, size = 10) => {
     try {
       const response = await api.get(`${BASE_URL}/balances/summary`, {
@@ -66,20 +66,20 @@ const distributionService = {
       return response.data?.data || null;
     } catch (error) {
       console.error("Savat tarqatishda xatolik:", error);
-      throw error; 
+      throw error;
     }
   },
 
   // Fermerlarni izlash (Debounce API)
   searchFarmers: async (keyword) => {
     try {
-      const response = await api.get(`/farmers/search`, { 
-        params: { q: keyword } 
+      const response = await api.get(`/farmers/search`, {
+        params: { q: keyword }
       });
       return response.data?.data || [];
     } catch (error) {
       console.error("Fermerlarni qidirishda xatolik:", error);
-      return []; 
+      return [];
     }
   },
   // Fermerning qo'lidagi mavjud savatlarini olish
@@ -100,7 +100,7 @@ const distributionService = {
         params: { page, size }
       });
       // Pagination ma'lumotlarini to'liq qaytaramiz (content, totalPages, va hokazo)
-      return response.data?.data || { content: [], totalPages: 0 }; 
+      return response.data?.data || { content: [], totalPages: 0 };
     } catch (error) {
       console.error("Tarixni yuklashda xato:", error);
       return { content: [], totalPages: 0 };

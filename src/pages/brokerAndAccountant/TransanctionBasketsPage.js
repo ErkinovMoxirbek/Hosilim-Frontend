@@ -1,416 +1,203 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Box, Search, Calendar, ChevronLeft, ChevronRight, Loader2, RefreshCcw, ArrowDownCircle, ArrowUpCircle, AlertCircle } from 'lucide-react';
 import distributionService from '../../services/distributionService';
-import basketService from '../../services/basketService';
-import { Loader2, Search, Filter, ChevronLeft, ChevronRight, X, Box, Package, Clock, Calendar } from 'lucide-react';
 
-export default function BasketHistoryPage() {
-  const [transactions, setTransactions] = useState([]);
-  const [baskets, setBaskets] = useState([]);
+// Transaction turini chiroyli ko'rsatish
+const getTypeBadge = (type) => {
+  const types = {
+    RETURNED_EMPTY: {
+      label: "Bo'sh qaytarildi",
+      color: "bg-blue-50 border-blue-100 text-blue-700",
+      icon: <ArrowUpCircle size={13} />
+    },
+    ISSUED: {
+      label: "Berildi",
+      color: "bg-green-50 border-green-100 text-green-700",
+      icon: <ArrowDownCircle size={13} />
+    },
+    RETURNED_FILLED: {
+      label: "To'la qaytarildi",
+      color: "bg-purple-50 border-purple-100 text-purple-700",
+      icon: <ArrowUpCircle size={13} />
+    },
+    LOST: {
+      label: "Yo'qoldi",
+      color: "bg-red-50 border-red-100 text-red-700",
+      icon: <AlertCircle size={13} />
+    },
+  };
+  const t = types[type] || { label: type, color: "bg-gray-100 border-gray-200 text-gray-600", icon: null };
+  return (
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-bold ${t.color}`}>
+      {t.icon} {t.label}
+    </span>
+  );
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  return date.toLocaleDateString('uz-UZ', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+};
+
+export default function BasketTransactionsHistoryPage() {
+  const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Paginatsiya state'lari
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const pageSize = 15;
 
-  // Filtr state'lari
-  const [filters, setFilters] = useState({
-    farmerId: '',
-    basketId: '',
-    type: '' // Hozircha faqat 'GIVEN_TO_FARMER' bo'lishi mumkin
-  });
-
-  // Fermer qidiruv state'lari
-  const [farmerSearch, setFarmerSearch] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearchingFarmer, setIsSearchingFarmer] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedFarmer, setSelectedFarmer] = useState(null);
-  const dropdownRef = useRef(null);
-
-  // Helper: Initsiallar
-  const getInitials = (fullName) => {
-    if (!fullName) return 'F';
-    const names = fullName.trim().split(' ');
-    if (names.length >= 2) return `${names[0][0]}${names[1][0]}`.toUpperCase();
-    return fullName.substring(0, 2).toUpperCase();
-  };
-
-  // Helper: Vaqt va Sana
-  const formatDateTime = (dateString) => {
-    if (!dateString) return { time: '', date: '' };
-    const d = new Date(dateString);
-    const time = d.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
-    const date = d.toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric', year: 'numeric' });
-    return { time, date };
-  };
-
-  // Dropdown yopish
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    fetchHistory(currentPage);
+  }, [currentPage]);
 
-  // Boshlang'ich datalarni va Savatlarni yuklash
-  useEffect(() => {
-    fetchBaskets();
-    fetchTransactions(0, filters);
-  }, []);
-
-  // Fermer izlash (Debounce)
-  useEffect(() => {
-    if (farmerSearch.trim().length < 2) {
-      setSearchResults([]);
-      setIsSearchingFarmer(false);
-      return;
-    }
-    
-    setIsSearchingFarmer(true);
-    const timer = setTimeout(async () => {
-      try {
-        const results = await distributionService.searchFarmers(farmerSearch.trim());
-        setSearchResults(Array.isArray(results) ? results : []);
-      } catch (e) {
-        console.error("Fermer qidirishda xatolik:", e);
-      } finally {
-        setIsSearchingFarmer(false);
-        setIsDropdownOpen(true);
-      }
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [farmerSearch]);
-
-  const fetchBaskets = async () => {
-    try {
-      const basketsData = await basketService.getBaskets();
-      const available = Array.isArray(basketsData?.content) ? basketsData.content : [];
-      setBaskets(available);
-    } catch (error) {
-      console.error('Savatlarni yuklashda xatolik:', error);
-    }
-  };
-
-  // Asosiy API chaqiruvi (Filtrlar bilan)
-  const fetchTransactions = async (pageToFetch, currentFilters) => {
+  const fetchHistory = async (page) => {
     setIsLoading(true);
     try {
-      // Backend API ga parametrlarni jo'natish
-      // Eslatma: distributionService ichiga getAllTransactions degan yangi metod qo'shishingiz kerak!
-      const response = await distributionService.getAllTransactions({
-        page: pageToFetch,
-        size: pageSize,
-        farmerId: currentFilters.farmerId || null,
-        basketId: currentFilters.basketId || null,
-        type: currentFilters.type || null
-      });
-
-      if (response && response.content) {
-        setTransactions(response.content);
-        setTotalPages(response.totalPages);
-        setTotalElements(response.totalElements);
-        setCurrentPage(response.number);
-      } else {
-        setTransactions(Array.isArray(response) ? response : []);
-      }
+      const data = await distributionService.getAllTransactions(page, pageSize);
+      setHistory(data.content || []);
+      setTotalPages(data.totalPages || 1);
     } catch (error) {
-      console.error('Tarixni yuklashda xatolik:', error);
+      console.error("Xatolik:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Filtr o'zgarganda
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    const newFilters = { ...filters, [name]: value };
-    setFilters(newFilters);
-    fetchTransactions(0, newFilters); // Filtr o'zgarsa har doim 1-sahifadan boshlaymiz
-  };
-
-  // Fermer tanlanganda
-  const handleSelectFarmer = (farmer) => {
-    setSelectedFarmer(farmer);
-    const newFilters = { ...filters, farmerId: farmer.id };
-    setFilters(newFilters);
-    setFarmerSearch('');
-    setSearchResults([]);
-    setIsDropdownOpen(false);
-    fetchTransactions(0, newFilters);
-  };
-
-  // Fermer filtrini tozalash
-  const handleClearFarmer = () => {
-    setSelectedFarmer(null);
-    const newFilters = { ...filters, farmerId: '' };
-    setFilters(newFilters);
-    fetchTransactions(0, newFilters);
-  };
-
-  // Sahifa o'zgarganda
-  const handlePageChange = (newPage) => {
-    if (newPage >= 0 && newPage < totalPages) {
-      fetchTransactions(newPage, filters);
-    }
-  };
+  const filteredHistory = history.filter(item =>
+    item.farmerFullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.farmerPhone?.includes(searchQuery)
+  );
 
   return (
-    <div className="p-4 sm:p-6 bg-slate-50 text-slate-900 w-full min-h-screen">
-      <div className="max-w-7xl mx-auto w-full flex flex-col">
+    <div className="p-6 max-w-7xl mx-auto pb-10">
 
-        {/* ===== HEADER ===== */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-[#1B5E20] rounded-lg text-white shadow-sm">
-              <Clock size={22} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800">Savatlar Tarixi</h1>
-              <p className="text-slate-500 text-sm mt-0.5">Barcha tarqatilgan savatlar ro'yxati</p>
-            </div>
-          </div>
-          
-          <div className="bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
-            <span className="text-sm text-slate-500 font-medium">Jami yozuvlar:</span>
-            <span className="font-bold text-[#1B5E20] text-lg leading-none">{totalElements}</span>
-          </div>
+      {/* Sarlavha */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-[#0B1A42] flex items-center gap-3">
+            <RefreshCcw className="text-blue-500" size={28} />
+            Savat Transaksiyalari Tarixi
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Barcha savat harakatlarining to'liq tarixi
+          </p>
+        </div>
+        <button
+          onClick={() => fetchHistory(currentPage)}
+          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm font-bold shadow-sm hover:bg-gray-50 transition-all"
+        >
+          <RefreshCcw size={16} /> Yangilash
+        </button>
+      </div>
+
+      {/* Qidiruv */}
+      <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm mb-6 flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <input
+            type="text"
+            placeholder="Fermer ismi yoki telefon raqami..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+          />
+        </div>
+      </div>
+
+      {/* Jadval */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50/80 border-b border-gray-200 text-gray-500 text-[12px] uppercase tracking-wider">
+                <th className="p-4 font-bold">#</th>
+                <th className="p-4 font-bold">Sana</th>
+                <th className="p-4 font-bold">Fermer</th>
+                <th className="p-4 font-bold">Turi</th>
+                <th className="p-4 font-bold">Savat</th>
+                <th className="p-4 font-bold text-right">Miqdor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan="6" className="p-10 text-center text-gray-500">
+                    <Loader2 className="animate-spin mx-auto mb-3 text-blue-500" size={32} />
+                    Yuklanmoqda...
+                  </td>
+                </tr>
+              ) : filteredHistory.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="p-10 text-center text-gray-500">
+                    Hech qanday ma'lumot topilmadi.
+                  </td>
+                </tr>
+              ) : (
+                filteredHistory.map((item, index) => (
+                  <tr key={item.id} className="border-b border-gray-100 hover:bg-blue-50/30 transition-colors">
+                    <td className="p-4 text-sm text-gray-500 font-medium">
+                      {currentPage * pageSize + index + 1}
+                    </td>
+                    <td className="p-4 text-sm text-gray-600 font-medium whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={14} className="text-gray-400" />
+                        {formatDate(item.createdAt)}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="font-bold text-[#0B1A42] text-sm">{item.farmerFullName}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{item.farmerPhone}</div>
+                    </td>
+                    <td className="p-4">
+                      {getTypeBadge(item.type)}
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <Box size={16} className="text-gray-400" />
+                        <span className="text-sm font-semibold text-gray-700">{item.basketName}</span>
+                      </div>
+                    </td>
+                    <td className="p-4 text-right">
+                      <div className="inline-flex items-center justify-center bg-blue-50 border border-blue-100 text-blue-700 px-3 py-1 rounded-lg font-black text-sm">
+                        {item.quantity} ta
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* ===== FILTRLAR QISMI ===== */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-6 flex flex-col lg:flex-row gap-4 items-end">
-          
-          {/* Fermer bo'yicha filtr */}
-          <div className="w-full lg:w-1/3 relative" ref={dropdownRef}>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-              Fermer bo'yicha qidirish
-            </label>
-            
-            {selectedFarmer ? (
-              <div className="flex items-center justify-between px-3 py-2.5 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#1B5E20] font-bold text-xs shadow-sm border border-green-100">
-                    {getInitials(`${selectedFarmer.name} ${selectedFarmer.surname}`)}
-                  </div>
-                  <div>
-                    <span className="font-bold text-green-900 text-sm block leading-none">{selectedFarmer.name}</span>
-                    <span className="text-[11px] text-green-700 font-mono mt-0.5">{selectedFarmer.phone}</span>
-                  </div>
-                </div>
-                <button onClick={handleClearFarmer} className="p-1.5 hover:bg-white rounded-md text-slate-400 hover:text-red-500 transition-colors">
-                  <X size={16} strokeWidth={2.5} />
-                </button>
-              </div>
-            ) : (
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  {isSearchingFarmer ? <Loader2 size={16} className="text-[#1B5E20] animate-spin" /> : <Search size={16} className="text-slate-400" />}
-                </div>
-                <input
-                  type="text" 
-                  autoComplete="off" 
-                  value={farmerSearch}
-                  onChange={e => setFarmerSearch(e.target.value)}
-                  onFocus={() => { if (farmerSearch.length >= 2) setIsDropdownOpen(true); }}
-                  placeholder="Ism yoki telefon raqam..."
-                  className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1B5E20] focus:ring-1 focus:ring-[#1B5E20] rounded-lg text-slate-900 text-sm outline-none transition-all"
-                />
-                
-                {isDropdownOpen && farmerSearch.length >= 2 && (
-                  <div className="absolute z-50 w-full mt-1 bg-white rounded-lg shadow-lg border border-slate-200 max-h-60 overflow-y-auto">
-                    {isSearchingFarmer ? (
-                      <div className="p-3 text-center text-slate-500 text-xs flex items-center justify-center gap-2">
-                        <Loader2 size={14} className="animate-spin text-[#1B5E20]" /> Qidirilmoqda...
-                      </div>
-                    ) : searchResults.length === 0 ? (
-                      <div className="p-3 text-center text-slate-500 text-xs">Fermer topilmadi.</div>
-                    ) : searchResults.map(f => (
-                      <div key={f.id} onMouseDown={e => { e.preventDefault(); handleSelectFarmer(f); }} className="flex flex-col px-3 py-2 hover:bg-slate-50 border-b border-slate-100 last:border-0 cursor-pointer">
-                        <span className="font-bold text-slate-800 text-sm">{f.name} {f.surname}</span>
-                        <span className="text-xs text-slate-500 font-mono">{f.phone}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Savat turi bo'yicha filtr */}
-          <div className="w-full lg:w-1/4">
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-              Tara turi
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Box size={16} className="text-slate-400" />
-              </div>
-              <select
-                name="basketId"
-                value={filters.basketId}
-                onChange={handleFilterChange}
-                className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1B5E20] focus:ring-1 focus:ring-[#1B5E20] rounded-lg text-slate-900 text-sm outline-none transition-all cursor-pointer font-medium appearance-none"
+        {/* Pagination */}
+        {!isLoading && totalPages > 1 && (
+          <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
+            <span className="text-sm text-gray-500 font-medium">
+              Sahifa {currentPage + 1} / {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                disabled={currentPage === 0}
+                className="p-2 border border-gray-200 bg-white rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
               >
-                <option value="">Barcha taralar</option>
-                {baskets.map(b => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Tozalash tugmasi (Faqat filtr tanlanganda chiqadi) */}
-          {(filters.farmerId || filters.basketId) && (
-            <div className="w-full lg:w-auto flex-shrink-0">
-              <button 
-                onClick={() => {
-                  setSelectedFarmer(null);
-                  setFarmerSearch('');
-                  const emptyFilters = { farmerId: '', basketId: '', type: '' };
-                  setFilters(emptyFilters);
-                  fetchTransactions(0, emptyFilters);
-                }}
-                className="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5"
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+                disabled={currentPage === totalPages - 1}
+                className="p-2 border border-gray-200 bg-white rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
               >
-                <Filter size={16} />
-                Filtrni tozalash
+                <ChevronRight size={18} />
               </button>
             </div>
-          )}
-        </div>
-
-        {/* ===== JADVAL QISMI (TABLE) ===== */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col flex-1">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[800px]">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200">
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-16 text-center">#</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Fermer ma'lumotlari</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tara turi</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Berilgan soni</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Sana va Vaqt</th>
-                </tr>
-              </thead>
-              
-              <tbody className="divide-y divide-slate-100">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan="5" className="px-6 py-16 text-center">
-                      <Loader2 className="animate-spin text-[#1B5E20] mx-auto mb-3" size={28} />
-                      <p className="text-slate-500 text-sm">Tarix yuklanmoqda...</p>
-                    </td>
-                  </tr>
-                ) : transactions.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="px-6 py-16 text-center">
-                      <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Search size={24} className="text-slate-400" />
-                      </div>
-                      <p className="text-slate-600 font-medium">Hech qanday ma'lumot topilmadi</p>
-                      <p className="text-slate-400 text-sm mt-1">Boshqa qidiruv so'zlarini kiritib ko'ring</p>
-                    </td>
-                  </tr>
-                ) : (
-                  transactions.map((dist, index) => {
-                    const { time, date } = formatDateTime(dist.createdAt || dist.date);
-                    // Umumiy ro'yxatdagi tartib raqami
-                    const itemNumber = (currentPage * pageSize) + index + 1;
-                    
-                    return (
-                      <tr key={dist.id} className="hover:bg-slate-50/60 transition-colors group">
-                        <td className="px-6 py-4 text-sm font-medium text-slate-400 text-center">
-                          {itemNumber}
-                        </td>
-                        
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-[#1B5E20] font-bold text-xs border border-slate-200">
-                              {getInitials(dist.farmerFullName)}
-                            </div>
-                            <div>
-                              <div className="font-bold text-slate-800 text-sm">{dist.farmerFullName || "Noma'lum"}</div>
-                              <div className="text-xs text-slate-500 font-mono mt-0.5">{dist.farmerPhone}</div>
-                            </div>
-                          </div>
-                        </td>
-                        
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/60">
-                            <Package size={12} className="text-slate-400" />
-                            {dist.basketName}
-                          </span>
-                        </td>
-                        
-                        <td className="px-6 py-4 text-right">
-                          <span className="inline-flex items-baseline gap-1 text-[#1B5E20]">
-                            <span className="font-black text-lg">+{dist.quantity}</span>
-                            <span className="text-xs font-semibold text-green-700/60 uppercase">dona</span>
-                          </span>
-                        </td>
-                        
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex flex-col items-end justify-center">
-                            <span className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-                              <Clock size={12} className="text-slate-400" /> {time}
-                            </span>
-                            <span className="text-xs text-slate-400 font-medium flex items-center gap-1.5 mt-0.5">
-                              <Calendar size={12} className="text-slate-400" /> {date}
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
           </div>
-
-          {/* ===== PAGINATSIYA ===== */}
-          {!isLoading && totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-slate-100 bg-white flex items-center justify-between mt-auto">
-              <div className="text-sm text-slate-500 font-medium">
-                Ko'rsatilmoqda <span className="font-bold text-slate-800">{(currentPage * pageSize) + 1}</span> dan <span className="font-bold text-slate-800">{Math.min((currentPage + 1) * pageSize, totalElements)}</span> gacha
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 0}
-                  className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                
-                {/* Sahifa raqamlari (soddalashtirilgan) */}
-                <div className="flex items-center gap-1 px-2">
-                  <span className="text-sm font-bold text-white bg-[#1B5E20] px-3 py-1 rounded-md">
-                    {currentPage + 1}
-                  </span>
-                  <span className="text-sm font-medium text-slate-400 px-1">/</span>
-                  <span className="text-sm font-medium text-slate-600">
-                    {totalPages}
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage >= totalPages - 1}
-                  className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
+        )}
       </div>
     </div>
   );
