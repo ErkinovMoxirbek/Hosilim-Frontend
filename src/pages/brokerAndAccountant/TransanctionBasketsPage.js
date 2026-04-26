@@ -10,12 +10,12 @@ const getTypeBadge = (type) => {
       color: "bg-blue-50 border-blue-100 text-blue-700",
       icon: <ArrowUpCircle size={13} />
     },
-    ISSUED: {
+    GIVEN_TO_FARMER: {
       label: "Berildi",
       color: "bg-green-50 border-green-100 text-green-700",
       icon: <ArrowDownCircle size={13} />
     },
-    RETURNED_FILLED: {
+    RETURNED_WITH_CROP: {
       label: "To'la qaytarildi",
       color: "bg-purple-50 border-purple-100 text-purple-700",
       icon: <ArrowUpCircle size={13} />
