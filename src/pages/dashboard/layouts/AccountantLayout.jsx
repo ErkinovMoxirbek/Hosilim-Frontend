@@ -14,6 +14,8 @@ import {
   ArrowRightLeft,
   RotateCcw,
   Bell,
+  RefreshCcw,
+  Briefcase,
 } from "lucide-react";
 
 import { useAuth } from "../../../hooks/useAuth";
@@ -22,7 +24,7 @@ import Sidebar from "./components/Sidebar";
 import BrokerDashboard from "../../brokerAndAccountant/BrokerDashboard";
 import ReceiveCropPage from "../../brokerAndAccountant/ReceiveCropPage";
 import CancelledSalePage from "../../brokerAndAccountant/CancelledSalePage";
-import AllSalePage from "../../brokerAndAccountant/AllSalePage";
+import ReceiveHistoryPage from "../../brokerAndAccountant/ReceiveHistoryPage";
 import PricingPage from "../../brokerAndAccountant/PriceManagerPage";
 import BasketCatalogPage from "../../brokerAndAccountant/BasketCatalogPage";
 import TransactionBasketsPage from "../../brokerAndAccountant/TransanctionBasketsPage";
@@ -70,10 +72,10 @@ const AccountantLayout = () => {
     if (path.includes("/baskets/")) {
       setActiveSection("baskets");
       setIsSubmenuOpen(true);
-
       if (path.endsWith("/catalog")) setActiveSubSection("catalog");
       else if (path.endsWith("/distribution")) setActiveSubSection("distribution");
-      else if (path.endsWith("/returned")) setActiveSubSection("returned");
+      else if (path.endsWith("/balances")) setActiveSubSection("balances");
+      else if (path.endsWith("/transaction")) setActiveSubSection("transaction");
       else setActiveSubSection("history");
       return;
     }
@@ -98,7 +100,7 @@ const AccountantLayout = () => {
     } else {
       navigate(`${BASE_PATH}/${sectionId}`);
     }
-    
+
     // Mobil menyudan bosilganda uni yopish
     if (isMobileMenuOpen) {
       setIsMobileMenuOpen(false);
@@ -108,7 +110,7 @@ const AccountantLayout = () => {
   const handleSubSectionClick = (subSectionId) => {
     setActiveSubSection(subSectionId);
     navigate(`${BASE_PATH}/${activeSection}/${subSectionId}`);
-    
+
     // Mobil menyudan bosilganda uni yopish
     if (isMobileMenuOpen) {
       setIsMobileMenuOpen(false);
@@ -140,10 +142,11 @@ const AccountantLayout = () => {
 
   const basketsSubmenu = useMemo(
     () => [
-      { id: "catalog", name: "Savat turlari", icon: PackagePlus },
-      { id: "distribution", name: "Savat tarqatish", icon: ArrowRightLeft },
-      { id: "transaction-baskets", name: "Savat tranzaksiyalari", icon: RotateCcw },
-      { id: "history", name: "Savatlar tarixi", icon: List },
+      { id: "catalog", name: "Ombor (Savat turlari)", icon: Package },
+      { id: "distribution", name: "Savat Tarqatish", icon: ArrowRightLeft },
+      { id: "balances", name: "Fermerlar Qarzi", icon: Briefcase },
+      { id: "transaction", name: "Savatlar aylanmasi", icon: RefreshCcw },
+      { id: "history", name: "Umumiy Tarix", icon: History },
     ],
     []
   );
@@ -157,7 +160,7 @@ const AccountantLayout = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col lg:block relative">
-      
+
       {/* Mobil uchun Header */}
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30">
         <div>
@@ -184,7 +187,7 @@ const AccountantLayout = () => {
 
       {/* 🟢 Bu yerdan w-full olib tashlandi 🟢 */}
       <div className="flex flex-1 relative">
-        
+
         {/* Desktop Sidebar */}
         <div className="hidden lg:block w-[260px] shrink-0">
           <Sidebar
@@ -204,9 +207,8 @@ const AccountantLayout = () => {
 
         {/* Mobile Sidebar */}
         <div
-          className={`lg:hidden fixed inset-y-0 left-0 z-50 w-[260px] transform transition-transform duration-300 ease-in-out ${
-            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`lg:hidden fixed inset-y-0 left-0 z-50 w-[260px] transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
           <Sidebar
             user={user}
@@ -228,12 +230,12 @@ const AccountantLayout = () => {
           <main className="p-4 lg:p-8">
             <Routes>
               <Route index element={<BrokerDashboard />} />
-              
+
               <Route path="announcements" element={<AnnouncementsPage />} />
 
               <Route path="receive" element={<Navigate to="all" replace />} />
               <Route path="receive/new" element={<ReceiveCropPage />} />
-              <Route path="receive/all" element={<AllSalePage />} />
+              <Route path="receive/all" element={<ReceiveHistoryPage />} />
               <Route path="receive/cancelled" element={<CancelledSalePage />} />
 
               <Route path="baskets" element={<Navigate to="all" replace />} />
@@ -242,7 +244,7 @@ const AccountantLayout = () => {
               <Route path="baskets/transaction-baskets" element={<TransactionBasketsPage />} />
               <Route path="baskets/history" element={<BasketHistoryPage />} />
 
-              <Route path="farmers" element={<FarmerPage/>} />
+              <Route path="farmers" element={<FarmerPage />} />
               <Route path="inventory" element={<ComingSoon title="Omborxona" />} />
               <Route path="pricing" element={<PricingPage />} />
               <Route path="profile" element={<ComingSoon title="Profil" />} />
