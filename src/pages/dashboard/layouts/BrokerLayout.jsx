@@ -37,7 +37,7 @@ import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";
 import FarmerPage from "../../brokerAndAccountant/FarmerPage";
 import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
 import FarmerBalancesPage from "../../brokerAndAccountant/FarmerBalancesPage";
-import ReturnedBasketsHistoryPage from "../../brokerAndAccountant/ReturnedBasketsHistoryPage";
+import DistributionHistory from "../../brokerAndAccountant/DistributionHistory";
 
 const BASE_PATH = "/dashboard/broker";
 
@@ -247,7 +247,7 @@ const BrokerLayout = () => {
               <Route path="baskets/catalog" element={<BasketCatalogPage />} />
               <Route path="baskets/distribution" element={<BasketDistributionPage />} />
               <Route path="baskets/balances" element={<FarmerBalancesPage />} />
-              <Route path="baskets/returned-history" element={<ReturnedBasketsHistoryPage />} />
+              <Route path="baskets/history" element={<DistributionHistory />} />
               <Route path="baskets/history" element={<BasketHistoryPage />} />
               {/* Eski marshrut ishlamay qolmasligi uchun uni ham qoldirdim */}
               <Route path="baskets/transaction-baskets" element={<TransactionBasketsPage />} />
@@ -262,6 +262,7 @@ const BrokerLayout = () => {
 
               <Route path="*" element={<Navigate to="." replace />} />
             </Routes>
+            
           </main>
         </div>
 

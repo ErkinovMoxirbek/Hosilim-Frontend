@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight, LogOut, TrendingUp, ShoppingBasket, Users, 
   Package, DollarSign, Settings, List, PackagePlus, 
-  ArrowRightLeft, LayoutGrid, ArrowLeft,Download, History,RefreshCcw,XCircle,
-  Database, Truck, Apple, BarChart3, MapPin, Bell ,Briefcase
+  ArrowRightLeft, LayoutGrid, ArrowLeft, Download, History, 
+  RefreshCcw, XCircle, Database, Truck, Apple, BarChart3, 
+  MapPin, Bell, Briefcase, Home, ClipboardList, 
+  ThermometerSnowflake, Tractor, Tag, Megaphone, User
 } from "lucide-react";
 
 function getBasePath(user) {
@@ -37,11 +39,10 @@ export default function Sidebar({ user, onLogout }) {
 
   let mainItems = [];
 
-  // 🟢 Barcha rollarga "E'lonlar" qo'shildi
   if (isAdmin) {
     mainItems = [
-      { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
-      { id: "announcements", label: "E'lonlar", icon: Bell, to: `${basePath}/announcements` }, // 🟢
+      { id: "dashboard", label: "Bosh sahifa", icon: Home, to: basePath },
+      { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 
       { id: "fruit-types", label: "Meva Katalogi", icon: Database, to: `${basePath}/fruit-types` },
       { id: "collection-points", label: "Yig'ish Punktlari", icon: MapPin, to: `${basePath}/collection-points` },
       { id: "users", label: "Foydalanuvchilar", icon: Users, to: `${basePath}/users` },
@@ -53,33 +54,34 @@ export default function Sidebar({ user, onLogout }) {
     ];
   } else if (isAccountant) {
     mainItems = [
-      { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
+      { id: "dashboard", label: "Bosh sahifa", icon: Home, to: basePath },
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
-      { id: "receive", label: "Qabullar", icon: TrendingUp, hasSubMenu: true },
-      { id: "announcements", label: "E'lonlar", icon: Bell, to: `${basePath}/announcements` }, // 🟢
-      { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
-      { id: "farmers", label: "Fermerlar", icon: Users, to: `${basePath}/farmers` },
-      { id: "pricing", label: "Narx belgilash", icon: DollarSign, to: `${basePath}/pricing` },
-      { id: "profile", label: "Profil", icon: Settings, to: `${basePath}/profile` },
+      { id: "receive", label: "Qabullar", icon: ClipboardList, hasSubMenu: true },
+      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, to: `${basePath}/inventory` },
+      { id: "farmers", label: "Fermerlar", icon: Tractor, to: `${basePath}/farmers` },
+      { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },
+      { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 
+      { id: "profile", label: "Profil", icon: User, to: `${basePath}/profile` },
     ];
   } else if (isBroker) {
+    // 🚀 BROKER UCHUN YANGILANGAN TARTIB VA IKONKALAR
     mainItems = [
-      { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
-      { id: "announcements", label: "E'lonlar", icon: Bell, to: `${basePath}/announcements` }, // 🟢
-      { id: "receive", label: "Qabullar", icon: TrendingUp, hasSubMenu: true },
+      { id: "dashboard", label: "Bosh sahifa", icon: Home, to: basePath },
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
+      { id: "receive", label: "Qabullar", icon: ClipboardList, hasSubMenu: true },
+      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, to: `${basePath}/inventory` },
+      { id: "farmers", label: "Fermerlar", icon: Tractor, to: `${basePath}/farmers` },
       { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
-      { id: "farmers", label: "Fermerlar", icon: Users, to: `${basePath}/farmers` },
-      { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
-      { id: "pricing", label: "Narx belgilash", icon: DollarSign, to: `${basePath}/pricing` },
-      { id: "profile", label: "Profil", icon: Settings, to: `${basePath}/profile` },
+      { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },
+      { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 
+      { id: "profile", label: "Profil", icon: User, to: `${basePath}/profile` },
     ];
   } else if (isFarmer) {
     mainItems = [
-      { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
-      { id: "announcements", label: "E'lonlar", icon: Bell, to: `${basePath}/announcements` }, // 🟢
-      { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
-      { id: "profile", label: "Profil", icon: Settings, to: `${basePath}/profile` },
+      { id: "dashboard", label: "Bosh sahifa", icon: Home, to: basePath },
+      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, to: `${basePath}/inventory` },
+      { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 
+      { id: "profile", label: "Profil", icon: User, to: `${basePath}/profile` },
     ];
   }
 
@@ -126,8 +128,9 @@ export default function Sidebar({ user, onLogout }) {
           <span className="font-extrabold text-[#0B1A42] tracking-wide text-[20px] leading-none mb-0.5">
             Hosilim
           </span>
-          <span className="text-[10px] font-bold text-[#0081C9] tracking-widest uppercase">
-            {String(user?.role || "TIZIMI").replace('_', ' ')} TIZIMI
+          {/* 🚀 O'ZGARTIRILDI: Barcha rollar uchun bir xil AGRO PLATFORMA */}
+          <span className="text-[10px] font-black text-green-500 tracking-widest uppercase mt-0.5">
+            AGRO PLATFORMA
           </span>
         </div>
       </div>

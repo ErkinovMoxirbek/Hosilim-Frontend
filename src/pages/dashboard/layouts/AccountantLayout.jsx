@@ -31,6 +31,7 @@ import FarmerPage from "../../brokerAndAccountant/FarmerPage";
 import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";
 import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
 
+
 const BASE_PATH = "/dashboard/accountant";
 
 const AccountantLayout = () => {
