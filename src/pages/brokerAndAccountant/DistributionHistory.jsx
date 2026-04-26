@@ -1,84 +1,86 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Calendar, Package, ArrowDownRight, Filter } from 'lucide-react';
-// API_BASE_URL ni o'zingizning config faylingizdan chaqirasiz
-// import API_BASE_URL from "../../config";
 
 export default function DistributionHistory() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Backend'dan API kelganda shu funksiyani ishlatasiz
-  /*
-  const fetchHistory = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("authToken");
-      // Sherigingiz bergan API manzilini shu yerga yozasiz
-      const response = await fetch(`${API_BASE_URL}/broker/baskets/distribution-history`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setHistory(data.content || data.data || []); 
-      }
-    } catch (error) {
-      console.error('Tarixni yuklashda xatolik:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  */
+  // 🚀 SHERIGING API BERGANDA SHU YERDAGI MANZILNI O'ZGARTIRASAN
+  const API_URL = "http://localhost:8080/api/v1/baskets/distributions"; 
 
-  // Vaqtinchalik (Mock) ma'lumotlar - API bitguncha dizaynni ko'rib turish uchun
   useEffect(() => {
-    // API ulasangiz, pastdagi setTimeout o'rniga fetchHistory() ni chaqirasiz
-    setTimeout(() => {
-      setHistory([
-        { id: 1, farmerName: "Biloliddin Abdulazizov", phone: "+998912134567", basketType: "8-olchamlik karzinka", count: 5169, date: "2026-04-23T15:16:00" },
-        { id: 2, farmerName: "Biloliddin Abdulazizov", phone: "+998912134567", basketType: "8-olchamlik karzinka", count: 10, date: "2026-04-22T15:49:00" },
-        { id: 3, farmerName: "ABDUQODIR SOTVOLDIYEV", phone: "+998937770137", basketType: "Reyka yashik", count: 100, date: "2026-04-22T15:48:00" },
-        { id: 4, farmerName: "ABDUQODIR SOTVOLDIYEV", phone: "+998937770137", basketType: "Reyka yashik", count: 1, date: "2026-04-17T23:40:00" }
-      ]);
-      setLoading(false);
-    }, 800); // 0.8 soniya yuklanish animatsiyasi
-  }, []);
+    const fetchHistory = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token"); // Tokenni olish
 
-  // Ismning birinchi harflarini olish uchun yordamchi funksiya
+        const response = await fetch(API_URL, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // Agar xavfsizlik (Spring Security) bo'lsa
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Backend ma'lumotni 'content' ichida yoki to'g'ridan-to'g'ri massivda berishi mumkin
+          setHistory(data.content || data.data || data || []);
+        } else {
+          console.error("Serverdan xato keldi:", response.status);
+        }
+      } catch (error) {
+        console.error("API ulanishida xatolik:", error);
+        // Xato bo'lsa, jadval bo'sh qolmasligi uchun vaqtinchalik namunalar (test uchun)
+        // Agar realniy ishlatmoqchi bo'lsang buni o'chirib tashla:
+        setHistory([
+          { id: 1, farmerName: "Namuna Fermer", phone: "+998901234567", basketType: "Yashik", count: 100, date: new Date().toISOString() }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [API_URL]);
+
+  // Qidiruv filtri
+  const filteredHistory = history.filter(item => 
+    item.farmerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.phone?.includes(searchTerm)
+  );
+
   const getInitials = (name) => {
     if (!name) return "F";
-    const parts = name.split(" ");
-    return parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].substring(0, 2).toUpperCase();
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2);
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return {
-      day: date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-      time: date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+      day: date.toLocaleDateString('uz-UZ'),
+      time: date.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
     };
   };
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1B5E20]"></div>
-        <p className="text-gray-500 font-medium">Tarix yuklanmoqda...</p>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600"></div>
+        <p className="text-gray-500 font-medium font-sans">Tarix yuklanmoqda...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-      
-      {/* Sahifa Sarlavhasi */}
+    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-black text-gray-900 tracking-tight">Tarqatishlar tarixi</h1>
-          <p className="text-gray-500 mt-1 font-medium">Fermerlarga tarqatilgan barcha savatlar ro'yxati</p>
+          <h1 className="text-2xl lg:text-3xl font-black text-gray-900 tracking-tight italic">Tarqatishlar tarixi</h1>
+          <p className="text-gray-500 mt-1 font-medium">Barcha tarqatilgan savatlar ro'yxati (API ulanishiga tayyor)</p>
         </div>
         
-        {/* Qidiruv va Filter */}
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -87,16 +89,15 @@ export default function DistributionHistory() {
               placeholder="Fermerni qidirish..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#1B5E20]/20 focus:border-[#1B5E20] transition-all w-full sm:w-64 shadow-sm"
+              className="pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all w-full sm:w-64 shadow-sm"
             />
           </div>
-          <button className="p-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
+          <button className="p-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 shadow-sm">
             <Filter size={18} />
           </button>
         </div>
       </div>
 
-      {/* Asosiy Jadval */}
       <div className="bg-white border border-gray-100 rounded-[1.5rem] shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600">
@@ -109,14 +110,12 @@ export default function DistributionHistory() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {history.length > 0 ? (
-                history.map((item) => (
+              {filteredHistory.length > 0 ? (
+                filteredHistory.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
-                    
-                    {/* Fermer ma'lumotlari */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-green-50 text-[#1B5E20] flex items-center justify-center font-bold text-sm border border-green-100">
+                        <div className="w-10 h-10 rounded-xl bg-green-50 text-green-700 flex items-center justify-center font-bold text-sm border border-green-100">
                           {getInitials(item.farmerName)}
                         </div>
                         <div>
@@ -125,27 +124,21 @@ export default function DistributionHistory() {
                         </div>
                       </div>
                     </td>
-
-                    {/* Tara turi */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <Package size={16} className="text-gray-400" />
                         <span className="font-medium bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md text-xs">
-                          {item.basketType}
+                          {item.basketType || "Aniqlanmagan"}
                         </span>
                       </div>
                     </td>
-
-                    {/* Soni (Yashil rangda ajralib turadi) */}
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5 text-[#1B5E20] font-black text-lg">
+                      <div className="flex items-center justify-end gap-1.5 text-green-700 font-black text-lg">
                         <ArrowDownRight size={16} strokeWidth={3} />
                         {item.count}
                         <span className="text-[11px] font-bold text-gray-400 uppercase">dona</span>
                       </div>
                     </td>
-
-                    {/* Sana va Vaqt */}
                     <td className="px-6 py-4 text-right">
                       <div className="flex flex-col items-end">
                         <span className="font-bold text-gray-900">{formatDate(item.date).time}</span>
@@ -155,13 +148,12 @@ export default function DistributionHistory() {
                         </div>
                       </div>
                     </td>
-
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan="4" className="px-6 py-16 text-center">
-                    <p className="text-gray-500 font-medium text-base">Hozircha tarqatilgan savatlar tarixi yo'q.</p>
+                    <p className="text-gray-400 font-medium">Ma'lumot topilmadi.</p>
                   </td>
                 </tr>
               )}
@@ -169,7 +161,6 @@ export default function DistributionHistory() {
           </table>
         </div>
       </div>
-
     </div>
   );
 }
