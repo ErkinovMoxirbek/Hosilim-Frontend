@@ -54,11 +54,11 @@ export default function Sidebar({ user, onLogout }) {
   } else if (isAccountant) {
     mainItems = [
       { id: "dashboard", label: "Bosh sahifa", icon: LayoutGrid, to: basePath },
-      { id: "announcements", label: "E'lonlar", icon: Bell, to: `${basePath}/announcements` }, // 🟢
-      { id: "receive", label: "Qabullar", icon: TrendingUp, hasSubMenu: true },
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
-      { id: "farmers", label: "Fermerlar", icon: Users, to: `${basePath}/farmers` },
+      { id: "receive", label: "Qabullar", icon: TrendingUp, hasSubMenu: true },
+      { id: "announcements", label: "E'lonlar", icon: Bell, to: `${basePath}/announcements` }, // 🟢
       { id: "inventory", label: "Omborxona", icon: Package, to: `${basePath}/inventory` },
+      { id: "farmers", label: "Fermerlar", icon: Users, to: `${basePath}/farmers` },
       { id: "pricing", label: "Narx belgilash", icon: DollarSign, to: `${basePath}/pricing` },
       { id: "profile", label: "Profil", icon: Settings, to: `${basePath}/profile` },
     ];
