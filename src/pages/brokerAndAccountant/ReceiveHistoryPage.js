@@ -171,7 +171,7 @@ export default function ReceiveHistoryPage() {
                           </button>
                         </td>
                         <td className="p-4">
-                          <div className="font-bold text-[#0B1A42] text-[15px]">{group.farmerName}</div>
+                          <div className="font-bold text-[#0B1A42] text-[15px]">{group.farmerFullName}</div>
                           <div className="text-xs text-gray-500 mt-0.5">{group.farmerPhone}</div>
                         </td>
                         <td className="p-4">
