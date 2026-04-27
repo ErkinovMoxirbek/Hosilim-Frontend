@@ -166,20 +166,7 @@ const BrokerLayout = () => {
     <div className="h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col overflow-hidden">
       
       {/* Mobil uchun Header */}
-      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm shrink-0 z-30">
-        <div>
-          <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Hosil Tizimi
-          </h1>
-          <p className="text-sm text-gray-600 capitalize">{String(user?.role || "").replace('_', ' ')}</p>
-        </div>
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
-        >
-          {isMobileMenuOpen ? <X size={24} /> : <List size={24} />}
-        </button>
-      </div>
+      
 
       {isMobileMenuOpen && (
         <div
