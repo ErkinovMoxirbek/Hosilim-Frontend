@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Select from 'react-select';
 import farmerService from '../../services/farmerService';
-import basketService from '../../services/basketService';
 import distributionService from '../../services/distributionService';
 import priceService from '../../services/priceService';
 import cropService from '../../services/cropService';
@@ -17,7 +16,7 @@ const WEIGH = { FULL: 'FULL', AVERAGE: 'AVERAGE' };
 const INITIAL_FORM = {
   farmerId: null,
   priceId: null,
-  basketId: null,
+  basketName: null,
   basketCount: '',
 };
 
@@ -61,7 +60,6 @@ export default function ReceiveCropPage() {
 
   // Ma'lumotlar
   const [prices, setPrices]                   = useState([]);
-  const [allBaskets, setAllBaskets]           = useState([]);
   const [farmerBaskets, setFarmerBaskets]     = useState([]); 
   const [isFarmerBasketsLoading, setIsFarmerBasketsLoading] = useState(false);
 
@@ -97,17 +95,13 @@ export default function ReceiveCropPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ── Statik ma'lumotlarni yuklash ───────────────────────────────────────────
+  // ── Statik ma'lumotlarni yuklash (Faqat narxlar) ───────────────────────────
   useEffect(() => {
     (async () => {
       setIsPageLoading(true);
       try {
-        const [pricesRes, basketsRes] = await Promise.all([
-          priceService.getActivePrices(),
-          basketService.getBaskets(0, 100),
-        ]);
+        const pricesRes = await priceService.getActivePrices();
         setPrices(Array.isArray(pricesRes) ? pricesRes : []);
-        setAllBaskets(Array.isArray(basketsRes?.content) ? basketsRes.content : []);
       } catch (err) {
         console.error('Statik ma\'lumotlarni yuklashda xato:', err);
       } finally {
@@ -151,7 +145,13 @@ export default function ReceiveCropPage() {
       setIsFarmerBasketsLoading(true);
       try {
         const balances = await distributionService.getFarmerBalances(form.farmerId);
-        setFarmerBaskets(Array.isArray(balances) ? balances : []);
+        const data = Array.isArray(balances) ? balances : [];
+        setFarmerBaskets(data);
+
+        // 🟢 UX: Agar fermerda faqat 1 turdagi savat bo'lsa, avtomat tanlaymiz
+        if (data.length === 1) {
+          updateForm({ basketName: data[0].basketName || data[0].basketName });
+        }
       } catch (err) {
         console.error('Fermer savatlarini yuklashda xato:', err);
         setFarmerBaskets([]);
@@ -161,22 +161,16 @@ export default function ReceiveCropPage() {
     })();
   }, [form.farmerId]);
 
-  // ── Select options hisoblash ───────────────────────────────────────────────
-  const farmerBasketIds = useMemo(() => {
-    if (farmerBaskets.length === 0) return [];
-    return farmerBaskets.map(b => {
-      if (b.basketId) return b.basketId;
-      const found = allBaskets.find(bsk => bsk.name === b.basketName);
-      return found?.id ?? null;
-    }).filter(Boolean);
-  }, [farmerBaskets, allBaskets]);
-
+  // ── 🟢 TOZALANGAN MANTIQ: Select options faqat fermer savatlaridan ────────
   const basketOptions = useMemo(() => {
-    const filtered = farmerBasketIds.length > 0
-      ? allBaskets.filter(b => farmerBasketIds.includes(b.id))
-      : allBaskets;
-    return filtered.map(b => ({ value: b.id, label: `${b.name} (${b.weight} kg)` }));
-  }, [allBaskets, farmerBasketIds]);
+    if (!form.farmerId || farmerBaskets.length === 0) return [];
+    
+    return farmerBaskets.map(b => ({
+      // Eslatma: Backenddan basketName kelsa o'shani olamiz, kelmasa ismini value qilamiz
+      value: b.basketName || b.basketName, 
+      label: b.basketName
+    }));
+  }, [farmerBaskets, form.farmerId]);
 
   const priceOptions = useMemo(() =>
     prices.map(p => ({
@@ -186,22 +180,19 @@ export default function ReceiveCropPage() {
 
   // ── Tanlangan savat bo'yicha ruxsat etilgan maksimal son (LIMIT) ───────────
   const maxAllowedBaskets = useMemo(() => {
-    if (!form.basketId || farmerBaskets.length === 0) return 0;
-
-    const selectedBasket = allBaskets.find(b => b.id === form.basketId);
-    if (!selectedBasket) return 0;
+    if (!form.basketName || farmerBaskets.length === 0) return 0;
 
     const farmerBasket = farmerBaskets.find(b => 
-      b.basketId === form.basketId || b.basketName === selectedBasket.name
+      b.basketName === form.basketName || b.basketName === form.basketName
     );
 
     return farmerBasket ? farmerBasket.quantity : 0;
-  }, [form.basketId, farmerBaskets, allBaskets]);
+  }, [form.basketName, farmerBaskets]);
 
   // ── Kvitansiya hisob-kitobi ──────────────────────────────────────────────
   const isReadyToCalculate = useMemo(() => {
     if (activeMode !== MODE.CROP) return false;
-    if (!form.farmerId || !form.priceId || !form.basketId) return false;
+    if (!form.farmerId || !form.priceId || !form.basketName) return false;
     if (farmerBaskets.length === 0) return false;
 
     if (weighingMode === WEIGH.FULL)    return weightBatches.length > 0;
@@ -221,7 +212,7 @@ export default function ReceiveCropPage() {
           farmerId:         form.farmerId,
           priceId:          form.priceId,
           hasBasket:        true,
-          basketId:         form.basketId,
+          basketName:         form.basketName,
           basketCount:      parseInt(form.basketCount || 0),
           weighingMode,
           weightBatches,
@@ -238,7 +229,7 @@ export default function ReceiveCropPage() {
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [isReadyToCalculate, form.farmerId, form.priceId, form.basketId, form.basketCount, weighingMode, weightBatches, sampleCount, sampleWeight]);
+  }, [isReadyToCalculate, form.farmerId, form.priceId, form.basketName, form.basketCount, weighingMode, weightBatches, sampleCount, sampleWeight]);
 
   // ── Amallar ───────────────────────────────────────────────────────────────
   const addWeight = (e) => {
@@ -275,13 +266,13 @@ export default function ReceiveCropPage() {
     if (!form.farmerId) return alert('Iltimos, fermerni tanlang!');
 
     if (activeMode === MODE.CROP) {
-      if (!form.basketId)          return alert('Savat turini tanlang!');
+      if (!form.basketName)          return alert('Savat turini tanlang!');
       if (farmerBaskets.length === 0) return alert('Bu fermerda savat yo\'q!');
       if (!receipt)                return alert('Hisob-kitob to\'liq emas!');
     }
 
     if (activeMode === MODE.EMPTY_BASKET) {
-      if (!form.basketId || !form.basketCount) return alert('Savat turi va sonini kiriting!');
+      if (!form.basketName || !form.basketCount) return alert('Savat turi va sonini kiriting!');
     }
 
     setIsSubmitting(true);
@@ -291,7 +282,7 @@ export default function ReceiveCropPage() {
           farmerId:          form.farmerId,
           priceId:           form.priceId,
           hasBasket:         true,
-          basketId:          form.basketId,
+          basketName:          form.basketName,
           basketCount:       parseInt(form.basketCount),
           weighingMode,
           weightBatches,
@@ -303,7 +294,7 @@ export default function ReceiveCropPage() {
       } else {
         await distributionService.returnEmptyBaskets({
           farmerId:  form.farmerId,
-          basketId:  form.basketId,
+          basketName:  form.basketName,
           quantity:  parseInt(form.basketCount),
         });
         setSuccessMessage("Bo'sh savatlar muvaffaqiyatli qabul qilindi!");
@@ -321,7 +312,7 @@ export default function ReceiveCropPage() {
   // ── Yordamchi o'zgaruvchilar ───────────────────────────────────────────────
   const farmerHasNoBaskets = form.farmerId && !isFarmerBasketsLoading && farmerBaskets.length === 0;
   const isSubmitDisabled   = isSubmitting || isCalculating ||
-    (activeMode === MODE.CROP && (!receipt || !form.basketId || farmerHasNoBaskets));
+    (activeMode === MODE.CROP && (!receipt || !form.basketName || farmerHasNoBaskets));
 
   const totalBatchWeight = weightBatches.reduce((s, w) => s + w, 0);
 
@@ -401,7 +392,7 @@ export default function ReceiveCropPage() {
                       type="button" 
                       onClick={() => {
                         setSelectedFarmer(null);
-                        updateForm({ farmerId: null, basketId: null, basketCount: '' });
+                        updateForm({ farmerId: null, basketName: null, basketCount: '' });
                         setReceipt(null);
                         setWeightBatches([]);
                       }}
@@ -445,7 +436,7 @@ export default function ReceiveCropPage() {
                               onMouseDown={e => { 
                                 e.preventDefault(); 
                                 setSelectedFarmer(f);
-                                updateForm({ farmerId: f.id, basketId: null, basketCount: '' });
+                                updateForm({ farmerId: f.id, basketName: null, basketCount: '' });
                                 setFarmerSearch('');
                                 setSearchResults([]);
                                 setIsDropdownOpen(false);
@@ -534,7 +525,7 @@ export default function ReceiveCropPage() {
 
                 {/* 3. SAVAT */}
                 {form.farmerId && !isFarmerBasketsLoading && farmerBaskets.length > 0 && (
-                  <div className={`border-2 rounded-2xl p-5 sm:p-6 space-y-5 transition-colors duration-300 ${form.basketId ? 'border-emerald-500 bg-emerald-50/20' : 'border-gray-200'}`}>
+                  <div className={`border-2 rounded-2xl p-5 sm:p-6 space-y-5 transition-colors duration-300 ${form.basketName ? 'border-emerald-500 bg-emerald-50/20' : 'border-gray-200'}`}>
                     <SectionLabel icon={Box} text="Savat ma'lumotlari" />
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -545,9 +536,9 @@ export default function ReceiveCropPage() {
                         </label>
                         <Select
                           options={basketOptions}
-                          value={basketOptions.find(o => o.value === form.basketId) ?? null}
+                          value={basketOptions.find(o => o.value === form.basketName) ?? null}
                           onChange={(sel) => {
-                            updateForm({ basketId: sel?.value ?? null, basketCount: '' });
+                            updateForm({ basketName: sel?.value ?? null, basketCount: '' });
                           }}
                           placeholder="Tanlang..."
                           className="text-sm font-medium"
@@ -561,9 +552,6 @@ export default function ReceiveCropPage() {
                             })
                           }}
                         />
-                        {basketOptions.length === 0 && (
-                          <p className="text-[11px] font-medium text-amber-600 mt-2">Bu fermerga mos savat topilmadi</p>
-                        )}
                       </div>
 
                       {/* Savat soni (LIMIT BILAN) */}
@@ -598,7 +586,7 @@ export default function ReceiveCropPage() {
                             
                             updateForm({ basketCount: val.toString() });
                           }}
-                          disabled={!form.basketId}
+                          disabled={!form.basketName}
                           className="w-full h-[42px] px-4 border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 text-sm font-bold transition-all outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="Soni..."
                         />
@@ -608,7 +596,7 @@ export default function ReceiveCropPage() {
                 )}
 
                 {/* 4. TORTISH REJIMI */}
-                {form.farmerId && farmerBaskets.length > 0 && form.basketId && (
+                {form.farmerId && farmerBaskets.length > 0 && form.basketName && (
                   <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
 
                     {/* Tab */}
@@ -751,9 +739,9 @@ export default function ReceiveCropPage() {
                     <Select
                       options={basketOptions}
                       placeholder="Savatni tanlang..."
-                      value={basketOptions.find(o => o.value === form.basketId) ?? null}
+                      value={basketOptions.find(o => o.value === form.basketName) ?? null}
                       onChange={(sel) => {
-                        updateForm({ basketId: sel?.value ?? null, basketCount: '' });
+                        updateForm({ basketName: sel?.value ?? null, basketCount: '' });
                       }}
                       className="text-sm font-medium"
                       styles={{
@@ -795,7 +783,7 @@ export default function ReceiveCropPage() {
                         if (val > maxAllowedBaskets) val = maxAllowedBaskets;
                         updateForm({ basketCount: val.toString() });
                       }}
-                      disabled={!form.basketId}
+                      disabled={!form.basketName}
                       className="w-full h-[42px] px-4 bg-white border border-gray-300 rounded-xl text-lg font-black text-[#0B1A42] focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
                       placeholder="0"
                     />
@@ -854,7 +842,7 @@ export default function ReceiveCropPage() {
                       ? 'Bu fermerda savat yo\'q'
                       : !form.priceId
                       ? 'Meva turini tanlang'
-                      : !form.basketId
+                      : !form.basketName
                       ? 'Savatni tanlang'
                       : 'Vazn kiriting'
                     }

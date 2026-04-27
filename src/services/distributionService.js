@@ -93,19 +93,18 @@ const distributionService = {
     }
   },
 
-  // Bo'sh savatlar qaytish tarixini olish
-  getReturnedEmptyHistory: async (page = 0, size = 50) => {
+  returnEmptyBaskets: async (data) => {
+    /* data obyekti quyidagicha keladi: 
+      { farmerId: 12, basketId: 3, quantity: 150 }
+    */
     try {
-      const response = await api.get(`${BASE_URL}/history/returned-empty`, {
-        params: { page, size }
-      });
-      // Pagination ma'lumotlarini to'liq qaytaramiz (content, totalPages, va hokazo)
-      return response.data?.data || { content: [], totalPages: 0 };
+      const response = await api.post(`${BASE_URL}/return-empty`, data);
+      return response.data; 
     } catch (error) {
-      console.error("Tarixni yuklashda xato:", error);
-      return { content: [], totalPages: 0 };
+      console.error("Bo'sh savatni qaytarishda xatolik:", error);
+      throw error; // Xatoni sahifaga uzatamiz (Alert chiqishi uchun)
     }
-  }
+  },
 };
 
 export default distributionService;
