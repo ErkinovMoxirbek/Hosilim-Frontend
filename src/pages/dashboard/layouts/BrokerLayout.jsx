@@ -10,7 +10,6 @@ import {
   DollarSign,
   Settings,
   List,
-  X,
   PackagePlus,
   ArrowRightLeft,
   Briefcase,
@@ -37,6 +36,7 @@ import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";
 import FarmerPage from "../../brokerAndAccountant/FarmerPage";
 import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
 import FarmerBalancesPage from "../../brokerAndAccountant/FarmerBalancesPage";
+import DailyReportPage from "../../brokerAndAccountant/DailyReportPage";
 
 const BASE_PATH = "/dashboard/broker";
 
@@ -225,7 +225,7 @@ const BrokerLayout = () => {
               <Route path="receive" element={<Navigate to="all" replace />} />
               <Route path="receive/new" element={<ReceiveCropPage />} />
               <Route path="receive/all" element={<ReceiveHistoryPage />} />
-              <Route path="receive/daily-report" element={<ComingSoon title="Kunlik Hisobot" />} />
+              <Route path="receive/daily-report" element={<DailyReportPage />} />
               <Route path="receive/cancelled" element={<CancelledSalePage />} />
 
               {/* SAVATLAR YO'LLARI */}
