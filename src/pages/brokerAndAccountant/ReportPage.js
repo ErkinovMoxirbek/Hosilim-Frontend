@@ -145,7 +145,7 @@ export default function ReportPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <SummaryCard icon={Scale} title="Jami Sof Vazn" value={`${totalSummary.weight.toFixed(1)} kg`} color="text-emerald-600" bg="bg-emerald-50" border="border-emerald-100" />
         <SummaryCard icon={Banknote} title="Jami Summa" value={`${totalSummary.amount.toLocaleString()} UZS`} color="text-blue-600" bg="bg-blue-50" border="border-blue-100" />
-        <SummaryCard icon={Box} title="Qaytgan Savatlar" value={`${totalSummary.baskets} ta`} color="text-orange-600" bg="bg-orange-50" border="border-orange-100" />
+        <SummaryCard icon={Box} title="Qabul qilingan Savatlar" value={`${totalSummary.baskets} ta`} color="text-orange-600" bg="bg-orange-50" border="border-orange-100" />
       </div>
 
       {/* ─── Jadval Qismi ─── */}
