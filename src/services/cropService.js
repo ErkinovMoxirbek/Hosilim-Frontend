@@ -49,24 +49,26 @@ const cropService = {
     }
   },
 
-  getDailyGroupedHistory: async (date, search = '', page = 0, size = 50) => {
+  getDailyGroupedHistory: async (startDate, endDate, search = '', page = 0, size = 50) => {
     try {
       const params = { page, size };
-      if (date) params.date = date; // 'YYYY-MM-DD' formatida
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
       if (search) params.search = search;
 
       const response = await api.get(`${BASE_URL}/daily/history/grouped`, { params });
       return response.data?.data || { content: [], totalPages: 0 };
     } catch (error) {
-      console.error("Kunlik hisobotni yuklashda xato:", error);
+      console.error("Hisobotni yuklashda xato:", error);
       throw error;
     }
   },
 
-  getDailyHistoryDetails: async (farmerId, date) => {
+  getDailyHistoryDetails: async (farmerId, startDate, endDate) => {
     try {
       const params = {};
-      if (date) params.date = date;
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
 
       const response = await api.get(`${BASE_URL}/daily/history/${farmerId}/details`, { params });
       return response.data?.data || [];

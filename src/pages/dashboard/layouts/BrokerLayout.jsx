@@ -37,6 +37,7 @@ import FarmerPage from "../../brokerAndAccountant/FarmerPage";
 import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
 import FarmerBalancesPage from "../../brokerAndAccountant/FarmerBalancesPage";
 import DailyReportPage from "../../brokerAndAccountant/DailyReportPage";
+import ReportPage from "../../brokerAndAccountant/ReportPage";
 
 const BASE_PATH = "/dashboard/broker";
 
@@ -120,6 +121,7 @@ const BrokerLayout = () => {
   const sections = useMemo(
     () => [
       { id: "dashboard", name: "Bosh Sahifa", icon: Home },
+      { id: "report", name: "Hisobotlar", icon: BarChart3 },
       { id: "receive", name: "Hosil Qabuli", icon: Download },
       { id: "baskets", name: "Savatlar Aylanmasi", icon: ShoppingBasket },
       { id: "accountants", name: "Xisobchilar", icon: Users },
@@ -222,6 +224,7 @@ const BrokerLayout = () => {
               <Route index element={<BrokerDashboard />} />
 
               {/* HOSIL QABULI YO'LLARI */}
+              <Route path="report" element={<ReportPage />} />
               <Route path="receive" element={<Navigate to="all" replace />} />
               <Route path="receive/new" element={<ReceiveCropPage />} />
               <Route path="receive/all" element={<ReceiveHistoryPage />} />

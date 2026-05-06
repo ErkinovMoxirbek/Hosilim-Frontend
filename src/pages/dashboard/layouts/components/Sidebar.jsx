@@ -74,6 +74,7 @@ export default function Sidebar({ user, onLogout }) {
       { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
       { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },
       { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 
+      { id: "report", label: "Hisobotlar", icon: BarChart3, to: `${basePath}/report` },
       { id: "profile", label: "Profil", icon: User, to: `${basePath}/profile` },
     ];
   } else if (isFarmer) {
