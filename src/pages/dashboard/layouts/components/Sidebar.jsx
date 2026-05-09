@@ -2,11 +2,11 @@ import { useMemo, useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ChevronRight, LogOut, TrendingUp, ShoppingBasket, Users, 
+  ChevronRight, LogOut, ShoppingBasket, Users, 
   Package, DollarSign, Settings, List, PackagePlus, 
-  ArrowRightLeft, LayoutGrid, ArrowLeft, Download, History, 
+  ArrowRightLeft, ArrowLeft, Download, History, 
   RefreshCcw, XCircle, Database, Truck, Apple, BarChart3, 
-  MapPin, Bell, Briefcase, Home, ClipboardList, 
+  MapPin, Briefcase, Home, ClipboardList, 
   ThermometerSnowflake, Tractor, Tag, Megaphone, User
 } from "lucide-react";
 
@@ -93,7 +93,7 @@ export default function Sidebar({ user, onLogout }) {
       items: [
         { id: "new", label: "Yangi Qabul", icon: PackagePlus, to: `${basePath}/receive/new` },
         { id: "all", label: "Kirimlar Tarixi", icon: List, to: `${basePath}/receive/all` },
-        { id: "daily-report", label: "Kunlik Hisobot", icon: BarChart3, to: `${basePath}/receive/daily-report` },
+        { id: "warehouse", label: "Omborxona", icon: Database, to: `${basePath}/receive/warehouse` },
         { id: "cancelled", label: "Bekor Qilinganlar", icon: XCircle, to: `${basePath}/receive/cancelled` },
       ]
     },
