@@ -49,14 +49,14 @@ const cropService = {
     }
   },
 
-  getDailyGroupedHistory: async (startDate, endDate, search = '', page = 0, size = 50) => {
+  getReportsGrouped: async (startDate, endDate, search = '', page = 0, size = 50) => {
     try {
       const params = { page, size };
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
       if (search) params.search = search;
 
-      const response = await api.get(`${BASE_URL}/daily/history/grouped`, { params });
+      const response = await api.get(`${BASE_URL}/report/grouped`, { params });
       return response.data?.data || { content: [], totalPages: 0 };
     } catch (error) {
       console.error("Hisobotni yuklashda xato:", error);
@@ -64,13 +64,13 @@ const cropService = {
     }
   },
 
-  getDailyHistoryDetails: async (farmerId, startDate, endDate) => {
+  getReportsDetails: async (farmerId, startDate, endDate) => {
     try {
       const params = {};
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
 
-      const response = await api.get(`${BASE_URL}/daily/history/${farmerId}/details`, { params });
+      const response = await api.get(`${BASE_URL}/report/${farmerId}/details`, { params });
       return response.data?.data || [];
     } catch (error) {
       console.error("Batafsil tarixni yuklashda xato:", error);

@@ -27,7 +27,7 @@ export default function ReportPage() {
     const fetchGroupedData = async () => {
       setIsLoading(true);
       try {
-        const res = await reportService.getDailyGroupedHistory(startDate, endDate, search, 0, 50);
+        const res = await reportService.getReportsGrouped(startDate, endDate, search, 0, 50);
         setGroupedData(res.content || []);
       } catch (error) {
         console.error("Ma'lumotlarni yuklashda xato:", error);
@@ -56,7 +56,7 @@ export default function ReportPage() {
     setIsDetailsLoading(true);
     try {
       // Bitta date o'rniga startDate va endDate yuboriladi
-      const res = await reportService.getDailyHistoryDetails(farmerId, startDate, endDate);
+      const res = await reportService.getReportsDetails(farmerId, startDate, endDate);
       setDetails(res);
     } catch (error) {
       console.error("Batafsil ma'lumotni yuklashda xato:", error);
