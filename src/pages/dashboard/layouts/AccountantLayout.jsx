@@ -1,22 +1,6 @@
-import { useMemo, useState, useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
-import {
-  Home,
-  TrendingUp,
-  ShoppingBasket,
-  Users,
-  Package,
-  DollarSign,
-  Settings,
-  List,
-  X,
-  PackagePlus,
-  ArrowRightLeft,
-  RotateCcw,
-  Bell,
-  RefreshCcw,
-  Briefcase,
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { X, List } from "lucide-react";
 
 import { useAuth } from "../../../hooks/useAuth";
 import Sidebar from "./components/Sidebar";
@@ -32,124 +16,22 @@ import BasketDistributionPage from "../../brokerAndAccountant/BasketDistribution
 import FarmerPage from "../../brokerAndAccountant/FarmerPage";
 import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";
 import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
+import FarmerBalancesPage from "../../brokerAndAccountant/FarmerBalancesPage";
 
-
-const BASE_PATH = "/dashboard/accountant";
+// YANGLIK: Hisobchiga ham Haladelnik yo'llarini ulaymiz
+import FridgeInventoryPage from "../../brokerAndAccountant/FridgeInventoryPage"; 
+import FridgesPage from "../../brokerAndAccountant/FridgeInventoryPage";
 
 const AccountantLayout = () => {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
 
-  const [activeSection, setActiveSection] = useState("dashboard");
-  const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
-  const [activeSubSection, setActiveSubSection] = useState("all");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const path = location.pathname;
-
-    if (path === BASE_PATH || path === `${BASE_PATH}/`) {
-      setActiveSection("dashboard");
-      return;
-    }
-
-    if (path.endsWith("/announcements")) {
-      setActiveSection("announcements");
-      return;
-    }
-
-    if (path.includes("/receive/")) {
-      setActiveSection("receive");
-      setIsSubmenuOpen(true);
-
-      if (path.endsWith("/new")) setActiveSubSection("new");
-      else if (path.endsWith("/cancelled")) setActiveSubSection("cancelled");
-      else setActiveSubSection("all");
-      return;
-    }
-
-    if (path.includes("/baskets/")) {
-      setActiveSection("baskets");
-      setIsSubmenuOpen(true);
-      if (path.endsWith("/catalog")) setActiveSubSection("catalog");
-      else if (path.endsWith("/distribution")) setActiveSubSection("distribution");
-      else if (path.endsWith("/balances")) setActiveSubSection("balances");
-      else if (path.endsWith("/transaction")) setActiveSubSection("transaction");
-      else setActiveSubSection("history");
-      return;
-    }
-
-    if (path.endsWith("/farmers")) setActiveSection("farmers");
-    else if (path.endsWith("/inventory")) setActiveSection("inventory");
-    else if (path.endsWith("/pricing")) setActiveSection("pricing");
-    else if (path.endsWith("/profile")) setActiveSection("profile");
+    // Mobil menyudan o'tilgandan keyin menyuni yopish uchun
+    setIsMobileMenuOpen(false);
   }, [location.pathname]);
-
-  const handleSectionClick = (sectionId) => {
-    setActiveSection(sectionId);
-
-    if (sectionId === "dashboard") {
-      navigate(BASE_PATH);
-    } else if (sectionId === "receive") {
-      setIsSubmenuOpen(true);
-      navigate(`${BASE_PATH}/receive/all`);
-    } else if (sectionId === "baskets") {
-      setIsSubmenuOpen(true);
-      navigate(`${BASE_PATH}/baskets/all`);
-    } else {
-      navigate(`${BASE_PATH}/${sectionId}`);
-    }
-
-    // Mobil menyudan bosilganda uni yopish
-    if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
-  };
-
-  const handleSubSectionClick = (subSectionId) => {
-    setActiveSubSection(subSectionId);
-    navigate(`${BASE_PATH}/${activeSection}/${subSectionId}`);
-
-    // Mobil menyudan bosilganda uni yopish
-    if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
-  };
-
-  const sections = useMemo(
-    () => [
-      { id: "dashboard", name: "Bosh Sahifa", icon: Home },
-      { id: "announcements", name: "E'lonlar", icon: Bell }, // 🟢 3. Menyular ro'yxatiga E'lonlar qo'shildi
-      { id: "sales", name: "Sotuvlar", icon: TrendingUp },
-      { id: "baskets", name: "Savatlar", icon: ShoppingBasket },
-      { id: "farmers", name: "Fermerlar", icon: Users },
-      { id: "inventory", name: "Omborxona", icon: Package },
-      { id: "pricing", name: "Narx Belgilash", icon: DollarSign },
-      { id: "profile", name: "Profil", icon: Settings },
-    ],
-    []
-  );
-
-  const receiveSubmenu = useMemo(
-    () => [
-      { id: "new", name: "Yangi qabul", icon: PackagePlus },
-      { id: "all", name: "Barcha qabullar", icon: List },
-      { id: "cancelled", name: "Bekor qilingan", icon: X },
-    ],
-    []
-  );
-
-  const basketsSubmenu = useMemo(
-    () => [
-      { id: "catalog", name: "Ombor (Savat turlari)", icon: Package },
-      { id: "distribution", name: "Savat Tarqatish", icon: ArrowRightLeft },
-      { id: "balances", name: "Fermerlar Qarzi", icon: Briefcase },
-      { id: "transaction", name: "Savatlar aylanmasi", icon: RefreshCcw },
-      { id: "history", name: "Umumiy Tarix", icon: History },
-    ],
-    []
-  );
 
   const ComingSoon = ({ title }) => (
     <div className="p-4 lg:p-8 bg-white rounded-lg lg:rounded-xl border border-gray-200 shadow-sm">
@@ -185,67 +67,48 @@ const AccountantLayout = () => {
         />
       )}
 
-      {/* 🟢 Bu yerdan w-full olib tashlandi 🟢 */}
       <div className="flex flex-1 relative">
 
         {/* Desktop Sidebar */}
         <div className="hidden lg:block w-[260px] shrink-0">
-          <Sidebar
-            user={user}
-            sections={sections}
-            activeSection={activeSection}
-            setActiveSection={handleSectionClick}
-            onLogout={logout}
-            isSubmenuOpen={isSubmenuOpen}
-            setIsSubmenuOpen={setIsSubmenuOpen}
-            activeSubSection={activeSubSection}
-            setActiveSubSection={handleSubSectionClick}
-            receiveSubmenu={receiveSubmenu}
-            basketsSubmenu={basketsSubmenu}
-          />
+          <Sidebar user={user} onLogout={logout} />
         </div>
 
         {/* Mobile Sidebar */}
         <div
-          className={`lg:hidden fixed inset-y-0 left-0 z-50 w-[260px] transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+          className={`lg:hidden fixed inset-y-0 left-0 z-50 w-[260px] transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
-          <Sidebar
-            user={user}
-            sections={sections}
-            activeSection={activeSection}
-            setActiveSection={handleSectionClick}
-            onLogout={logout}
-            isSubmenuOpen={isSubmenuOpen}
-            setIsSubmenuOpen={setIsSubmenuOpen}
-            activeSubSection={activeSubSection}
-            setActiveSubSection={handleSubSectionClick}
-            receiveSubmenu={receiveSubmenu}
-            basketsSubmenu={basketsSubmenu}
-          />
+          <Sidebar user={user} onLogout={logout} />
         </div>
 
-        {/* 🟢 Bu yerdan ham w-full olib tashlandi 🟢 */}
         <div className="flex-1 min-h-screen bg-zinc-50 relative">
           <main className="p-4 lg:p-8">
             <Routes>
               <Route index element={<BrokerDashboard />} />
-
               <Route path="announcements" element={<AnnouncementsPage />} />
 
+              {/* HOSIL QABULI */}
               <Route path="receive" element={<Navigate to="all" replace />} />
               <Route path="receive/new" element={<ReceiveCropPage />} />
               <Route path="receive/all" element={<ReceiveHistoryPage />} />
               <Route path="receive/cancelled" element={<CancelledSalePage />} />
 
-              <Route path="baskets" element={<Navigate to="all" replace />} />
+              {/* SAVATLAR */}
+              <Route path="baskets" element={<Navigate to="balances" replace />} />
               <Route path="baskets/catalog" element={<BasketCatalogPage />} />
               <Route path="baskets/distribution" element={<BasketDistributionPage />} />
+              <Route path="baskets/balances" element={<FarmerBalancesPage />} />
               <Route path="baskets/transaction-baskets" element={<TransactionBasketsPage />} />
               <Route path="baskets/history" element={<BasketHistoryPage />} />
 
+              {/* YANGLIK: HALADELNIK YO'LLARI */}
+              <Route path="inventory" element={<Navigate to="stocks" replace />} />
+              <Route path="inventory/stocks" element={<FridgeInventoryPage />} />
+              <Route path="inventory/manage" element={<FridgesPage />} />
+              <Route path="inventory/history" element={<ComingSoon title="Kirim-Chiqim Tarixi" />} />
+
+              {/* BOSHQA */}
               <Route path="farmers" element={<FarmerPage />} />
-              <Route path="inventory" element={<ComingSoon title="Omborxona" />} />
               <Route path="pricing" element={<PricingPage />} />
               <Route path="profile" element={<ComingSoon title="Profil" />} />
 
