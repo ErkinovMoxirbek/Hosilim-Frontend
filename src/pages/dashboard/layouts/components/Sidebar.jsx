@@ -7,7 +7,8 @@ import {
   ArrowRightLeft, ArrowLeft, Download, History, 
   RefreshCcw, XCircle, Database, Truck, Apple, BarChart3, 
   MapPin, Briefcase, Home, ClipboardList, 
-  ThermometerSnowflake, Tractor, Tag, Megaphone, User
+  ThermometerSnowflake, Tractor, Tag, Megaphone, User,
+  ServerCog
 } from "lucide-react";
 
 function getBasePath(user) {
@@ -31,9 +32,11 @@ export default function Sidebar({ user, onLogout }) {
 
   const [currentView, setCurrentView] = useState("main");
 
+  // YANGLIK: inventory (Haladelnik) uchun ham sub-menyu tekshiruvi qo'shildi
   useEffect(() => {
     if (location.pathname.includes("/receive")) setCurrentView("receive");
     else if (location.pathname.includes("/baskets")) setCurrentView("baskets");
+    else if (location.pathname.includes("/inventory")) setCurrentView("inventory");
     else setCurrentView("main");
   }, [location.pathname]);
 
@@ -57,19 +60,18 @@ export default function Sidebar({ user, onLogout }) {
       { id: "dashboard", label: "Bosh sahifa", icon: Home, to: basePath },
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
       { id: "receive", label: "Qabullar", icon: ClipboardList, hasSubMenu: true },
-      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, to: `${basePath}/inventory` },
+      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, hasSubMenu: true }, // YANGLIK
       { id: "farmers", label: "Fermerlar", icon: Tractor, to: `${basePath}/farmers` },
       { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },
       { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 
       { id: "profile", label: "Profil", icon: User, to: `${basePath}/profile` },
     ];
   } else if (isBroker) {
-    // 🚀 BROKER UCHUN YANGILANGAN TARTIB VA IKONKALAR
     mainItems = [
       { id: "dashboard", label: "Bosh sahifa", icon: Home, to: basePath },
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
       { id: "receive", label: "Qabullar", icon: ClipboardList, hasSubMenu: true },
-      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, to: `${basePath}/inventory` },
+      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, hasSubMenu: true }, // YANGLIK
       { id: "farmers", label: "Fermerlar", icon: Tractor, to: `${basePath}/farmers` },
       { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
       { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },
@@ -80,7 +82,7 @@ export default function Sidebar({ user, onLogout }) {
   } else if (isFarmer) {
     mainItems = [
       { id: "dashboard", label: "Bosh sahifa", icon: Home, to: basePath },
-      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, to: `${basePath}/inventory` },
+      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, hasSubMenu: true }, // YANGLIK
       { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 
       { id: "profile", label: "Profil", icon: User, to: `${basePath}/profile` },
     ];
@@ -107,6 +109,16 @@ export default function Sidebar({ user, onLogout }) {
         { id: "transaction", label: "Savatlar Aylanmasi", icon: RefreshCcw, to: `${basePath}/baskets/transaction` }, 
         { id: "history", label: "Umumiy Tarix", icon: History, to: `${basePath}/baskets/history` },
       ]
+    },
+    // YANGLIK: Haladelnik uchun Sub-menyu qismi
+    inventory: {
+      title: "Haladelnik",
+      icon: ThermometerSnowflake,
+      items: [
+        { id: "stocks", label: "Xolodilnikdagi Yuklar", icon: Package, to: `${basePath}/inventory/stocks` },
+        { id: "manage", label: "Xolodilnik Boshqaruvi", icon: ServerCog, to: `${basePath}/inventory/manage` },
+        { id: "history", label: "Kirim-Chiqim Tarixi", icon: History, to: `${basePath}/inventory/history` },
+      ]
     }
   };
 
@@ -129,7 +141,6 @@ export default function Sidebar({ user, onLogout }) {
           <span className="font-extrabold text-[#0B1A42] tracking-wide text-[20px] leading-none mb-0.5">
             Hosilim
           </span>
-          {/* 🚀 O'ZGARTIRILDI: Barcha rollar uchun bir xil AGRO PLATFORMA */}
           <span className="text-[10px] font-black text-green-500 tracking-widest uppercase mt-0.5">
             AGRO PLATFORMA
           </span>
@@ -139,7 +150,6 @@ export default function Sidebar({ user, onLogout }) {
       {/* 2. Dinamik Navigation Area */}
       <div className="flex-1 relative overflow-hidden">
         <AnimatePresence initial={false} custom={direction} mode="wait">
-          {/* ASOSIY MENYU */}
           {currentView === "main" && (
             <motion.nav
               key="main"
@@ -191,7 +201,6 @@ export default function Sidebar({ user, onLogout }) {
             </motion.nav>
           )}
 
-          {/* IKKILAMCHI MENYU */}
           {currentView !== "main" && (
             <motion.nav
               key={currentView}

@@ -1,25 +1,6 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
-
-// 🟢 YANGILIK: Kerakli yangi ikonkalar (Download, BarChart3, XCircle, RefreshCcw, History) qo'shildi
-import {
-  Home,
-  ShoppingBasket,
-  Users,
-  Package,
-  DollarSign,
-  Settings,
-  List,
-  PackagePlus,
-  ArrowRightLeft,
-  Briefcase,
-  Download,
-  BarChart3,
-  XCircle,
-  RefreshCcw,
-  History,
-  Database
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react"; // Mobil menyu ikonkasi uchun kerak
 
 import { useAuth } from "../../../hooks/useAuth";
 import Sidebar from "./components/Sidebar";
@@ -39,125 +20,21 @@ import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
 import FarmerBalancesPage from "../../brokerAndAccountant/FarmerBalancesPage";
 import ReportPage from "../../brokerAndAccountant/ReportPage";
 import MyStocksPage from "../../brokerAndAccountant/MyStocksPage";
-
-const BASE_PATH = "/dashboard/broker";
+import FridgeInventoryPage from "../../brokerAndAccountant/FridgeInventoryPage"; 
+import FridgesPage from "../../brokerAndAccountant/FridgesPage";
 
 const BrokerLayout = () => {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
 
-  const [activeSection, setActiveSection] = useState("dashboard");
-  const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
-  const [activeSubSection, setActiveSubSection] = useState("all");
+  // Faqat mobil menyu oynasini ochib-yopish uchun state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // 🟢 Sahifa o'zgarganda Sidebar'dagi faol (Active) joyni topish
   useEffect(() => {
-    const path = location.pathname;
-
-    if (path === BASE_PATH || path === `${BASE_PATH}/`) {
-      setActiveSection("dashboard");
-      return;
-    }
-
-    if (path.includes("/receive/")) {
-      setActiveSection("receive");
-      setIsSubmenuOpen(true);
-      if (path.endsWith("/new")) setActiveSubSection("new");
-      else if (path.endsWith("/daily-report")) setActiveSubSection("daily-report");
-      else if (path.endsWith("/cancelled")) setActiveSubSection("cancelled");
-      else setActiveSubSection("all");
-      return;
-    }
-
-    if (path.includes("/baskets/")) {
-      setActiveSection("baskets");
-      setIsSubmenuOpen(true);
-      if (path.endsWith("/catalog")) setActiveSubSection("catalog");
-      else if (path.endsWith("/distribution")) setActiveSubSection("distribution");
-      else if (path.endsWith("/balances")) setActiveSubSection("balances");
-      else if (path.endsWith("/transaction")) setActiveSubSection("transaction");
-      else setActiveSubSection("history");
-      return;
-    }
-
-    if (path.endsWith("/accountants")) setActiveSection("accountants");
-    else if (path.endsWith("/farmers")) setActiveSection("farmers");
-    else if (path.endsWith("/inventory")) setActiveSection("inventory");
-    else if (path.endsWith("/pricing")) setActiveSection("pricing");
-    else if (path.endsWith("/profile")) setActiveSection("profile");
+    // Marshrut (URL) o'zgarganda mobil menyuni avtomatik yopish
+    setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
-  const handleSectionClick = (sectionId) => {
-    setActiveSection(sectionId);
-
-    if (sectionId === "dashboard") {
-      navigate(BASE_PATH);
-    } else if (sectionId === "receive") {
-      setIsSubmenuOpen(true);
-      navigate(`${BASE_PATH}/receive/all`);
-    } else if (sectionId === "baskets") {
-      setIsSubmenuOpen(true);
-      navigate(`${BASE_PATH}/baskets/distribution`); // Savatlarga bosganda to'g'ridan-to'g'ri Qarzlar oynasini ochish ham yaxshi UX
-    } else {
-      navigate(`${BASE_PATH}/${sectionId}`);
-    }
-    
-    if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
-  };
-
-  const handleSubSectionClick = (subSectionId) => {
-    setActiveSubSection(subSectionId);
-    navigate(`${BASE_PATH}/${activeSection}/${subSectionId}`);
-    
-    if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
-  };
-
-  // 🟢 ASOSIY MENYU
-  const sections = useMemo(
-    () => [
-      { id: "dashboard", name: "Bosh Sahifa", icon: Home },
-      { id: "report", name: "Hisobotlar", icon: BarChart3 },
-      { id: "receive", name: "Hosil Qabuli", icon: Download },
-      { id: "baskets", name: "Savatlar Aylanmasi", icon: ShoppingBasket },
-      { id: "accountants", name: "Xisobchilar", icon: Users },
-      { id: "farmers", name: "Fermerlar", icon: Users },
-      { id: "inventory", name: "Omborxona", icon: Package },
-      { id: "pricing", name: "Narx Belgilash", icon: DollarSign },
-      { id: "profile", name: "Profil", icon: Settings },
-    ],
-    []
-  );
-
-  // 🟢 HOSIL QABULI (SUBMENU)
-  const receiveSubmenu = useMemo(
-    () => [
-      { id: "new", name: "Yangi Qabul", icon: PackagePlus },
-      { id: "all", name: "Kirimlar Tarixi", icon: List },
-      { id: "warehouse", name: "Obmorxona", icon: Database },
-      { id: "cancelled", name: "Bekor Qilinganlar", icon: XCircle },
-    ],
-    []
-  );
-
-  // 🟢 SAVATLAR AYLANMASI (SUBMENU)
-  const basketsSubmenu = useMemo(
-    () => [
-      { id: "catalog", name: "Ombor (Savat turlari)", icon: Package },
-      { id: "distribution", name: "Savat Tarqatish", icon: ArrowRightLeft },
-      { id: "balances", name: "Fermerlar Qarzi", icon: Briefcase },
-      { id: "transaction", name: "Savatlar aylanmasi", icon: RefreshCcw },
-      { id: "history", name: "Umumiy Tarix", icon: History },
-    ],
-    []
-  );
-
-  // Hali yozilmagan sahifalar uchun vaqtinchalik oyna
   const ComingSoon = ({ title }) => (
     <div className="p-4 lg:p-8 bg-white rounded-lg lg:rounded-xl border border-gray-200 shadow-sm m-4 lg:m-0">
       <h2 className="text-lg lg:text-xl font-bold text-[#0B1A42]">{title}</h2>
@@ -166,11 +43,25 @@ const BrokerLayout = () => {
   );
 
   return (
-    <div className="h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col overflow-hidden">
+    <div className="h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col lg:block overflow-hidden relative">
       
-      {/* Mobil uchun Header */}
-      
+      {/* MOBIL UCHUN HEADER (Tushib qolgan ekan, qo'shildi) */}
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30">
+        <div>
+          <h1 className="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+            Hosilim Tizimi
+          </h1>
+          <p className="text-sm text-gray-600 capitalize">{String(user?.role || "").replace('_', ' ')}</p>
+        </div>
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
 
+      {/* Mobil menyu ochilganda orqa foni qoraytirish */}
       {isMobileMenuOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
@@ -178,49 +69,25 @@ const BrokerLayout = () => {
         />
       )}
 
-      <div className="flex flex-1 relative overflow-hidden">
+      <div className="flex flex-1 relative h-full overflow-hidden">
         
         {/* Desktop Sidebar */}
-        <div className="hidden lg:block w-[260px] shrink-0 h-full shadow-sm z-10 relative">
-          <Sidebar
-            user={user}
-            sections={sections}
-            activeSection={activeSection}
-            setActiveSection={handleSectionClick}
-            onLogout={logout}
-            isSubmenuOpen={isSubmenuOpen}
-            setIsSubmenuOpen={setIsSubmenuOpen}
-            activeSubSection={activeSubSection}
-            setActiveSubSection={handleSubSectionClick}
-            receiveSubmenu={receiveSubmenu}
-            basketsSubmenu={basketsSubmenu}
-          />
+        <div className="hidden lg:block w-[270px] shrink-0 h-full shadow-sm z-10 relative">
+          <Sidebar user={user} onLogout={logout} />
         </div>
 
         {/* Mobile Sidebar */}
         <div
-          className={`lg:hidden fixed inset-y-0 left-0 z-50 w-[260px] transform transition-transform duration-300 ease-in-out shadow-2xl ${
+          className={`lg:hidden fixed inset-y-0 left-0 z-50 w-[270px] bg-white transform transition-transform duration-300 ease-in-out shadow-2xl ${
             isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <Sidebar
-            user={user}
-            sections={sections}
-            activeSection={activeSection}
-            setActiveSection={handleSectionClick}
-            onLogout={logout}
-            isSubmenuOpen={isSubmenuOpen}
-            setIsSubmenuOpen={setIsSubmenuOpen}
-            activeSubSection={activeSubSection}
-            setActiveSubSection={handleSubSectionClick}
-            receiveSubmenu={receiveSubmenu}
-            basketsSubmenu={basketsSubmenu}
-          />
+          <Sidebar user={user} onLogout={logout} />
         </div>
 
-        {/* ASOSIY QISM */}
+        {/* ASOSIY QISM (O'ng tomon) */}
         <div className="flex-1 flex flex-col h-full bg-zinc-50 relative overflow-hidden">
-          <main className="flex-1 overflow-y-auto bg-gray-50/50 p-2 sm:p-4 lg:p-6">
+          <main className="flex-1 overflow-y-auto bg-gray-50/50 lg">
             <Routes>
               <Route index element={<BrokerDashboard />} />
 
@@ -240,14 +107,20 @@ const BrokerLayout = () => {
               <Route path="baskets/transaction" element={<TransactionBasketsPage />} />
               <Route path="baskets/history" element={<BasketHistoryPage />} />
 
+              {/* HALADELNIK YO'LLARI */}
+              <Route path="inventory" element={<Navigate to="stocks" replace />} />
+              <Route path="inventory/stocks" element={<FridgeInventoryPage />} />
+              <Route path="inventory/manage" element={<FridgesPage />} />
+              <Route path="inventory/history" element={<ComingSoon title="Kirim-Chiqim Tarixi" />} />
+
               {/* BOSHQA YO'LLAR */}
               <Route path="accountants" element={<AccountantsPage />} />
               <Route path="farmers" element={<FarmerPage />} />
-              <Route path="inventory" element={<ComingSoon title="Omborxona Zaxirasi" />} />
               <Route path="pricing" element={<PricingPage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="profile" element={<ComingSoon title="Profil Sozlamalari" />} />
 
+              {/* Topilmagan sahifalar uchun */}
               <Route path="*" element={<Navigate to="." replace />} />
             </Routes>
           </main>
