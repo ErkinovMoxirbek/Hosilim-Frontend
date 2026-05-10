@@ -558,7 +558,7 @@ export default function ReceiveCropPage() {
                       <div>
                         <div className="flex items-center justify-between mb-2">
                           <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wide">
-                            Nechta savat keldi?
+                            Kelgan savat soni
                           </label>
                           {maxAllowedBaskets > 0 && (
                             <span className="text-[10px] font-extrabold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md">
@@ -679,7 +679,7 @@ export default function ReceiveCropPage() {
                           <div className="grid grid-cols-2 gap-5">
                             <div>
                               <label className="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wide">
-                                Namuna savatlar soni
+                                Savatlar soni
                               </label>
                               <input
                                 type="number"
@@ -692,7 +692,7 @@ export default function ReceiveCropPage() {
                             </div>
                             <div>
                               <label className="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wide">
-                                Ularning brutto vazni
+                                Mahsulot vazni
                               </label>
                               <div className="relative">
                                 <input
@@ -710,7 +710,7 @@ export default function ReceiveCropPage() {
 
                           {receipt?.grossWeight > 0 && (
                             <div className="flex justify-between items-center pt-4 border-t border-orange-100">
-                              <span className="text-sm font-bold text-gray-500">Hisoblab topilgan jami brutto:</span>
+                              <span className="text-sm font-bold text-gray-500">Hisoblab topilgan jami vazni:</span>
                               <span className="text-2xl font-black text-orange-600 bg-orange-50 px-3 py-1 rounded-lg">{receipt.grossWeight} kg</span>
                             </div>
                           )}
@@ -814,7 +814,7 @@ export default function ReceiveCropPage() {
             {activeMode === MODE.CROP && (
               receipt ? (
                 <div className="space-y-4 text-sm font-medium">
-                  <ReceiptRow label="Jami brutto" value={`${receipt.grossWeight} kg`} />
+                  <ReceiptRow label="Jami vazn" value={`${receipt.grossWeight} kg`} />
                   <ReceiptRow label={`Tara (${receipt.basketCount || 0} ta savat)`} value={`− ${receipt.taraWeight} kg`} valueClass="text-red-400" />
                   <div className="pt-4 border-t border-white/10 flex justify-between items-center">
                     <span className="font-extrabold text-gray-400 uppercase tracking-widest text-xs">Sof vazn</span>

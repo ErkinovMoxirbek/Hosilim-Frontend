@@ -17,7 +17,8 @@ import {
   BarChart3,
   XCircle,
   RefreshCcw,
-  History
+  History,
+  Database
 } from "lucide-react";
 
 import { useAuth } from "../../../hooks/useAuth";
@@ -36,8 +37,8 @@ import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";
 import FarmerPage from "../../brokerAndAccountant/FarmerPage";
 import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
 import FarmerBalancesPage from "../../brokerAndAccountant/FarmerBalancesPage";
-import DailyReportPage from "../../brokerAndAccountant/DailyReportPage";
 import ReportPage from "../../brokerAndAccountant/ReportPage";
+import MyStocksPage from "../../brokerAndAccountant/MyStocksPage";
 
 const BASE_PATH = "/dashboard/broker";
 
@@ -138,7 +139,7 @@ const BrokerLayout = () => {
     () => [
       { id: "new", name: "Yangi Qabul", icon: PackagePlus },
       { id: "all", name: "Kirimlar Tarixi", icon: List },
-      { id: "daily-report", name: "Kunlik Hisobot", icon: BarChart3 },
+      { id: "warehouse", name: "Obmorxona", icon: Database },
       { id: "cancelled", name: "Bekor Qilinganlar", icon: XCircle },
     ],
     []
@@ -228,7 +229,7 @@ const BrokerLayout = () => {
               <Route path="receive" element={<Navigate to="all" replace />} />
               <Route path="receive/new" element={<ReceiveCropPage />} />
               <Route path="receive/all" element={<ReceiveHistoryPage />} />
-              <Route path="receive/daily-report" element={<DailyReportPage />} />
+              <Route path="receive/warehouse" element={<MyStocksPage />} />
               <Route path="receive/cancelled" element={<CancelledSalePage />} />
 
               {/* SAVATLAR YO'LLARI */}

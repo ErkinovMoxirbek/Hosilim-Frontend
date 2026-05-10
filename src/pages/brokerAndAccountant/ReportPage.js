@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Calendar, Search, ChevronDown, ChevronUp, 
-  UserCircle, Scale, Banknote, Box, Loader2, FileText, Clock, Filter
+  Scale, Banknote, Box, Loader2, FileText, Clock, Filter, UserCircle
 } from 'lucide-react';
 import reportService from '../../services/cropService';
 
@@ -36,7 +36,6 @@ export default function ReportPage() {
       }
     };
 
-    // Qidiruvda yozishni to'xtatgandan keyin 500ms o'tib jo'natish (Debounce)
     const timer = setTimeout(() => {
       fetchGroupedData();
     }, 500);
@@ -44,7 +43,7 @@ export default function ReportPage() {
     return () => clearTimeout(timer);
   }, [startDate, endDate, search]);
 
-  // ─── Accordion (Ichki ma'lumotni) ochish/yopish ─────────────────────────
+  // ─── Accordion ochish/yopish ─────────────────────────
   const toggleRow = async (farmerId) => {
     if (expandedId === farmerId) {
       setExpandedId(null);
@@ -55,7 +54,6 @@ export default function ReportPage() {
     setExpandedId(farmerId);
     setIsDetailsLoading(true);
     try {
-      // Bitta date o'rniga startDate va endDate yuboriladi
       const res = await reportService.getReportsDetails(farmerId, startDate, endDate);
       setDetails(res);
     } catch (error) {
@@ -66,18 +64,16 @@ export default function ReportPage() {
     }
   };
 
-  // ─── Yordamchi UI: Sana va Vaqtni formatlash ────────────────────────────
   const formatDateTime = (isoString) => {
     if (!isoString) return '';
     const d = new Date(isoString);
-    // Oraliq hisobotlar uchun ham sana, ham soat ko'rinishi kerak (12.05.2024, 14:35)
     return d.toLocaleString('uz-UZ', { 
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit' 
     });
   };
 
-  // ─── Svodka (Umumiy hisob-kitoblar) ─────────────────────────────────────
+  // ─── Svodka hisob-kitoblari ─────────────────────────────────────
   const totalSummary = groupedData.reduce((acc, curr) => ({
     weight: acc.weight + (curr.totalNetWeight || 0),
     amount: acc.amount + (curr.totalAmount || 0),
@@ -89,10 +85,8 @@ export default function ReportPage() {
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto pb-16 space-y-6 bg-gray-50/50 min-h-screen">
       
-      {/* ─── Sarlavha va Filtrlar (Modern UI) ─── */}
+      {/* ─── Sarlavha va Filtrlar ─── */}
       <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col xl:flex-row gap-5 xl:justify-between xl:items-center">
-        
-        {/* Dinamik Sarlavha */}
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-[#0B1A42] flex items-center gap-2">
             <FileText className="text-blue-500" size={28} />
@@ -103,10 +97,7 @@ export default function ReportPage() {
           </p>
         </div>
 
-        {/* Filtrlar bloki */}
         <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
-          
-          {/* Sana Tanlagich (Date Range) */}
           <div className="flex items-center bg-gray-50 border border-gray-300 rounded-xl p-1 w-full sm:w-auto focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <div className="flex items-center pl-3 text-gray-400">
               <Calendar size={18} />
@@ -121,13 +112,12 @@ export default function ReportPage() {
             <input 
               type="date"
               value={endDate}
-              min={startDate} // Boshlanish sanasidan oldinga o'tib ketmasligi uchun
+              min={startDate}
               onChange={(e) => { setEndDate(e.target.value); setExpandedId(null); }}
               className="bg-transparent border-none outline-none font-bold text-gray-700 text-sm px-3 py-2 w-full cursor-pointer"
             />
           </div>
 
-          {/* Qidiruv */}
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
@@ -141,148 +131,171 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* ─── Asosiy Dashboard (Kichik svodka) ─── */}
+      {/* ─── Asosiy Dashboard ─── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <SummaryCard icon={Scale} title="Jami Sof Vazn" value={`${totalSummary.weight.toFixed(1)} kg`} color="text-emerald-600" bg="bg-emerald-50" border="border-emerald-100" />
         <SummaryCard icon={Banknote} title="Jami Summa" value={`${totalSummary.amount.toLocaleString()} UZS`} color="text-blue-600" bg="bg-blue-50" border="border-blue-100" />
         <SummaryCard icon={Box} title="Qabul qilingan Savatlar" value={`${totalSummary.baskets} ta`} color="text-orange-600" bg="bg-orange-50" border="border-orange-100" />
       </div>
 
-      {/* ─── Jadval Qismi ─── */}
+      {/* ─── Jadval Qismi (Yangilangan Dizayn) ─── */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        
-        {/* Sarlavha qatori (Desktop uchun) */}
-        <div className="hidden md:flex items-center justify-between p-4 bg-gray-50/80 border-b border-gray-200 text-xs font-extrabold text-gray-400 uppercase tracking-wider">
-          <div className="flex-1 ml-14">Fermer ma'lumotlari</div>
-          <div className="w-32 text-right">Jami Vazn</div>
-          <div className="w-40 text-right">Jami Summa</div>
-          <div className="w-12"></div>
-        </div>
-
-        {isLoading ? (
-          <div className="py-24 flex flex-col items-center justify-center text-gray-400 gap-4">
-            <Loader2 className="animate-spin text-blue-500" size={36} />
-            <span className="font-medium text-sm tracking-wide">Ma'lumotlar yuklanmoqda...</span>
-          </div>
-        ) : groupedData.length === 0 ? (
-          <div className="py-24 flex flex-col items-center justify-center text-gray-400 gap-3">
-            <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-2">
-              <Filter size={28} className="text-gray-300" />
-            </div>
-            <span className="font-bold text-gray-500 text-lg">Ma'lumot topilmadi</span>
-            <span className="text-sm font-medium text-gray-400">Boshqa sanani tanlab ko'ring yoki qidiruvni o'zgartiring.</span>
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {groupedData.map((farmer) => (
-              <div key={farmer.farmerId} className="flex flex-col group">
-                
-                {/* Asosiy Qator (Guruhlangan) */}
-                <div 
-                  onClick={() => toggleRow(farmer.farmerId)}
-                  className={`flex flex-col md:flex-row md:items-center justify-between p-4 sm:px-6 cursor-pointer hover:bg-blue-50/40 transition-colors ${expandedId === farmer.farmerId ? 'bg-blue-50/40' : ''}`}
-                >
-                  <div className="flex items-center gap-4 mb-3 md:mb-0 flex-1">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${expandedId === farmer.farmerId ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400 group-hover:text-gray-600'}`}>
-                      <UserCircle size={24} />
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[900px]">
+            <thead>
+              <tr className="bg-gray-50/80 border-b border-gray-200 text-gray-500 text-[11px] font-bold uppercase tracking-wider">
+                <th className="p-4 pl-6 w-10"></th>
+                <th className="p-4">Fermer</th>
+                <th className="p-4">Jami Netto Vazn</th>
+                <th className="p-4">Jami Summa</th>
+                <th className="p-4 text-center">Ishlatilgan Savatlar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan="5" className="p-16 text-center text-gray-400">
+                    <Loader2 className="animate-spin mx-auto mb-3 text-blue-500" size={36} />
+                    <p className="font-medium text-sm">Ma'lumotlar yuklanmoqda...</p>
+                  </td>
+                </tr>
+              ) : groupedData.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="p-16 text-center text-gray-400">
+                    <div className="flex flex-col items-center">
+                      <Filter size={48} className="mb-3 text-gray-300" />
+                      <p className="font-medium text-sm">Hech qanday ma'lumot topilmadi.</p>
                     </div>
-                    <div>
-                      <h3 className="font-extrabold text-gray-800 text-sm sm:text-base">{farmer.farmerFullName}</h3>
-                      <p className="text-xs font-medium text-gray-500">{farmer.farmerPhone}</p>
-                    </div>
-                  </div>
+                  </td>
+                </tr>
+              ) : (
+                groupedData.map((farmer) => {
+                  const isOpen = expandedId === farmer.farmerId;
 
-                  <div className="flex items-center gap-4 sm:gap-6 justify-between md:justify-end ml-14 md:ml-0">
-                    <div className="md:w-32 text-left md:text-right">
-                      <p className="text-[10px] uppercase font-bold text-gray-400 md:hidden">Jami Vazn</p>
-                      <p className="font-black text-emerald-600 text-sm sm:text-base">{farmer.totalNetWeight?.toFixed(1)} kg</p>
-                    </div>
-                    <div className="md:w-40 text-left md:text-right">
-                      <p className="text-[10px] uppercase font-bold text-gray-400 md:hidden">Jami Summa</p>
-                      <p className="font-black text-blue-600 text-sm sm:text-base">{farmer.totalAmount?.toLocaleString()} UZS</p>
-                    </div>
-                    <div className="w-8 flex justify-end text-gray-400">
-                      {expandedId === farmer.farmerId ? <ChevronUp size={20} className="text-blue-500" /> : <ChevronDown size={20} />}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Ichki Qator (Accordion/Details) */}
-                {expandedId === farmer.farmerId && (
-                  <div className="bg-gray-50/80 p-4 sm:px-6 border-t border-gray-100 shadow-inner">
-                    {isDetailsLoading ? (
-                      <div className="flex justify-center py-6"><Loader2 className="animate-spin text-blue-400" size={24} /></div>
-                    ) : details.length === 0 ? (
-                      <p className="text-center text-gray-400 text-sm font-medium py-4">Batafsil ma'lumot topilmadi.</p>
-                    ) : (
-                      <div className="space-y-3 md:pl-14">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4 border-b border-gray-200 pb-2">
-                          Batafsil kvitansiyalar tarixi
-                        </h4>
-                        {details.map((detail) => (
-                          <div key={detail.id} className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] hover:border-blue-200 transition-colors">
-                            
-                            {/* Vaqt va ID */}
-                            <div className="flex items-center gap-3 w-full xl:w-48">
-                              <div className="bg-gray-50 p-2.5 rounded-xl text-gray-400">
-                                <Clock size={18} />
-                              </div>
-                              <div>
-                                <p className="font-bold text-gray-800 text-sm">{formatDateTime(detail.createdAt)}</p>
-                                <p className="text-xs text-gray-400 font-medium tracking-wide">ID: #{detail.id}</p>
-                              </div>
-                            </div>
-
-                            {/* Ko'rsatkichlar */}
-                            <div className="flex flex-wrap gap-x-6 gap-y-3 flex-1 px-2 xl:px-4 w-full justify-between xl:justify-start">
-                              <div>
-                                <span className="block text-[10px] font-extrabold text-gray-400 uppercase tracking-wide">Meva turi</span>
-                                <span className="text-sm font-bold text-gray-700">{detail.fruitName}</span>
-                              </div>
-                              <div>
-                                <span className="block text-[10px] font-extrabold text-gray-400 uppercase tracking-wide">Narxi</span>
-                                <span className="text-sm font-bold text-gray-700">{detail.unitPrice?.toLocaleString()}</span>
-                              </div>
-                              <div>
-                                <span className="block text-[10px] font-extrabold text-gray-400 uppercase tracking-wide">Savat</span>
-                                <span className="text-sm font-bold text-gray-700">{detail.basketName} <span className="text-gray-400 font-medium">x{detail.basketCount}</span></span>
-                              </div>
-                              <div className="xl:ml-auto pr-4 border-r border-gray-100 hidden xl:block">
-                                <span className="block text-[10px] font-extrabold text-gray-400 uppercase tracking-wide text-right">Netto Vazn</span>
-                                <span className="text-sm font-black text-emerald-600">{detail.netWeight} kg</span>
-                              </div>
-                            </div>
-
-                            {/* Mobile uchun Netto */}
-                            <div className="flex justify-between w-full xl:hidden pt-2 border-t border-gray-100">
-                               <span className="text-xs font-extrabold text-gray-400 uppercase mt-1">Netto Vazn:</span>
-                               <span className="text-sm font-black text-emerald-600">{detail.netWeight} kg</span>
-                            </div>
-
-                            {/* Summa qutisi */}
-                            <div className="bg-blue-50/50 px-4 py-2.5 rounded-xl border border-blue-100 min-w-[150px] text-right w-full xl:w-auto mt-2 xl:mt-0 flex justify-between xl:block items-center">
-                              <span className="block text-[10px] font-extrabold text-blue-400/80 uppercase tracking-wider xl:mb-0.5">Kvitansiya summasi</span>
-                              <span className="text-base font-black text-blue-600 leading-none">{detail.totalAmount?.toLocaleString()} UZS</span>
-                            </div>
-
+                  return (
+                    <React.Fragment key={farmer.farmerId}>
+                      <tr
+                        onClick={() => toggleRow(farmer.farmerId)}
+                        className={`border-b cursor-pointer transition-colors ${isOpen ? 'bg-blue-50/40 border-blue-100' : 'border-gray-100 hover:bg-gray-50'}`}
+                      >
+                        <td className="p-4 pl-6">
+                          <button className={`p-1.5 rounded-md transition-colors ${isOpen ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
+                            {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          </button>
+                        </td>
+                        <td className="p-4">
+                          <div className="font-bold text-[#0B1A42] text-[15px]">{farmer.farmerFullName}</div>
+                          <div className="text-xs text-gray-500 mt-0.5">{farmer.farmerPhone}</div>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <Scale size={16} className="text-emerald-600" />
+                            <span className="text-lg font-black text-emerald-600">
+                              {farmer.totalNetWeight?.toFixed(1)} <span className="text-xs text-gray-400 font-bold">kg</span>
+                            </span>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
+                          <div className="text-[10px] font-bold text-gray-400 uppercase mt-0.5">Topshiriqlar mavjud</div>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-1.5">
+                            <div className="p-1 bg-blue-50 text-blue-600 rounded">
+                              <Banknote size={14} />
+                            </div>
+                            <span className="font-black text-[#0B1A42] text-[16px]">
+                              {farmer.totalAmount?.toLocaleString()} <span className="text-sm">UZS</span>
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-center">
+                          <div className="inline-flex flex-col items-center">
+                            <span className="text-[12px] font-extrabold bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md">
+                              {farmer.totalBaskets?.toLocaleString()} ta
+                            </span>
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">Savat</span>
+                          </div>
+                        </td>
+                      </tr>
 
-              </div>
-            ))}
-          </div>
-        )}
+                      {isOpen && (
+                        <tr className="bg-gray-50/50 border-b border-gray-200">
+                          <td colSpan="5" className="p-0">
+                            <div className="p-4 pl-16 pr-6 py-5">
+                              <div className="bg-white border border-blue-100 rounded-xl overflow-hidden shadow-sm">
+                                {isDetailsLoading ? (
+                                  <div className="p-8 text-center text-gray-400">
+                                    <Loader2 className="animate-spin mx-auto mb-2 text-blue-500" size={24} />
+                                    <p className="text-xs font-medium">Tranzaksiyalar yuklanmoqda...</p>
+                                  </div>
+                                ) : (
+                                  <table className="w-full text-left border-collapse">
+                                    <thead>
+                                      <tr className="bg-blue-50/50 text-blue-800 text-[10px] font-bold uppercase tracking-wider border-b border-blue-100">
+                                        <th className="p-3 pl-4">Sana</th>
+                                        <th className="p-3">Meva Turi</th>
+                                        <th className="p-3">Sof vazn</th>
+                                        <th className="p-3">Summa</th>
+                                        <th className="p-3">Savat Turi</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {details.length === 0 ? (
+                                        <tr>
+                                          <td colSpan="5" className="p-6 text-center text-xs text-gray-400">Ma'lumot topilmadi</td>
+                                        </tr>
+                                      ) : (
+                                        details.map((item, idx) => (
+                                          <tr key={item.id || idx} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                                            <td className="p-3 pl-4 text-xs text-gray-500 font-medium">{formatDateTime(item.createdAt)}</td>
+                                            <td className="p-3">
+                                              <div className="flex items-center gap-2">
+                                                <FileText size={14} className="text-orange-500" />
+                                                <div>
+                                                  <div className="font-semibold text-gray-800 text-xs">{item.fruitName}</div>
+                                                  <div className="text-[10px] font-bold text-gray-400 mt-0.5">
+                                                    {item.unitPrice?.toLocaleString()} so'm/kg
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </td>
+                                            <td className="p-3">
+                                              <span className="font-bold text-emerald-600 text-sm">{item.netWeight} kg</span>
+                                            </td>
+                                            <td className="p-3 font-bold text-[#0B1A42] text-sm">
+                                              {item.totalAmount?.toLocaleString()} <span className="text-[10px] text-gray-400">UZS</span>
+                                            </td>
+                                            <td className="p-3">
+                                              {item.basketCount > 0 ? (
+                                                <div className="flex items-center gap-1.5 text-xs">
+                                                  <span className="font-bold text-gray-600">{item.basketCount}x</span>
+                                                  <span className="text-gray-400 truncate max-w-[120px]">{item.basketName}</span>
+                                                </div>
+                                              ) : (
+                                                <span className="text-gray-300">-</span>
+                                              )}
+                                            </td>
+                                          </tr>
+                                        ))
+                                      )}
+                                    </tbody>
+                                  </table>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-
     </div>
   );
 }
 
-// ─── Kichik komponent: Tepadagi Svodka kartochkasi ───────────────────────
 function SummaryCard({ icon: Icon, title, value, color, bg, border }) {
   return (
     <div className={`p-5 rounded-2xl border ${bg} ${border} flex items-center gap-4 transition-transform hover:-translate-y-0.5 duration-200`}>

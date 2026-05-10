@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  ShoppingCart, Users, Package, DollarSign, Plus, Check, X, ChevronRight, TrendingUp 
+  ShoppingCart, Users, Package, DollarSign, Plus, Check, X, ChevronRight, TrendingUp, Scale 
 } from 'lucide-react';
 import API_BASE_URL from "../../config";
 
@@ -9,7 +9,8 @@ export default function BrokerDashboard() {
     pendingOrders: 0,
     activeFarmers: 0,
     totalInventory: 0,
-    dailyIncome: 0
+    dailyIncome: 0,
+    dailyAcceptedWeight: 0 
   });
   const [orders, setOrders] = useState([]);
   const [prices, setPrices] = useState([]);
@@ -64,6 +65,7 @@ export default function BrokerDashboard() {
       
       if (response.ok) {
         setOrders(orders.filter(order => order.id !== orderId));
+        fetchBrokerData(); 
       }
     } catch (error) {
       console.error('Accept order error:', error);
@@ -97,29 +99,30 @@ export default function BrokerDashboard() {
 
   return (
     <div className="p-6 lg:p-10 max-w-7xl mx-auto space-y-8 bg-[#F8FAFC] min-h-screen">
-      {/* Sarlavha - Joyida qoldi */}
+      {/* Sarlavha */}
       <div>
         <h1 className="text-3xl font-black text-slate-900 tracking-tight">Bosh sahifa</h1>
         <p className="text-slate-500 mt-1 font-medium text-sm">Tizimning umumiy xulosasi va tezkor amallar</p>
       </div>
 
-      {/* Statistika Kartalari - Tiniq chegaralar va qat'iy soya */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Statistika Kartalari */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {[
-          { label: 'Kutayotgan', val: stats.pendingOrders, unit: 'ta', icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Faol Fermerlar', val: stats.activeFarmers, unit: 'nafar', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Tarqatilgan savatlar', val: stats.pendingOrders, unit: 'ta', icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Fermerlar', val: stats.activeFarmers, unit: 'nafar', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Mahsulot qiymati', val: stats.dailyIncome?.toLocaleString(), unit: "so'm", icon: DollarSign, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'Kunlik Qabul', val: stats.dailyAcceptedWeight || 0, unit: 'kg', icon: Scale, color: 'text-rose-600', bg: 'bg-rose-50' },
           { label: 'Haladelnik', val: stats.totalInventory, unit: 'kg', icon: Package, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Kunlik Daromad', val: stats.dailyIncome?.toLocaleString(), unit: "so'm", icon: DollarSign, color: 'text-purple-600', bg: 'bg-purple-50' },
         ].map((item, idx) => (
-          <div key={idx} className="bg-white rounded-xl p-5 border border-slate-200 shadow-[0_2px_4px_rgba(0,0,0,0.05)] hover:shadow-md transition-all duration-200">
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-lg ${item.bg} ${item.color} flex items-center justify-center border border-current/10`}>
-                <item.icon size={24} strokeWidth={2} />
+          <div key={idx} className="bg-white rounded-xl p-4 border border-slate-200 shadow-[0_2px_4px_rgba(0,0,0,0.05)] hover:shadow-md transition-all duration-200">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-lg ${item.bg} ${item.color} flex items-center justify-center border border-current/10 shrink-0`}>
+                <item.icon size={20} strokeWidth={2.5} />
               </div>
-              <div>
-                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">{item.label}</p>
-                <p className="text-2xl font-black text-slate-900 leading-none">
-                  {item.val} <span className="text-xs font-bold text-slate-400 uppercase">{item.unit}</span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 truncate">{item.label}</p>
+                <p className="text-xl font-black text-slate-900 leading-none truncate">
+                  {item.val} <span className="text-[10px] font-bold text-slate-400 uppercase">{item.unit}</span>
                 </p>
               </div>
             </div>
@@ -130,7 +133,7 @@ export default function BrokerDashboard() {
       {/* Asosiy Qism (Ikki ustun) */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         
-        {/* Chap ustun: Buyurtmalar - Soya va Border tiniqlashtirildi */}
+        {/* Chap ustun: Buyurtmalar */}
         <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
           <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white">
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -196,9 +199,6 @@ export default function BrokerDashboard() {
         <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
           <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white">
             <h3 className="text-base font-bold text-slate-900 uppercase tracking-tight">Hozirgi Narxlar</h3>
-            <button className="bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 px-3 py-1.5 rounded-lg flex items-center text-[11px] font-bold transition-all border border-blue-100">
-              <Plus size={14} className="mr-1" /> NARX
-            </button>
           </div>
           
           <div className="p-2 flex-1">
