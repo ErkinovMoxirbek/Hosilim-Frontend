@@ -1,8 +1,6 @@
-// src/services/adminUsersService.js
-import api from "../api/Axios";  // api.js fayli turgan manzilni to'g'rilab yozing (masalan: "./api" yoki "../services/api")
+import api from "../api/Axios";  
 
-// UI (Frontend) qismida ushbu xatolik klassi ishlatilgan bo'lishi mumkin, 
-// shuning uchun uni saqlab qolamiz.
+
 export class ApiError extends Error {
   constructor(message, status, payload) {
     super(message);

@@ -8,7 +8,7 @@ import {
   RefreshCcw, XCircle, Database, Truck, Apple, BarChart3, 
   MapPin, Briefcase, Home, ClipboardList, 
   ThermometerSnowflake, Tractor, Tag, Megaphone, User,
-  ServerCog
+  ServerCog, Wallet, Banknote, FileText // YANGLIK: Moliya ikonkalari qo'shildi
 } from "lucide-react";
 
 function getBasePath(user) {
@@ -32,11 +32,12 @@ export default function Sidebar({ user, onLogout }) {
 
   const [currentView, setCurrentView] = useState("main");
 
-  // YANGLIK: inventory (Haladelnik) uchun ham sub-menyu tekshiruvi qo'shildi
+  // YANGLIK: finance uchun tekshiruv qo'shildi
   useEffect(() => {
     if (location.pathname.includes("/receive")) setCurrentView("receive");
     else if (location.pathname.includes("/baskets")) setCurrentView("baskets");
     else if (location.pathname.includes("/inventory")) setCurrentView("inventory");
+    else if (location.pathname.includes("/finance")) setCurrentView("finance");
     else setCurrentView("main");
   }, [location.pathname]);
 
@@ -60,7 +61,8 @@ export default function Sidebar({ user, onLogout }) {
       { id: "dashboard", label: "Bosh sahifa", icon: Home, to: basePath },
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
       { id: "receive", label: "Qabullar", icon: ClipboardList, hasSubMenu: true },
-      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, hasSubMenu: true }, // YANGLIK
+      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, hasSubMenu: true },
+      { id: "finance", label: "Moliya va Kassa", icon: Wallet, hasSubMenu: true }, // YANGLIK
       { id: "farmers", label: "Fermerlar", icon: Tractor, to: `${basePath}/farmers` },
       { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },
       { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 
@@ -71,7 +73,8 @@ export default function Sidebar({ user, onLogout }) {
       { id: "dashboard", label: "Bosh sahifa", icon: Home, to: basePath },
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
       { id: "receive", label: "Qabullar", icon: ClipboardList, hasSubMenu: true },
-      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, hasSubMenu: true }, // YANGLIK
+      { id: "inventory", label: "Muzlatgich", icon: ThermometerSnowflake, hasSubMenu: true },
+      { id: "finance", label: "Moliya va Kassa", icon: Wallet, hasSubMenu: true }, // YANGLIK
       { id: "farmers", label: "Fermerlar", icon: Tractor, to: `${basePath}/farmers` },
       { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
       { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },
@@ -82,7 +85,7 @@ export default function Sidebar({ user, onLogout }) {
   } else if (isFarmer) {
     mainItems = [
       { id: "dashboard", label: "Bosh sahifa", icon: Home, to: basePath },
-      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, hasSubMenu: true }, // YANGLIK
+      { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, hasSubMenu: true },
       { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 
       { id: "profile", label: "Profil", icon: User, to: `${basePath}/profile` },
     ];
@@ -110,7 +113,6 @@ export default function Sidebar({ user, onLogout }) {
         { id: "history", label: "Umumiy Tarix", icon: History, to: `${basePath}/baskets/history` },
       ]
     },
-    // YANGLIK: Haladelnik uchun Sub-menyu qismi
     inventory: {
       title: "Haladelnik",
       icon: ThermometerSnowflake,
@@ -118,6 +120,15 @@ export default function Sidebar({ user, onLogout }) {
         { id: "stocks", label: "Xolodilnikdagi Yuklar", icon: Package, to: `${basePath}/inventory/stocks` },
         { id: "manage", label: "Xolodilnik Boshqaruvi", icon: ServerCog, to: `${basePath}/inventory/manage` },
         { id: "history", label: "Kirim-Chiqim Tarixi", icon: History, to: `${basePath}/inventory/history` },
+      ]
+    },
+    // YANGLIK: Moliya va Kassa menyusi
+    finance: {
+      title: "Moliya va Kassa",
+      icon: Wallet,
+      items: [
+        { id: "debts", label: "Qarzdorlik va To'lov", icon: Banknote, to: `${basePath}/finance/debts` },
+        { id: "history", label: "To'lovlar Tarixi", icon: FileText, to: `${basePath}/finance/history` },
       ]
     }
   };

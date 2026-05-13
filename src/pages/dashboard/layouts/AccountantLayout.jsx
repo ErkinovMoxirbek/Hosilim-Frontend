@@ -18,9 +18,11 @@ import BasketHistoryPage from "../../brokerAndAccountant/BasketHistoryPage";
 import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
 import FarmerBalancesPage from "../../brokerAndAccountant/FarmerBalancesPage";
 
-// YANGLIK: Hisobchiga ham Haladelnik yo'llarini ulaymiz
+// Haladelnik va Moliya
 import FridgeInventoryPage from "../../brokerAndAccountant/FridgeInventoryPage"; 
 import FridgesPage from "../../brokerAndAccountant/FridgeInventoryPage";
+import PaymentsPage from "../../brokerAndAccountant/payment/PaymentsPage"; 
+import PaymentHistoryPage from "../../brokerAndAccountant/payment/PaymentHistoryPage";
 
 const AccountantLayout = () => {
   const { user, logout } = useAuth();
@@ -29,7 +31,6 @@ const AccountantLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Mobil menyudan o'tilgandan keyin menyuni yopish uchun
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
@@ -101,11 +102,16 @@ const AccountantLayout = () => {
               <Route path="baskets/transaction-baskets" element={<TransactionBasketsPage />} />
               <Route path="baskets/history" element={<BasketHistoryPage />} />
 
-              {/* YANGLIK: HALADELNIK YO'LLARI */}
+              {/* HALADELNIK */}
               <Route path="inventory" element={<Navigate to="stocks" replace />} />
               <Route path="inventory/stocks" element={<FridgeInventoryPage />} />
               <Route path="inventory/manage" element={<FridgesPage />} />
               <Route path="inventory/history" element={<ComingSoon title="Kirim-Chiqim Tarixi" />} />
+
+              {/* YANGLIK: MOLIYA VA KASSA */}
+              <Route path="finance" element={<Navigate to="debts" replace />} />
+              <Route path="finance/debts" element={<PaymentsPage />} />
+              <Route path="finance/history" element={<PaymentHistoryPage />} />
 
               {/* BOSHQA */}
               <Route path="farmers" element={<FarmerPage />} />

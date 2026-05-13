@@ -1,12 +1,12 @@
 import axios from "axios";
-import API_BASE_URL from "../config";
+import API_BASE_URL from "../config"; // Masalan: http://localhost:8080/api/v1
 import { clearAuth, getAccessToken, getRefreshToken, setTokens } from "../utils/tokenManager";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// Request oldidan token qo‘yish
+// Request Interceptor
 api.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token) {
@@ -15,57 +15,62 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Javobni tutib olish
+// Response Interceptor
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // 401 xatolik va bu so'rov birinchi marta fail bo'lishi (_retry yo'q)
-    if (error.response && error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true; // Cheksiz siklga tushmasligi uchun
+    // 401 xato va bu refresh so'rovi emasligiga ishonch hosil qilish
+    if (
+      error.response?.status === 401 && 
+      !originalRequest._retry && 
+      !originalRequest.url.includes("/auth/refresh")
+    ) {
+      originalRequest._retry = true;
 
       const refreshToken = getRefreshToken();
-
-      // 1-QADAM: Refresh token bormi o'zi?
       if (!refreshToken) {
-        console.warn("Refresh token topilmadi, loginga yo'naltirilmoqda.");
-        window.location.href = "/";
+        handleLogout();
         return Promise.reject(error);
       }
 
       try {
-        console.log("Refresh token orqali yangi token so'ralmoqda...");
-        
+        // MUHIM: 'api' emas, original 'axios' dan foydalanamiz
+        // Chunki 'api' yana interceptorga tushib ketishi mumkin
         const res = await axios.post(`${API_BASE_URL}/auth/refresh`, {
           refreshToken: refreshToken,
         });
 
-        console.log("Yangi tokenlar muvaffaqiyatli olindi!");
-        setTokens(res.data.accessToken, res.data.refreshToken);
+        // Backend javobini tekshirish (ApiResponse formatiga moslab)
+        const data = res.data.data || res.data;
+        const newAccessToken = data.accessToken;
+        const newRefreshToken = data.refreshToken;
 
-        // eski requestni qayta yuborish
-        originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
-        return api(originalRequest);
-        
-      } catch (err) {
-        // 2-QADAM: Asl xatolikni ko'rish
-        console.error("Refresh token so'rovida xatolik yuz berdi:", err);
-        
-        // Agar backend xatoni batafsil qaytargan bo'lsa
-        if (err.response) {
-            console.error("Backend javobi:", err.response.data);
+        if (newAccessToken) {
+          setTokens(newAccessToken, newRefreshToken);
+          
+          // Yangi tokenni headerga qo'shish
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          
+          // Asl so'rovni qaytadan yuborish
+          return axios(originalRequest);
         }
-
-        // Refresh ham eskirgan yoki xato ishlagan → login sahifaga qaytarish
-        clearAuth();
-        window.location.href = "/";
-        
-        return Promise.reject(err);
+      } catch (refreshError) {
+        console.error("Refresh token muddati o'tgan:", refreshError);
+        handleLogout();
+        return Promise.reject(refreshError);
       }
     }
     return Promise.reject(error);
   }
 );
+
+function handleLogout() {
+  clearAuth();
+  if (window.location.pathname !== "/") {
+    window.location.href = "/";
+  }
+}
 
 export default api;
