@@ -1,13 +1,12 @@
-import axios from "axios";
-import API_BASE_URL from "../config";
+import api from "../api/Axios"; 
 import { getAccessToken } from "../utils/tokenManager";
 
-const API_URL = `${API_BASE_URL}/prices`;
+const API_URL = '/prices';
 
 const priceService = {
   getActivePrices: async () => {
     try {
-      const response = await axios.get(`${API_URL}/active`, {
+      const response = await api.get(`${API_URL}/active`, {
         headers: { Authorization: `Bearer ${getAccessToken()}` }
       });
       return response.data?.data || [];
@@ -17,7 +16,7 @@ const priceService = {
   },
   setPrice: async (payload) => {
     try {
-      const response = await axios.post(API_URL, payload, {
+      const response = await api.post(API_URL, payload, {
         headers: { Authorization: `Bearer ${getAccessToken()}` }
       });
       return response.data;

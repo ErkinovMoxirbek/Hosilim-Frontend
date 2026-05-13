@@ -1,18 +1,15 @@
 // src/services/authService.js
-import axios from "axios";
-import API_BASE_URL from "../config";
+import api from "../api/Axios"; 
 import { setTokens, getAccessToken, setUser, clearAuth } from "../utils/tokenManager";
 
 // Alohida, toza axios instanceni ishlatamiz (api.js ga aralashmasligi uchun)
-const authAxios = axios.create({
-  baseURL: API_BASE_URL,
-});
+const BASE_URL = "/auth"; 
 
 export const authService = {
   // 1. SMS yuborish
   async sendOtp(phoneE164, signal) {
     try {
-      const res = await authAxios.post("/auth/login", { phone: phoneE164 }, { signal });
+      const res = await api.post(`${BASE_URL}/login`, { phone: phoneE164 }, { signal });
       return res.data?.data || res.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || "SMS kod yuborishda xatolik yuz berdi");
@@ -22,7 +19,7 @@ export const authService = {
   // 2. Kodni tasdiqlash
   async verifyOtp(phoneE164, otp, signal) {
     try {
-      const res = await authAxios.post("/auth/verify", { phone: phoneE164, otp }, { signal });
+      const res = await api.post(`${BASE_URL}/verify`, { phone: phoneE164, otp }, { signal });
       const data = res.data;
 
       const accessToken = (data?.data?.accessToken || data?.accessToken || "").trim();
@@ -42,7 +39,7 @@ export const authService = {
   // 3. 🔥 YANGI QO'SHILDI: api.js qidiradigan refresh funksiyasi
   async refresh(refreshToken) {
     try {
-      const res = await authAxios.post("/auth/refresh", { refreshToken });
+      const res = await api.post(`${BASE_URL}/refresh`, { refreshToken });
       // Backend { accessToken, refreshToken } qaytarishi kutilmoqda
       return res.data?.data || res.data; 
     } catch (error) {
@@ -57,7 +54,7 @@ export const authService = {
 
     try {
       // Bu yerda tokenni qolda qo'shamiz, chunki api.js dan foydalanmayapmiz
-      const res = await authAxios.get("/users/me", {
+      const res = await api.get("/users/me", {
         headers: { Authorization: `Bearer ${token}` },
         signal,
       });

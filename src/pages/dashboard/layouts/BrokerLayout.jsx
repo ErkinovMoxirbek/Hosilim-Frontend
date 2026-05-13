@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react"; // Mobil menyu ikonkasi uchun kerak
+import { Menu, X } from "lucide-react";
 
 import { useAuth } from "../../../hooks/useAuth";
 import Sidebar from "./components/Sidebar";
@@ -20,18 +20,19 @@ import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
 import FarmerBalancesPage from "../../brokerAndAccountant/FarmerBalancesPage";
 import ReportPage from "../../brokerAndAccountant/ReportPage";
 import MyStocksPage from "../../brokerAndAccountant/MyStocksPage";
+
+// Haladelnik va Moliya
 import FridgeInventoryPage from "../../brokerAndAccountant/FridgeInventoryPage"; 
 import FridgesPage from "../../brokerAndAccountant/FridgesPage";
+import PaymentsPage from "../../brokerAndAccountant/PaymentsPage"; // YANGLIK
 
 const BrokerLayout = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
 
-  // Faqat mobil menyu oynasini ochib-yopish uchun state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Marshrut (URL) o'zgarganda mobil menyuni avtomatik yopish
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
@@ -45,7 +46,7 @@ const BrokerLayout = () => {
   return (
     <div className="h-screen w-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col lg:block overflow-hidden relative">
       
-      {/* MOBIL UCHUN HEADER (Tushib qolgan ekan, qo'shildi) */}
+      {/* MOBIL UCHUN HEADER */}
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30">
         <div>
           <h1 className="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
@@ -112,6 +113,11 @@ const BrokerLayout = () => {
               <Route path="inventory/stocks" element={<FridgeInventoryPage />} />
               <Route path="inventory/manage" element={<FridgesPage />} />
               <Route path="inventory/history" element={<ComingSoon title="Kirim-Chiqim Tarixi" />} />
+
+              {/* YANGLIK: MOLIYA VA KASSA YO'LLARI */}
+              <Route path="finance" element={<Navigate to="debts" replace />} />
+              <Route path="finance/debts" element={<PaymentsPage />} />
+              <Route path="finance/history" element={<ComingSoon title="To'lovlar Tarixi va Excel Akt Sverki" />} />
 
               {/* BOSHQA YO'LLAR */}
               <Route path="accountants" element={<AccountantsPage />} />

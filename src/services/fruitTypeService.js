@@ -1,8 +1,7 @@
-import axios from "axios";
-import API_BASE_URL from "../config";
+import api from "../api/Axios"; 
 import { getAccessToken } from "../utils/tokenManager";
 
-const API_URL = `${API_BASE_URL}/fruit-types`;
+const API_URL = '/fruit-types';
 
 const getAuthHeaders = () => ({
   headers: {
@@ -15,7 +14,7 @@ const fruitTypeService = {
   // 1. Yangi: Backenddan Enum (Navlar) ro'yxatini tortib olish
   getQualities: async () => {
     try {
-      const response = await axios.get(`${API_URL}/qualities`, getAuthHeaders());
+      const response = await api.get(`${API_URL}/qualities`, getAuthHeaders());
       return response.data?.data || [];
     } catch (error) {
       console.error("Navlarni yuklashda xatolik:", error);
@@ -26,7 +25,7 @@ const fruitTypeService = {
   // 2. Barcha mevalarni ko'rish
   getAllFruitTypes: async () => {
     try {
-      const response = await axios.get(`${API_URL}/active`, getAuthHeaders());
+      const response = await api.get(`${API_URL}/active`, getAuthHeaders());
       return response.data?.data || [];
     } catch (error) {
       console.error("Meva turlarini yuklashda xatolik:", error);
@@ -37,7 +36,7 @@ const fruitTypeService = {
   // 3. Yangi meva qo'shish
   createFruitType: async (payload) => {
     try {
-      const response = await axios.post(API_URL, payload, getAuthHeaders());
+      const response = await api.post(API_URL, payload, getAuthHeaders());
       return response.data;
     } catch (error) {
       console.error("Meva qo'shishda xatolik:", error);
@@ -48,7 +47,7 @@ const fruitTypeService = {
   // 4. Holatini o'zgartirish (Faol / Nofaol)
   toggleStatus: async (id) => {
     try {
-      const response = await axios.put(`${API_URL}/${id}/toggle`, {}, getAuthHeaders());
+      const response = await api.put(`${API_URL}/${id}/toggle`, {}, getAuthHeaders());
       return response.data;
     } catch (error) {
       console.error("Holatni o'zgartirishda xatolik:", error);
@@ -58,7 +57,7 @@ const fruitTypeService = {
   // Admin barcha mevalarni 
   getAllFruitTypesForAdmin: async () => {
     try {
-      const response = await axios.get(API_URL, getAuthHeaders());
+      const response = await api.get(API_URL, getAuthHeaders());
       return response.data?.data || [];
     } catch (error) {
       console.error("Meva turlarini yuklashda xatolik:", error);
