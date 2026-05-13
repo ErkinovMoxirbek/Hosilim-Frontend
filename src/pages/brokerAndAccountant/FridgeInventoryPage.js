@@ -310,13 +310,13 @@ export default function FridgeInventoryPage() {
                 {/* Og'irlik */}
                 <div className="grid grid-cols-2 border-y border-gray-100 divide-x divide-gray-100 bg-gray-50/50">
                   <div className="p-3 flex flex-col">
-                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Netto</span>
+                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Sof vazn</span>
                     <span className="font-bold text-gray-900 text-base" style={{ fontFamily: '"DM Mono", monospace' }}>
                       {stock.netWeight} <span className="text-xs font-normal text-gray-400">kg</span>
                     </span>
                   </div>
                   <div className="p-3 flex flex-col">
-                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Brutto</span>
+                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Umumiy vazn</span>
                     <span className="font-bold text-gray-900 text-base" style={{ fontFamily: '"DM Mono", monospace' }}>
                       {stock.grossWeight} <span className="text-xs font-normal text-gray-400">kg</span>
                     </span>

@@ -77,7 +77,7 @@ export default function BasketCatalogPage() {
       ...basket, 
       dimensions: basket.dimensions || '', 
       description: basket.description || '',
-      isActive: basket.isActive // 🚀 YANGI: Bazadan o'qiydi
+      isActive: basket.isActive
     });
     setIsModalOpen(true);
   };
@@ -136,7 +136,7 @@ export default function BasketCatalogPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Savatlar Ombori</h1>
-              <p className="text-sm text-slate-500 font-medium mt-1">Tara va yashiklarning joriy qoldig'i hamda nazorati</p>
+              <p className="text-sm text-slate-500 font-medium mt-1">Yashiklarning joriy qoldig'i hamda nazorati</p>
             </div>
           </div>
           
@@ -162,12 +162,12 @@ export default function BasketCatalogPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse whitespace-nowrap">
                 <thead>
-                  <tr className="bg-slate-50/50 border-b border-slate-200 text-[11px] uppercase tracking-widest text-slate-500 font-bold">
-                    <th className="px-6 py-4">Nomi & Materiali</th>
+                  <tr className="bg-slate-50/50 border-b border-slate-200 text-xs tracking-wider text-slate-500 font-bold">
+                    <th className="px-6 py-4">Nomi & materiali</th>
                     <th className="px-6 py-4 text-center">Soni</th>
-                    <th className="px-6 py-4 text-right">Dona Narxi</th>
-                    <th className="px-6 py-4 text-right">Jami Summa</th>
-                    <th className="px-6 py-4 text-center">Tara Og'irligi</th>
+                    <th className="px-6 py-4 text-right">Dona narxi</th>
+                    <th className="px-6 py-4 text-right">Jami summa</th>
+                    <th className="px-6 py-4 text-center">Tara og'irligi</th>
                     <th className="px-6 py-4 text-center">Holati</th>
                     <th className="px-6 py-4 text-right">Amallar</th>
                   </tr>
