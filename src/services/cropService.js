@@ -1,6 +1,6 @@
-import api from "../api/Axios"; 
+import api from "../api/Axios";
 
-const BASE_URL = "/crops"; 
+const BASE_URL = "/crops";
 
 const cropService = {
   // 1. Jonli hisob-kitob qilish
@@ -64,6 +64,7 @@ const cropService = {
     }
   },
 
+  // cropService.js — getReportsDetails
   getReportsDetails: async (farmerId, startDate, endDate) => {
     try {
       const params = {};
@@ -71,7 +72,8 @@ const cropService = {
       if (endDate) params.endDate = endDate;
 
       const response = await api.get(`${BASE_URL}/report/${farmerId}/details`, { params });
-      return response.data?.data || [];
+      // Backend: { data: { transactions: [], periodEarned, periodPaid, periodDifference } }
+      return response.data?.data || { transactions: [], periodEarned: 0, periodPaid: 0, periodDifference: 0 };
     } catch (error) {
       console.error("Batafsil tarixni yuklashda xato:", error);
       throw error;

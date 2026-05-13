@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import {
   Calendar, Search, ChevronDown, ChevronUp,
   Scale, Banknote, Box, Loader2, FileText, Filter,
-  CheckCircle2, Clock, AlertCircle
+  CheckCircle2, Clock, AlertCircle, TrendingUp
 } from 'lucide-react';
 import reportService from '../../services/cropService';
 
 const getTodayString = () => new Date().toISOString().split('T')[0];
-
 const fmt = (n) => (n ?? 0).toLocaleString('uz-UZ');
 const fmtKg = (n) => ((n ?? 0)).toFixed(1);
 
@@ -19,7 +18,6 @@ const formatDateTime = (isoString) => {
   });
 };
 
-// periodBalance = totalAmount - totalPaid (DTO'dan yoki hisoblash orqali)
 const getPeriodBalance = (farmer) => {
   if (farmer.periodBalance != null) return farmer.periodBalance;
   return (farmer.totalAmount ?? 0) - (farmer.totalPaid ?? 0);
@@ -35,6 +33,8 @@ export default function ReportPage() {
 
   const [expandedId, setExpandedId] = useState(null);
   const [details, setDetails] = useState([]);
+  // periodEarned, periodPaid, periodDifference — accordion ichida ko'rsatish uchun
+  const [detailsSummary, setDetailsSummary] = useState(null);
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
 
   useEffect(() => {
@@ -57,16 +57,24 @@ export default function ReportPage() {
     if (expandedId === farmerId) {
       setExpandedId(null);
       setDetails([]);
+      setDetailsSummary(null);
       return;
     }
     setExpandedId(farmerId);
     setIsDetailsLoading(true);
     try {
+      // Service: { transactions: [], periodEarned, periodPaid, periodDifference }
       const res = await reportService.getReportsDetails(farmerId, startDate, endDate);
-      setDetails(res);
+      setDetails(Array.isArray(res.transactions) ? res.transactions : []);
+      setDetailsSummary({
+        periodEarned: res.periodEarned ?? 0,
+        periodPaid: res.periodPaid ?? 0,
+        periodDifference: res.periodDifference ?? 0,
+      });
     } catch (error) {
       console.error("Batafsil ma'lumotni yuklashda xato:", error);
       setDetails([]);
+      setDetailsSummary(null);
     } finally {
       setIsDetailsLoading(false);
     }
@@ -93,9 +101,7 @@ export default function ReportPage() {
             {isDaily ? 'Kunlik Hisobot' : 'Oraliq Hisobot'}
           </h1>
           <p className="text-sm text-gray-500 mt-1 font-medium ml-9">
-            {isDaily
-              ? 'Bugungi qabul qilingan hosil statistikasi'
-              : "Tanlangan davr oralig'idagi statistika"}
+            {isDaily ? 'Bugungi qabul qilingan hosil statistikasi' : "Tanlangan davr oralig'idagi statistika"}
           </p>
         </div>
 
@@ -104,14 +110,12 @@ export default function ReportPage() {
             <div className="flex items-center pl-3 text-gray-400">
               <Calendar size={17} />
             </div>
-            <input
-              type="date" value={startDate}
+            <input type="date" value={startDate}
               onChange={(e) => { setStartDate(e.target.value); setExpandedId(null); }}
               className="bg-transparent border-none outline-none font-bold text-gray-700 text-sm px-3 py-2 w-full cursor-pointer"
             />
             <span className="text-gray-300 font-bold px-1">-</span>
-            <input
-              type="date" value={endDate} min={startDate}
+            <input type="date" value={endDate} min={startDate}
               onChange={(e) => { setEndDate(e.target.value); setExpandedId(null); }}
               className="bg-transparent border-none outline-none font-bold text-gray-700 text-sm px-3 py-2 w-full cursor-pointer"
             />
@@ -119,8 +123,7 @@ export default function ReportPage() {
 
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={17} />
-            <input
-              type="text" placeholder="Fermerning F.I.O yoki raqami..."
+            <input type="text" placeholder="Fermerning F.I.O yoki raqami..."
               value={search} onChange={(e) => setSearch(e.target.value)}
               className="pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl font-medium text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all w-full"
             />
@@ -128,16 +131,16 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* Summary Cards — 5 ta */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
-        <SummaryCard icon={Scale}      title="Jami Netto Vazn"   value={`${fmtKg(totalSummary.weight)} kg`} color="text-emerald-600" bg="bg-emerald-50"  border="border-emerald-100" />
-        <SummaryCard icon={Box}        title="Savatlar soni"     value={`${totalSummary.baskets} ta`}        color="text-orange-600" bg="bg-orange-50"   border="border-orange-100" />
-        <SummaryCard icon={Banknote}   title="Jami Summa"        value={`${fmt(totalSummary.amount)} UZS`}  color="text-blue-600"   bg="bg-blue-50"     border="border-blue-100" />
-        <SummaryCard icon={CheckCircle2} title="To'langan"       value={`${fmt(totalSummary.paid)} UZS`}    color="text-teal-600"   bg="bg-teal-50"     border="border-teal-100" />
-        <SummaryCard icon={AlertCircle} title="Qarz (Qoldiq)"    value={`${fmt(totalSummary.debt)} UZS`}    color="text-red-500"    bg="bg-red-50"      border="border-red-100" />
+        <SummaryCard icon={Scale}        title="Jami Netto Vazn" value={`${fmtKg(totalSummary.weight)} kg`}   color="text-emerald-600" bg="bg-emerald-50" border="border-emerald-100" />
+        <SummaryCard icon={Box}          title="Savatlar soni"   value={`${totalSummary.baskets} ta`}          color="text-orange-600" bg="bg-orange-50"  border="border-orange-100" />
+        <SummaryCard icon={Banknote}     title="Jami Summa"      value={`${fmt(totalSummary.amount)} UZS`}     color="text-blue-600"   bg="bg-blue-50"    border="border-blue-100" />
+        <SummaryCard icon={CheckCircle2} title="To'langan"       value={`${fmt(totalSummary.paid)} UZS`}       color="text-teal-600"   bg="bg-teal-50"    border="border-teal-100" />
+        <SummaryCard icon={AlertCircle}  title="Qarz (Qoldiq)"   value={`${fmt(totalSummary.debt)} UZS`}       color="text-red-500"    bg="bg-red-50"     border="border-red-100" />
       </div>
 
-      {/* Asosiy Jadval */}
+      {/* Jadval */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1000px]">
@@ -154,21 +157,17 @@ export default function ReportPage() {
             </thead>
             <tbody>
               {isLoading ? (
-                <tr>
-                  <td colSpan="7" className="p-16 text-center text-gray-400">
-                    <Loader2 className="animate-spin mx-auto mb-3 text-blue-500" size={34} />
-                    <p className="font-medium text-sm">Ma'lumotlar yuklanmoqda...</p>
-                  </td>
-                </tr>
+                <tr><td colSpan="7" className="p-16 text-center text-gray-400">
+                  <Loader2 className="animate-spin mx-auto mb-3 text-blue-500" size={34} />
+                  <p className="font-medium text-sm">Ma'lumotlar yuklanmoqda...</p>
+                </td></tr>
               ) : groupedData.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="p-16 text-center text-gray-400">
-                    <div className="flex flex-col items-center">
-                      <Filter size={44} className="mb-3 text-gray-300" />
-                      <p className="font-medium text-sm">Hech qanday ma'lumot topilmadi.</p>
-                    </div>
-                  </td>
-                </tr>
+                <tr><td colSpan="7" className="p-16 text-center text-gray-400">
+                  <div className="flex flex-col items-center">
+                    <Filter size={44} className="mb-3 text-gray-300" />
+                    <p className="font-medium text-sm">Hech qanday ma'lumot topilmadi.</p>
+                  </div>
+                </td></tr>
               ) : (
                 groupedData.map((farmer) => {
                   const isOpen = expandedId === farmer.farmerId;
@@ -179,52 +178,37 @@ export default function ReportPage() {
                     <React.Fragment key={farmer.farmerId}>
                       <tr
                         onClick={() => toggleRow(farmer.farmerId)}
-                        className={`border-b cursor-pointer transition-colors ${
-                          isOpen ? 'bg-blue-50/40 border-blue-100' : 'border-gray-100 hover:bg-gray-50'
-                        }`}
+                        className={`border-b cursor-pointer transition-colors ${isOpen ? 'bg-blue-50/40 border-blue-100' : 'border-gray-100 hover:bg-gray-50'}`}
                       >
                         <td className="p-4 pl-6">
-                          <button
-                            className={`p-1.5 rounded-md transition-colors ${
-                              isOpen ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'
-                            }`}
-                          >
+                          <button className={`p-1.5 rounded-md transition-colors ${isOpen ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
                             {isOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
                           </button>
                         </td>
-
                         <td className="p-4">
                           <div className="font-bold text-[#0B1A42] text-[15px]">{farmer.farmerFullName}</div>
                           <div className="text-xs text-gray-400 mt-0.5">{farmer.farmerPhone}</div>
                         </td>
-
                         <td className="p-4">
                           <span className="text-base font-black text-emerald-600">
-                            {fmtKg(farmer.totalNetWeight)}
-                            <span className="text-xs text-gray-400 font-bold ml-1">kg</span>
+                            {fmtKg(farmer.totalNetWeight)}<span className="text-xs text-gray-400 font-bold ml-1">kg</span>
                           </span>
                         </td>
-
                         <td className="p-4">
                           <span className="text-[12px] font-extrabold bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md">
                             {fmt(farmer.totalBaskets)} ta
                           </span>
                         </td>
-
                         <td className="p-4">
                           <span className="font-black text-[#0B1A42] text-[15px]">
-                            {fmt(farmer.totalAmount)}
-                            <span className="text-[10px] text-gray-400 ml-1">UZS</span>
+                            {fmt(farmer.totalAmount)}<span className="text-[10px] text-gray-400 ml-1">UZS</span>
                           </span>
                         </td>
-
                         <td className="p-4">
                           <span className="font-bold text-teal-600 text-sm">
-                            {fmt(farmer.totalPaid)}
-                            <span className="text-[10px] text-gray-400 ml-1">UZS</span>
+                            {fmt(farmer.totalPaid)}<span className="text-[10px] text-gray-400 ml-1">UZS</span>
                           </span>
                         </td>
-
                         <td className="p-4">
                           {isFullyPaid ? (
                             <span className="inline-flex items-center gap-1 text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full">
@@ -232,18 +216,28 @@ export default function ReportPage() {
                             </span>
                           ) : (
                             <span className="font-bold text-red-500 text-sm">
-                              {fmt(balance)}
-                              <span className="text-[10px] text-gray-400 ml-1">UZS</span>
+                              {fmt(balance)}<span className="text-[10px] text-gray-400 ml-1">UZS</span>
                             </span>
                           )}
                         </td>
                       </tr>
 
-                      {/* Ichki accordion panel */}
+                      {/* Accordion ichki panel */}
                       {isOpen && (
                         <tr className="bg-gray-50/50 border-b border-gray-200">
                           <td colSpan="7" className="p-0">
-                            <div className="p-4 pl-14 pr-6 py-4">
+                            <div className="p-4 pl-14 pr-6 py-4 space-y-3">
+
+                              {/* Period summary mini-cards */}
+                              {detailsSummary && (
+                                <div className="grid grid-cols-3 gap-3">
+                                  <MiniCard label="Davr daromadi"    value={`${fmt(detailsSummary.periodEarned)} UZS`}    color="text-blue-600"   bg="bg-blue-50" />
+                                  <MiniCard label="Davr to'lovi"     value={`${fmt(detailsSummary.periodPaid)} UZS`}      color="text-teal-600"   bg="bg-teal-50" />
+                                  <MiniCard label="Davr farqi (qarz)" value={`${fmt(detailsSummary.periodDifference)} UZS`} color="text-red-500"  bg="bg-red-50" />
+                                </div>
+                              )}
+
+                              {/* Tranzaksiyalar jadvali */}
                               <div className="bg-white border border-blue-100 rounded-xl overflow-hidden shadow-sm">
                                 {isDetailsLoading ? (
                                   <div className="p-8 text-center text-gray-400">
@@ -265,66 +259,45 @@ export default function ReportPage() {
                                     </thead>
                                     <tbody>
                                       {details.length === 0 ? (
-                                        <tr>
-                                          <td colSpan="7" className="p-6 text-center text-xs text-gray-400">
-                                            Ma'lumot topilmadi
-                                          </td>
-                                        </tr>
+                                        <tr><td colSpan="7" className="p-6 text-center text-xs text-gray-400">Ma'lumot topilmadi</td></tr>
                                       ) : (
                                         details.map((item, idx) => (
-                                          <tr
-                                            key={item.id ?? idx}
-                                            className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
-                                          >
+                                          <tr key={item.id ?? idx} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
                                             <td className="p-3 pl-4 text-xs text-gray-500 font-medium whitespace-nowrap">
                                               {formatDateTime(item.createdAt)}
                                             </td>
-
                                             <td className="p-3">
                                               <div className="flex items-center gap-2">
                                                 <FileText size={13} className="text-orange-500 shrink-0" />
                                                 <div>
                                                   <div className="font-semibold text-gray-800 text-xs">{item.fruitName}</div>
-                                                  <div className="text-[10px] text-gray-400 mt-0.5">
-                                                    {fmt(item.unitPrice)} so'm/kg
-                                                  </div>
+                                                  <div className="text-[10px] text-gray-400 mt-0.5">{fmt(item.unitPrice)} so'm/kg</div>
                                                 </div>
                                               </div>
                                             </td>
-
                                             <td className="p-3">
-                                              <span className="font-bold text-emerald-600 text-xs">
-                                                {fmtKg(item.netWeight)} kg
-                                              </span>
+                                              <span className="font-bold text-emerald-600 text-xs">{fmtKg(item.netWeight)} kg</span>
                                             </td>
-
                                             <td className="p-3">
                                               {(item.basketCount ?? 0) > 0 ? (
                                                 <div className="text-xs text-gray-600">
                                                   <span className="font-bold">{item.basketCount}x</span>
-                                                  <span className="text-gray-400 ml-1 truncate max-w-[100px] inline-block align-bottom">
-                                                    {item.basketName}
-                                                  </span>
+                                                  <span className="text-gray-400 ml-1 truncate max-w-[100px] inline-block align-bottom">{item.basketName}</span>
                                                 </div>
                                               ) : (
                                                 <span className="text-gray-300 text-xs">—</span>
                                               )}
                                             </td>
-
                                             <td className="p-3">
                                               <span className="font-bold text-[#0B1A42] text-xs">
-                                                {fmt(item.totalAmount)}
-                                                <span className="text-[9px] text-gray-400 ml-1">UZS</span>
+                                                {fmt(item.totalAmount)}<span className="text-[9px] text-gray-400 ml-1">UZS</span>
                                               </span>
                                             </td>
-
                                             <td className="p-3">
                                               <span className="font-bold text-teal-600 text-xs">
-                                                {fmt(item.paidAmount)}
-                                                <span className="text-[9px] text-gray-400 ml-1">UZS</span>
+                                                {fmt(item.paidAmount)}<span className="text-[9px] text-gray-400 ml-1">UZS</span>
                                               </span>
                                             </td>
-
                                             <td className="p-3">
                                               <PaymentBadge isPaid={item.isPaid} />
                                             </td>
@@ -351,8 +324,6 @@ export default function ReportPage() {
   );
 }
 
-// ─── Kichik komponentlar ──────────────────────────────────────────────────────
-
 function SummaryCard({ icon: Icon, title, value, color, bg, border }) {
   return (
     <div className={`p-4 rounded-2xl border ${bg} ${border} flex items-center gap-3 transition-transform hover:-translate-y-0.5 duration-200`}>
@@ -363,6 +334,15 @@ function SummaryCard({ icon: Icon, title, value, color, bg, border }) {
         <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500/80 mb-0.5 truncate">{title}</h3>
         <p className={`text-base sm:text-lg font-black ${color} truncate`}>{value}</p>
       </div>
+    </div>
+  );
+}
+
+function MiniCard({ label, value, color, bg }) {
+  return (
+    <div className={`${bg} rounded-xl px-4 py-2.5`}>
+      <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">{label}</div>
+      <div className={`text-sm font-black ${color}`}>{value}</div>
     </div>
   );
 }
