@@ -82,12 +82,26 @@ export default function ReceiveHistoryPage() {
     });
   }, []);
 
-  const formatDate = (dateString) => {
+ const formatDate = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString('uz-UZ', {
-      year: 'numeric', month: 'short', day: 'numeric',
-      hour: '2-digit', minute: '2-digit'
+    const d = new Date(dateString);
+
+    // Soat va minutni olish (masalan: 12:58)
+    const time = d.toLocaleTimeString('uz-UZ', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false 
     });
+
+    // Kun, oy va yilni olish (masalan: 09.05.2026)
+    const date = d.toLocaleDateString('uz-UZ', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
+    });
+
+    // Ikkalasini birlashtirish: birinchi vaqt, keyin sana
+    return `${time}, ${date}`;
   };
 
   return (
@@ -222,8 +236,8 @@ export default function ReceiveHistoryPage() {
                                       <tr className="bg-emerald-50/50 text-emerald-800 text-[10px] font-bold uppercase tracking-wider border-b border-emerald-100">
                                         <th className="p-3 pl-4">Sana</th>
                                         <th className="p-3">Meva Turi</th>
-                                        <th className="p-3">Netto (Sof vazn)</th>
-                                        <th className="p-3">Brutto / Tara</th>
+                                        <th className="p-3">Sof vazn</th>
+                                        <th className="p-3">To'liq vazn / Tara</th>
                                         <th className="p-3">Summa</th>
                                         <th className="p-3">Savat Turi</th>
                                       </tr>

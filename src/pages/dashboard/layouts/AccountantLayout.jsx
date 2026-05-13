@@ -21,7 +21,8 @@ import FarmerBalancesPage from "../../brokerAndAccountant/FarmerBalancesPage";
 // Haladelnik va Moliya
 import FridgeInventoryPage from "../../brokerAndAccountant/FridgeInventoryPage"; 
 import FridgesPage from "../../brokerAndAccountant/FridgeInventoryPage";
-import PaymentsPage from "../../brokerAndAccountant/PaymentsPage"; // YANGLIK
+import PaymentsPage from "../../brokerAndAccountant/payment/PaymentsPage"; 
+import PaymentHistoryPage from "../../brokerAndAccountant/payment/PaymentHistoryPage";
 
 const AccountantLayout = () => {
   const { user, logout } = useAuth();
@@ -110,7 +111,7 @@ const AccountantLayout = () => {
               {/* YANGLIK: MOLIYA VA KASSA */}
               <Route path="finance" element={<Navigate to="debts" replace />} />
               <Route path="finance/debts" element={<PaymentsPage />} />
-              <Route path="finance/history" element={<ComingSoon title="To'lovlar Tarixi va Excel Akt Sverki" />} />
+              <Route path="finance/history" element={<PaymentHistoryPage />} />
 
               {/* BOSHQA */}
               <Route path="farmers" element={<FarmerPage />} />
