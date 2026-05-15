@@ -91,6 +91,18 @@ const cropService = {
       console.error("Excel faylni yuklashda xatolik:", error);
       throw error;
     }
+  },
+
+  downloadReceipt: async (transactionId) => {
+    try {
+      const response = await api.get(`${BASE_URL}/${transactionId}/receipt/download`, {
+        responseType: 'blob' 
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Chekni yuklashda xato:", error);
+      throw error;
+    }
   }
 };
 

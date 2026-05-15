@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, ChevronLeft, ChevronRight, Loader2, RefreshCcw, Download, Apple, Scale, DollarSign, List, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Loader2, RefreshCcw, Download, Apple, Scale, DollarSign, List, ChevronDown, ChevronUp, Printer } from 'lucide-react';
 import cropService from '../../services/cropService';
 
 export default function ReceiveHistoryPage() {
@@ -59,7 +59,6 @@ export default function ReceiveHistoryPage() {
       }
 
       // Birinchi marta — detail yuklashni boshlaymiz
-      // State'ni pending holatga o'tkazamiz
       const nextState = {
         ...prev,
         [farmerId]: { isOpen: true, details: null, isLoadingDetails: true }
@@ -82,26 +81,42 @@ export default function ReceiveHistoryPage() {
     });
   }, []);
 
- const formatDate = (dateString) => {
+  const formatDate = (dateString) => {
     if (!dateString) return "-";
     const d = new Date(dateString);
 
-    // Soat va minutni olish (masalan: 12:58)
     const time = d.toLocaleTimeString('uz-UZ', { 
       hour: '2-digit', 
       minute: '2-digit',
       hour12: false 
     });
 
-    // Kun, oy va yilni olish (masalan: 09.05.2026)
     const date = d.toLocaleDateString('uz-UZ', { 
       day: '2-digit', 
       month: '2-digit', 
       year: 'numeric' 
     });
 
-    // Ikkalasini birlashtirish: birinchi vaqt, keyin sana
     return `${time}, ${date}`;
+  };
+
+  // 🟢 CHEK YUKLASH FUNKSIYASI
+  const handleDownloadReceipt = async (transactionId, e) => {
+    e.stopPropagation(); // Hodisa tepaga o'tib ketmasligi uchun
+    try {
+      const blobData = await cropService.downloadReceipt(transactionId);
+      const url = window.URL.createObjectURL(new Blob([blobData], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Kvitansiya_${transactionId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Chek yuklashda xatolik:", error);
+      alert("Chekni yuklab olishda xato yuz berdi. Backend tekshiring.");
+    }
   };
 
   return (
@@ -123,7 +138,7 @@ export default function ReceiveHistoryPage() {
         </button>
       </div>
 
-      {/* Qidiruv — endi backend'ga uzatiladi */}
+      {/* Qidiruv */}
       <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm mb-6">
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -219,7 +234,7 @@ export default function ReceiveHistoryPage() {
                         </td>
                       </tr>
 
-                      {/* Detail qator */}
+                      {/* Detail qator (Accordion) */}
                       {isOpen && (
                         <tr className="bg-gray-50/50 border-b border-gray-200">
                           <td colSpan="5" className="p-0">
@@ -240,12 +255,15 @@ export default function ReceiveHistoryPage() {
                                         <th className="p-3">To'liq vazn / Tara</th>
                                         <th className="p-3">Summa</th>
                                         <th className="p-3">Savat Turi</th>
+                                        {/* 🟢 YANGI USTUN: Chek */}
+                                        <th className="p-3 text-center">Chek</th> 
                                       </tr>
                                     </thead>
                                     <tbody>
+                                      {/* colSpan ni 6 dan 7 ga o'zgartiramiz chunki ustun ko'paydi */}
                                       {(acc.details || []).length === 0 ? (
                                         <tr>
-                                          <td colSpan="6" className="p-6 text-center text-xs text-gray-400">
+                                          <td colSpan="7" className="p-6 text-center text-xs text-gray-400">
                                             Tranzaksiya topilmadi
                                           </td>
                                         </tr>
@@ -283,6 +301,16 @@ export default function ReceiveHistoryPage() {
                                               ) : (
                                                 <span className="text-gray-300">-</span>
                                               )}
+                                            </td>
+                                            {/* 🟢 YANGI TUGMA: PDF Chek */}
+                                            <td className="p-3 text-center">
+                                              <button 
+                                                onClick={(e) => handleDownloadReceipt(item.id, e)}
+                                                title="Chekni yuklab olish"
+                                                className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-lg transition-colors border border-emerald-100"
+                                              >
+                                                <Printer size={16} />
+                                              </button>
                                             </td>
                                           </tr>
                                         ))
