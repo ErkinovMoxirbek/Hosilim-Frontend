@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import {
   Calendar, Search, ChevronDown, ChevronUp,
   Scale, Banknote, Box, Loader2, FileText, Filter,
-  CheckCircle2, Clock, AlertCircle, TrendingUp
+  CheckCircle2, Clock, AlertCircle, Download
 } from 'lucide-react';
-import reportService from '../../services/cropService';
+
+// DIQQAT: Hech qanday axios yo'q, hamma so'rovlar servis orqali qilinadi!
+import cropService from '../../services/cropService';
 
 const getTodayString = () => new Date().toISOString().split('T')[0];
 const fmt = (n) => (n ?? 0).toLocaleString('uz-UZ');
@@ -24,24 +26,30 @@ const getPeriodBalance = (farmer) => {
 };
 
 export default function ReportPage() {
+  // Filtrlash statelari
   const [startDate, setStartDate] = useState(getTodayString());
   const [endDate, setEndDate] = useState(getTodayString());
   const [search, setSearch] = useState('');
 
+  // Asosiy ma'lumotlar statelari
   const [groupedData, setGroupedData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Accordion (Ichki detallar) statelari
   const [expandedId, setExpandedId] = useState(null);
   const [details, setDetails] = useState([]);
-  // periodEarned, periodPaid, periodDifference — accordion ichida ko'rsatish uchun
   const [detailsSummary, setDetailsSummary] = useState(null);
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
 
+  // Excel yuklash statelari
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  // 1. Asosiy jadvalni yuklash
   useEffect(() => {
     const fetchGroupedData = async () => {
       setIsLoading(true);
       try {
-        const res = await reportService.getReportsGrouped(startDate, endDate, search, 0, 50);
+        const res = await cropService.getReportsGrouped(startDate, endDate, search, 0, 50);
         setGroupedData(res.content || []);
       } catch (error) {
         console.error("Ma'lumotlarni yuklashda xato:", error);
@@ -49,10 +57,12 @@ export default function ReportPage() {
         setIsLoading(false);
       }
     };
+    // Qidiruvda API ga ortiqcha yuk tushmasligi uchun 500ms kechikish (Debounce)
     const timer = setTimeout(fetchGroupedData, 500);
     return () => clearTimeout(timer);
   }, [startDate, endDate, search]);
 
+  // 2. Qatorni ochish / yopish va detallarni yuklash
   const toggleRow = async (farmerId) => {
     if (expandedId === farmerId) {
       setExpandedId(null);
@@ -60,11 +70,12 @@ export default function ReportPage() {
       setDetailsSummary(null);
       return;
     }
+    
     setExpandedId(farmerId);
     setIsDetailsLoading(true);
+    
     try {
-      // Service: { transactions: [], periodEarned, periodPaid, periodDifference }
-      const res = await reportService.getReportsDetails(farmerId, startDate, endDate);
+      const res = await cropService.getReportsDetails(farmerId, startDate, endDate);
       setDetails(Array.isArray(res.transactions) ? res.transactions : []);
       setDetailsSummary({
         periodEarned: res.periodEarned ?? 0,
@@ -80,6 +91,38 @@ export default function ReportPage() {
     }
   };
 
+  // 3. 🟢 EXCEL YUKLASH FUNKSIYASI (Toza arxitektura)
+  const downloadExcel = async () => {
+    setIsDownloading(true);
+    try {
+      // API orqali Blob faylni olamiz
+      const blobData = await cropService.downloadExcelReport(startDate, endDate, search);
+
+      // Uni yuklab olish uchun vaqtinchalik havola (URL) yaratamiz
+      const url = window.URL.createObjectURL(new Blob([blobData]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const fileName = startDate === endDate 
+          ? `Kunlik_Hisobot_${startDate}.xlsx` 
+          : `Hisobot_${startDate}_dan_${endDate}.xlsx`;
+          
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      
+      // DOM dan tozalaymiz va xotirani bo'shatamiz
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Excel yuklashda xatolik:", error);
+      alert("Excel yuklashda xatolik yuz berdi. Server aloqasini tekshiring.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  // Umumiy hisob-kitob summary (Kardlar uchun)
   const totalSummary = groupedData.reduce((acc, curr) => ({
     weight: acc.weight + (curr.totalNetWeight ?? 0),
     amount: acc.amount + (curr.totalAmount ?? 0),
@@ -93,7 +136,7 @@ export default function ReportPage() {
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto pb-16 space-y-5 bg-gray-50/50 min-h-screen">
 
-      {/* Sarlavha va Filtrlar */}
+      {/* SARLAVHA VA FILTRLAR */}
       <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col xl:flex-row gap-4 xl:justify-between xl:items-center">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-[#0B1A42] flex items-center gap-2">
@@ -106,6 +149,7 @@ export default function ReportPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
+          {/* Sana tanlash */}
           <div className="flex items-center bg-gray-50 border border-gray-300 rounded-xl p-1 w-full sm:w-auto focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <div className="flex items-center pl-3 text-gray-400">
               <Calendar size={17} />
@@ -121,6 +165,7 @@ export default function ReportPage() {
             />
           </div>
 
+          {/* Qidiruv */}
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={17} />
             <input type="text" placeholder="Fermerning F.I.O yoki raqami..."
@@ -128,19 +173,29 @@ export default function ReportPage() {
               className="pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl font-medium text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all w-full"
             />
           </div>
+
+          {/* Excel Yuklash Tugmasi */}
+          <button
+            onClick={downloadExcel}
+            disabled={isDownloading || groupedData.length === 0}
+            className="flex items-center justify-center gap-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-200 hover:border-emerald-500 px-4 py-2.5 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+          >
+            {isDownloading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+            <span className="hidden sm:inline">Excel</span>
+          </button>
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* SUMMARY KARTALAR */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
         <SummaryCard icon={Scale}        title="Jami Netto Vazn" value={`${fmtKg(totalSummary.weight)} kg`}   color="text-emerald-600" bg="bg-emerald-50" border="border-emerald-100" />
-        <SummaryCard icon={Box}          title="Savatlar soni"   value={`${totalSummary.baskets} ta`}          color="text-orange-600" bg="bg-orange-50"  border="border-orange-100" />
+        <SummaryCard icon={Box}          title="Savatlar soni"   value={`${totalSummary.baskets} ta`}         color="text-orange-600" bg="bg-orange-50"  border="border-orange-100" />
         <SummaryCard icon={Banknote}     title="Jami Summa"      value={`${fmt(totalSummary.amount)} UZS`}     color="text-blue-600"   bg="bg-blue-50"    border="border-blue-100" />
         <SummaryCard icon={CheckCircle2} title="To'langan"       value={`${fmt(totalSummary.paid)} UZS`}       color="text-teal-600"   bg="bg-teal-50"    border="border-teal-100" />
         <SummaryCard icon={AlertCircle}  title="Qarz (Qoldiq)"   value={`${fmt(totalSummary.debt)} UZS`}       color="text-red-500"    bg="bg-red-50"     border="border-red-100" />
       </div>
 
-      {/* Jadval */}
+      {/* ASOSIY JADVAL */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1000px]">
@@ -176,6 +231,7 @@ export default function ReportPage() {
 
                   return (
                     <React.Fragment key={farmer.farmerId}>
+                      {/* GURUH QATORI */}
                       <tr
                         onClick={() => toggleRow(farmer.farmerId)}
                         className={`border-b cursor-pointer transition-colors ${isOpen ? 'bg-blue-50/40 border-blue-100' : 'border-gray-100 hover:bg-gray-50'}`}
@@ -222,13 +278,13 @@ export default function ReportPage() {
                         </td>
                       </tr>
 
-                      {/* Accordion ichki panel */}
+                      {/* ICHKI DETALLAR (ACCORDION) */}
                       {isOpen && (
                         <tr className="bg-gray-50/50 border-b border-gray-200">
                           <td colSpan="7" className="p-0">
                             <div className="p-4 pl-14 pr-6 py-4 space-y-3">
 
-                              {/* Period summary mini-cards */}
+                              {/* Fermerning davr xulosasi (Mini kardlar) */}
                               {detailsSummary && (
                                 <div className="grid grid-cols-3 gap-3">
                                   <MiniCard label="Davr daromadi"    value={`${fmt(detailsSummary.periodEarned)} UZS`}    color="text-blue-600"   bg="bg-blue-50" />
@@ -237,7 +293,7 @@ export default function ReportPage() {
                                 </div>
                               )}
 
-                              {/* Tranzaksiyalar jadvali */}
+                              {/* Tranzaksiyalar tarix jadvali */}
                               <div className="bg-white border border-blue-100 rounded-xl overflow-hidden shadow-sm">
                                 {isDetailsLoading ? (
                                   <div className="p-8 text-center text-gray-400">
@@ -323,6 +379,10 @@ export default function ReportPage() {
     </div>
   );
 }
+
+// ==========================================
+// YORDAMCHI KOMPONENTLAR (UI UI/UX uchun)
+// ==========================================
 
 function SummaryCard({ icon: Icon, title, value, color, bg, border }) {
   return (
