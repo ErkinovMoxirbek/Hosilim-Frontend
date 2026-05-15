@@ -4,8 +4,6 @@ import {
   Scale, Banknote, Box, Loader2, FileText, Filter,
   CheckCircle2, Clock, AlertCircle, Download
 } from 'lucide-react';
-
-// DIQQAT: Hech qanday axios yo'q, hamma so'rovlar servis orqali qilinadi!
 import cropService from '../../services/cropService';
 
 const getTodayString = () => new Date().toISOString().split('T')[0];
@@ -26,25 +24,19 @@ const getPeriodBalance = (farmer) => {
 };
 
 export default function ReportPage() {
-  // Filtrlash statelari
   const [startDate, setStartDate] = useState(getTodayString());
   const [endDate, setEndDate] = useState(getTodayString());
   const [search, setSearch] = useState('');
 
-  // Asosiy ma'lumotlar statelari
   const [groupedData, setGroupedData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Accordion (Ichki detallar) statelari
   const [expandedId, setExpandedId] = useState(null);
   const [details, setDetails] = useState([]);
   const [detailsSummary, setDetailsSummary] = useState(null);
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
-
-  // Excel yuklash statelari
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // 1. Asosiy jadvalni yuklash
   useEffect(() => {
     const fetchGroupedData = async () => {
       setIsLoading(true);
@@ -57,12 +49,10 @@ export default function ReportPage() {
         setIsLoading(false);
       }
     };
-    // Qidiruvda API ga ortiqcha yuk tushmasligi uchun 500ms kechikish (Debounce)
     const timer = setTimeout(fetchGroupedData, 500);
     return () => clearTimeout(timer);
   }, [startDate, endDate, search]);
 
-  // 2. Qatorni ochish / yopish va detallarni yuklash
   const toggleRow = async (farmerId) => {
     if (expandedId === farmerId) {
       setExpandedId(null);
@@ -70,10 +60,8 @@ export default function ReportPage() {
       setDetailsSummary(null);
       return;
     }
-    
     setExpandedId(farmerId);
     setIsDetailsLoading(true);
-    
     try {
       const res = await cropService.getReportsDetails(farmerId, startDate, endDate);
       setDetails(Array.isArray(res.transactions) ? res.transactions : []);
@@ -91,27 +79,19 @@ export default function ReportPage() {
     }
   };
 
-  // 3. 🟢 EXCEL YUKLASH FUNKSIYASI (Toza arxitektura)
   const downloadExcel = async () => {
     setIsDownloading(true);
     try {
-      // API orqali Blob faylni olamiz
       const blobData = await cropService.downloadExcelReport(startDate, endDate, search);
-
-      // Uni yuklab olish uchun vaqtinchalik havola (URL) yaratamiz
       const url = window.URL.createObjectURL(new Blob([blobData]));
       const link = document.createElement('a');
       link.href = url;
-      
       const fileName = startDate === endDate 
           ? `Kunlik_Hisobot_${startDate}.xlsx` 
           : `Hisobot_${startDate}_dan_${endDate}.xlsx`;
-          
       link.setAttribute('download', fileName);
       document.body.appendChild(link);
       link.click();
-      
-      // DOM dan tozalaymiz va xotirani bo'shatamiz
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -122,7 +102,6 @@ export default function ReportPage() {
     }
   };
 
-  // Umumiy hisob-kitob summary (Kardlar uchun)
   const totalSummary = groupedData.reduce((acc, curr) => ({
     weight: acc.weight + (curr.totalNetWeight ?? 0),
     amount: acc.amount + (curr.totalAmount ?? 0),
@@ -136,7 +115,7 @@ export default function ReportPage() {
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto pb-16 space-y-5 bg-gray-50/50 min-h-screen">
 
-      {/* SARLAVHA VA FILTRLAR */}
+      {/* Sarlavha va Filtrlar */}
       <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col xl:flex-row gap-4 xl:justify-between xl:items-center">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-[#0B1A42] flex items-center gap-2">
@@ -149,7 +128,6 @@ export default function ReportPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
-          {/* Sana tanlash */}
           <div className="flex items-center bg-gray-50 border border-gray-300 rounded-xl p-1 w-full sm:w-auto focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <div className="flex items-center pl-3 text-gray-400">
               <Calendar size={17} />
@@ -165,7 +143,6 @@ export default function ReportPage() {
             />
           </div>
 
-          {/* Qidiruv */}
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={17} />
             <input type="text" placeholder="Fermerning F.I.O yoki raqami..."
@@ -186,16 +163,16 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* SUMMARY KARTALAR */}
+      {/* 🟢 SUMMARY CARDS (Eski dizayn, xatosiz sig'adigan qilingan) */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
-        <SummaryCard icon={Scale}        title="Jami Netto Vazn" value={`${fmtKg(totalSummary.weight)} kg`}   color="text-emerald-600" bg="bg-emerald-50" border="border-emerald-100" />
-        <SummaryCard icon={Box}          title="Savatlar soni"   value={`${totalSummary.baskets} ta`}         color="text-orange-600" bg="bg-orange-50"  border="border-orange-100" />
-        <SummaryCard icon={Banknote}     title="Jami Summa"      value={`${fmt(totalSummary.amount)} UZS`}     color="text-blue-600"   bg="bg-blue-50"    border="border-blue-100" />
-        <SummaryCard icon={CheckCircle2} title="To'langan"       value={`${fmt(totalSummary.paid)} UZS`}       color="text-teal-600"   bg="bg-teal-50"    border="border-teal-100" />
-        <SummaryCard icon={AlertCircle}  title="Qarz (Qoldiq)"   value={`${fmt(totalSummary.debt)} UZS`}       color="text-red-500"    bg="bg-red-50"     border="border-red-100" />
+        <SummaryCard icon={Scale}        title="Jami Netto Vazn" value={fmtKg(totalSummary.weight)} suffix="kg"  color="text-emerald-600" bg="bg-emerald-50" border="border-emerald-100" />
+        <SummaryCard icon={Box}          title="Savatlar soni"   value={fmt(totalSummary.baskets)}    suffix="ta"  color="text-orange-600"  bg="bg-orange-50"  border="border-orange-100" />
+        <SummaryCard icon={Banknote}     title="Jami Summa"      value={fmt(totalSummary.amount)}     suffix="UZS" color="text-blue-600"    bg="bg-blue-50"    border="border-blue-100" />
+        <SummaryCard icon={CheckCircle2} title="To'langan"       value={fmt(totalSummary.paid)}       suffix="UZS" color="text-teal-600"    bg="bg-teal-50"    border="border-teal-100" />
+        <SummaryCard icon={AlertCircle}  title="Qarz (Qoldiq)"   value={fmt(totalSummary.debt)}       suffix="UZS" color="text-red-500"     bg="bg-red-50"     border="border-red-100" />
       </div>
 
-      {/* ASOSIY JADVAL */}
+      {/* Jadval */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1000px]">
@@ -231,7 +208,6 @@ export default function ReportPage() {
 
                   return (
                     <React.Fragment key={farmer.farmerId}>
-                      {/* GURUH QATORI */}
                       <tr
                         onClick={() => toggleRow(farmer.farmerId)}
                         className={`border-b cursor-pointer transition-colors ${isOpen ? 'bg-blue-50/40 border-blue-100' : 'border-gray-100 hover:bg-gray-50'}`}
@@ -278,13 +254,13 @@ export default function ReportPage() {
                         </td>
                       </tr>
 
-                      {/* ICHKI DETALLAR (ACCORDION) */}
+                      {/* Accordion ichki panel */}
                       {isOpen && (
                         <tr className="bg-gray-50/50 border-b border-gray-200">
                           <td colSpan="7" className="p-0">
                             <div className="p-4 pl-14 pr-6 py-4 space-y-3">
 
-                              {/* Fermerning davr xulosasi (Mini kardlar) */}
+                              {/* Period summary mini-cards */}
                               {detailsSummary && (
                                 <div className="grid grid-cols-3 gap-3">
                                   <MiniCard label="Davr daromadi"    value={`${fmt(detailsSummary.periodEarned)} UZS`}    color="text-blue-600"   bg="bg-blue-50" />
@@ -293,7 +269,7 @@ export default function ReportPage() {
                                 </div>
                               )}
 
-                              {/* Tranzaksiyalar tarix jadvali */}
+                              {/* Tranzaksiyalar jadvali */}
                               <div className="bg-white border border-blue-100 rounded-xl overflow-hidden shadow-sm">
                                 {isDetailsLoading ? (
                                   <div className="p-8 text-center text-gray-400">
@@ -381,18 +357,22 @@ export default function ReportPage() {
 }
 
 // ==========================================
-// YORDAMCHI KOMPONENTLAR (UI UI/UX uchun)
+// YORDAMCHI KOMPONENTLAR (Eski dizayn aslidagidek qoldirildi, sig'ish to'g'irlandi)
 // ==========================================
 
-function SummaryCard({ icon: Icon, title, value, color, bg, border }) {
+function SummaryCard({ icon: Icon, title, value, suffix, color, bg, border }) {
   return (
     <div className={`p-4 rounded-2xl border ${bg} ${border} flex items-center gap-3 transition-transform hover:-translate-y-0.5 duration-200`}>
       <div className={`p-3 rounded-xl bg-white/80 ${color} shadow-sm shrink-0`}>
         <Icon size={20} strokeWidth={2.5} />
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500/80 mb-0.5 truncate">{title}</h3>
-        <p className={`text-base sm:text-lg font-black ${color} truncate`}>{value}</p>
+        {/* MASHU YERDA RAQAM VA SO'Z AJRATILDI */}
+        <div className="flex items-baseline gap-1 flex-wrap">
+          <span className={`text-[15px] xl:text-[17px] font-black ${color}`}>{value}</span>
+          {suffix && <span className="text-[10px] font-bold text-gray-400">{suffix}</span>}
+        </div>
       </div>
     </div>
   );
