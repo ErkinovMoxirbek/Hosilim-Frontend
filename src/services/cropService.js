@@ -78,6 +78,31 @@ const cropService = {
       console.error("Batafsil tarixni yuklashda xato:", error);
       throw error;
     }
+  },
+
+  downloadExcelReport: async (startDate, endDate, search = '') => {
+    try {
+      const response = await api.get(`${BASE_URL}/export/excel`, {
+        params: { startDate, endDate, search },
+        responseType: 'blob'
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Excel faylni yuklashda xatolik:", error);
+      throw error;
+    }
+  },
+
+  downloadReceipt: async (transactionId) => {
+    try {
+      const response = await api.get(`${BASE_URL}/${transactionId}/receipt/download`, {
+        responseType: 'blob' 
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Chekni yuklashda xato:", error);
+      throw error;
+    }
   }
 };
 

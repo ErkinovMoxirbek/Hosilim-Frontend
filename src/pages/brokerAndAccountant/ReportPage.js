@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import {
   Calendar, Search, ChevronDown, ChevronUp,
   Scale, Banknote, Box, Loader2, FileText, Filter,
-  CheckCircle2, Clock, AlertCircle, TrendingUp
+  CheckCircle2, Clock, AlertCircle, Download
 } from 'lucide-react';
-import reportService from '../../services/cropService';
+import cropService from '../../services/cropService';
 
 const getTodayString = () => new Date().toISOString().split('T')[0];
 const fmt = (n) => (n ?? 0).toLocaleString('uz-UZ');
@@ -33,15 +33,15 @@ export default function ReportPage() {
 
   const [expandedId, setExpandedId] = useState(null);
   const [details, setDetails] = useState([]);
-  // periodEarned, periodPaid, periodDifference — accordion ichida ko'rsatish uchun
   const [detailsSummary, setDetailsSummary] = useState(null);
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     const fetchGroupedData = async () => {
       setIsLoading(true);
       try {
-        const res = await reportService.getReportsGrouped(startDate, endDate, search, 0, 50);
+        const res = await cropService.getReportsGrouped(startDate, endDate, search, 0, 50);
         setGroupedData(res.content || []);
       } catch (error) {
         console.error("Ma'lumotlarni yuklashda xato:", error);
@@ -63,8 +63,7 @@ export default function ReportPage() {
     setExpandedId(farmerId);
     setIsDetailsLoading(true);
     try {
-      // Service: { transactions: [], periodEarned, periodPaid, periodDifference }
-      const res = await reportService.getReportsDetails(farmerId, startDate, endDate);
+      const res = await cropService.getReportsDetails(farmerId, startDate, endDate);
       setDetails(Array.isArray(res.transactions) ? res.transactions : []);
       setDetailsSummary({
         periodEarned: res.periodEarned ?? 0,
@@ -77,6 +76,29 @@ export default function ReportPage() {
       setDetailsSummary(null);
     } finally {
       setIsDetailsLoading(false);
+    }
+  };
+
+  const downloadExcel = async () => {
+    setIsDownloading(true);
+    try {
+      const blobData = await cropService.downloadExcelReport(startDate, endDate, search);
+      const url = window.URL.createObjectURL(new Blob([blobData]));
+      const link = document.createElement('a');
+      link.href = url;
+      const fileName = startDate === endDate 
+          ? `Kunlik_Hisobot_${startDate}.xlsx` 
+          : `Hisobot_${startDate}_dan_${endDate}.xlsx`;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Excel yuklashda xatolik:", error);
+      alert("Excel yuklashda xatolik yuz berdi. Server aloqasini tekshiring.");
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -128,16 +150,28 @@ export default function ReportPage() {
               className="pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl font-medium text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all w-full"
             />
           </div>
+
+          {/* Excel Yuklash Tugmasi */}
+          <button
+            onClick={downloadExcel}
+            disabled={isDownloading || groupedData.length === 0}
+            className="flex items-center justify-center gap-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-200 hover:border-emerald-500 px-4 py-2.5 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+          >
+            {isDownloading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+            <span className="hidden sm:inline">Excel</span>
+          </button>
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* 🟢 SUMMARY CARDS (Eski dizayn, xatosiz sig'adigan qilingan) */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
         <SummaryCard icon={Scale}        title="Jami sof vazn" value={`${fmtKg(totalSummary.weight)} kg`}   color="text-emerald-600" bg="bg-emerald-50" border="border-emerald-100" />
         <SummaryCard icon={Box}          title="Savatlar soni"   value={`${totalSummary.baskets} ta`}          color="text-orange-600" bg="bg-orange-50"  border="border-orange-100" />
         <SummaryCard icon={Banknote}     title="Jami Summa"      value={`${fmt(totalSummary.amount)} UZS`}     color="text-blue-600"   bg="bg-blue-50"    border="border-blue-100" />
         <SummaryCard icon={CheckCircle2} title="To'langan"       value={`${fmt(totalSummary.paid)} UZS`}       color="text-teal-600"   bg="bg-teal-50"    border="border-teal-100" />
         <SummaryCard icon={AlertCircle}  title="Qarz (Qoldiq)"   value={`${fmt(totalSummary.debt)} UZS`}       color="text-red-500"    bg="bg-red-50"     border="border-red-100" />
+
+      
       </div>
 
       {/* Jadval */}
@@ -324,15 +358,23 @@ export default function ReportPage() {
   );
 }
 
-function SummaryCard({ icon: Icon, title, value, color, bg, border }) {
+// ==========================================
+// YORDAMCHI KOMPONENTLAR (Eski dizayn aslidagidek qoldirildi, sig'ish to'g'irlandi)
+// ==========================================
+
+function SummaryCard({ icon: Icon, title, value, suffix, color, bg, border }) {
   return (
     <div className={`p-4 rounded-2xl border ${bg} ${border} flex items-center gap-3 transition-transform hover:-translate-y-0.5 duration-200`}>
       <div className={`p-3 rounded-xl bg-white/80 ${color} shadow-sm shrink-0`}>
         <Icon size={20} strokeWidth={2.5} />
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500/80 mb-0.5 truncate">{title}</h3>
-        <p className={`text-base sm:text-lg font-black ${color} truncate`}>{value}</p>
+        {/* MASHU YERDA RAQAM VA SO'Z AJRATILDI */}
+        <div className="flex items-baseline gap-1 flex-wrap">
+          <span className={`text-[15px] xl:text-[17px] font-black ${color}`}>{value}</span>
+          {suffix && <span className="text-[10px] font-bold text-gray-400">{suffix}</span>}
+        </div>
       </div>
     </div>
   );
