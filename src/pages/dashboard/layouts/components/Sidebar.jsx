@@ -127,7 +127,7 @@ export default function Sidebar({ user, onLogout }) {
       title: "Moliya va Kassa",
       icon: Wallet,
       items: [
-        { id: "debts", label: "Qarzdorlik va To'lov", icon: Banknote, to: `${basePath}/finance/debts` },
+        { id: "debts", label: "To'lov", icon: Banknote, to: `${basePath}/finance/debts` },
         { id: "history", label: "To'lovlar Tarixi", icon: FileText, to: `${basePath}/finance/history` },
       ]
     }

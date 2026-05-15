@@ -193,7 +193,7 @@ export default function BrokerDashboard() {
               { label: 'Tarqatilgan savatlar', val: stats.pendingOrders, unit: 'ta', icon: ShoppingCart, color: 'text-blue-500', bg: 'bg-blue-50/50' },
               { label: 'Fermerlar', val: stats.activeFarmers, unit: 'nafar', icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-50/50' },
               { label: 'Mahsulot qiymati', val: stats.dailyIncome?.toLocaleString(), unit: "so'm", icon: DollarSign, color: 'text-purple-500', bg: 'bg-purple-50/50' },
-              { label: 'Kunlik Qabul', val: stats.dailyAcceptedWeight || 0, unit: 'kg', icon: Scale, color: 'text-rose-500', bg: 'bg-rose-50/50' },
+              { label: 'Mahsulot og\'irligi', val: stats.dailyAcceptedWeight || 0, unit: 'kg', icon: Scale, color: 'text-rose-500', bg: 'bg-rose-50/50' },
               { label: 'Haladelnik', val: stats.totalInventory, unit: 'kg', icon: Package, color: 'text-amber-500', bg: 'bg-amber-50/50' },
             ].map((item, idx) => (
               <div key={idx} className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-[0_2px_12px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 group flex flex-col justify-between">

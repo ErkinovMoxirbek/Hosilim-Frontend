@@ -136,7 +136,7 @@ export default function BasketCatalogPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Savatlar Ombori</h1>
-              <p className="text-sm text-slate-500 font-medium mt-1">Yashiklarning joriy qoldig'i hamda nazorati</p>
+              <p className="text-sm text-slate-500 font-medium mt-1">Yashiklar nazorati</p>
             </div>
           </div>
           

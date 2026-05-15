@@ -34,6 +34,23 @@ const getTypeBadge = (type) => {
   );
 };
 
+// MIQDORNI IDEAL QIZIL TUSDA KO'RSATISH
+const getQuantityBadge = (type, quantity) => {
+  if (type === 'GIVEN_TO_FARMER') {
+    return (
+      <div className="inline-flex items-center justify-center bg-emerald-50 border border-emerald-200 text-emerald-600 px-3 py-1 rounded-lg font-black text-sm shadow-sm transition-all">
+        + {quantity} ta
+      </div>
+    );
+  }
+
+  return (
+    <div className="inline-flex items-center justify-center bg-rose-50 border border-rose-100 text-rose-600 px-3 py-1 rounded-lg font-black text-sm shadow-sm transition-all">
+      - {quantity} ta
+    </div>
+  );
+};
+
 const formatDate = (dateString) => {
   if (!dateString) return "-";
   const date = new Date(dateString);
@@ -74,10 +91,10 @@ export default function BasketTransactionsHistoryPage() {
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto pb-10">
+    <div className="p-6 max-w-7xl mx-auto h-[calc(100vh-80px)] flex flex-col">
 
       {/* Sarlavha */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-[#0B1A42] flex items-center gap-3">
             <RefreshCcw className="text-blue-500" size={28} />
@@ -90,7 +107,7 @@ export default function BasketTransactionsHistoryPage() {
       </div>
 
       {/* Qidiruv */}
-      <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm mb-6 flex flex-col sm:flex-row gap-4">
+      <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm mb-6 flex flex-col sm:flex-row gap-4 shrink-0">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input
@@ -103,12 +120,14 @@ export default function BasketTransactionsHistoryPage() {
         </div>
       </div>
 
-      {/* Jadval */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+      {/* Jadval va Pagination birga */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
+        
+        {/* SKROLL BO'LUVCHI JADVAL QISMI */}
+        <div className="overflow-y-auto flex-1 relative">
           <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50/80 border-b border-gray-200 text-gray-500 text-[12px] uppercase tracking-wider">
+            <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
+              <tr className="border-b border-gray-200 text-gray-500 text-[14px]">
                 <th className="p-4 font-bold">#</th>
                 <th className="p-4 font-bold">Sana</th>
                 <th className="p-4 font-bold">Fermer</th>
@@ -157,9 +176,7 @@ export default function BasketTransactionsHistoryPage() {
                       </div>
                     </td>
                     <td className="p-4 text-right">
-                      <div className="inline-flex items-center justify-center bg-blue-50 border border-blue-100 text-blue-700 px-3 py-1 rounded-lg font-black text-sm">
-                        {item.quantity} ta
-                      </div>
+                      {getQuantityBadge(item.type, item.quantity)}
                     </td>
                   </tr>
                 ))
@@ -168,24 +185,24 @@ export default function BasketTransactionsHistoryPage() {
           </table>
         </div>
 
-        {/* Pagination */}
+        {/* QAT'IY TURUVCHI PAGINATION (Ekranning pastida qoladi) */}
         {!isLoading && totalPages > 1 && (
-          <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
-            <span className="text-sm text-gray-500 font-medium">
+          <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-white shrink-0">
+            <span className="text-sm text-gray-500 font-bold">
               Sahifa {currentPage + 1} / {totalPages}
             </span>
             <div className="flex gap-2">
               <button
                 onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
                 disabled={currentPage === 0}
-                className="p-2 border border-gray-200 bg-white rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+                className="p-2 border border-gray-200 bg-white rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-30 transition-colors shadow-sm"
               >
                 <ChevronLeft size={18} />
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
                 disabled={currentPage === totalPages - 1}
-                className="p-2 border border-gray-200 bg-white rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+                className="p-2 border border-gray-200 bg-white rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-30 transition-colors shadow-sm"
               >
                 <ChevronRight size={18} />
               </button>
