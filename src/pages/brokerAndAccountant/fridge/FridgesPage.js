@@ -5,7 +5,7 @@ import {
   Server, X, Loader2, AlertCircle, Trash2,
   Settings2, AlertTriangle, CheckCircle2,
 } from "lucide-react";
-import { fridgeService } from "../../services/fridgeService";
+import { fridgeService } from "../../../services/fridgeService";
 
 /* ─────────────────────────────────────────
    TOAST
