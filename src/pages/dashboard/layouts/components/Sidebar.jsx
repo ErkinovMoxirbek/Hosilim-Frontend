@@ -52,7 +52,7 @@ export default function Sidebar({ user, onLogout }) {
       { id: "users", label: "Foydalanuvchilar", icon: Users, to: `${basePath}/users` },
       { id: "brokers", label: "Brokerlar", icon: Truck, to: `${basePath}/brokers` },
       { id: "farmers", label: "Fermerlar", icon: Apple, to: `${basePath}/farmers` },
-      { id: "transactions", label: "Moliyaviy Hisobot", icon: DollarSign, to: `${basePath}/transactions` },
+      { id: "transactions", label: "Moliya bo'limi", icon: DollarSign, to: `${basePath}/transactions` },
       { id: "analytics", label: "Statistika", icon: BarChart3, to: `${basePath}/analytics` },
       { id: "settings", label: "Sozlamalar", icon: Settings, to: `${basePath}/settings` },
     ];
@@ -62,7 +62,7 @@ export default function Sidebar({ user, onLogout }) {
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
       { id: "receive", label: "Qabullar", icon: ClipboardList, hasSubMenu: true },
       { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, hasSubMenu: true },
-      { id: "finance", label: "Moliya va Kassa", icon: Wallet, hasSubMenu: true }, // YANGLIK
+      { id: "finance", label: "Moliya bo'limi", icon: Wallet, hasSubMenu: true }, // YANGLIK
       { id: "farmers", label: "Fermerlar", icon: Tractor, to: `${basePath}/farmers` },
       { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },
       { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 
@@ -74,7 +74,7 @@ export default function Sidebar({ user, onLogout }) {
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
       { id: "receive", label: "Qabullar", icon: ClipboardList, hasSubMenu: true },
       { id: "inventory", label: "Muzlatgich", icon: ThermometerSnowflake, hasSubMenu: true },
-      { id: "finance", label: "Moliya va Kassa", icon: Wallet, hasSubMenu: true }, // YANGLIK
+      { id: "finance", label: "Moliya bo'limi", icon: Wallet, hasSubMenu: true }, // YANGLIK
       { id: "farmers", label: "Fermerlar", icon: Tractor, to: `${basePath}/farmers` },
       { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
       { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },

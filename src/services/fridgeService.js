@@ -1,24 +1,15 @@
 import api from "../api/Axios"; 
 
-// API ning asosiy manzili (O'zingizning base URL'ingizga moslang, masalan: 'http://localhost:8080/api/v1/fridges')
 const API_URL = '/fridges';
 
 export const fridgeService = {
   
-  /**
-   * 1. O'ziga tegishli xolodilniklar ro'yxatini olish
-   */
+  // 1. O'ziga tegishli xolodilniklar ro'yxatini olish
   getMyFridges: async () => {
     try {
-      // Tokenni headers ichida yuborish axios interceptors orqali sozlangan deb hisoblaymiz.
-      // Agar yo'q bo'lsa, bu yerga headers: { Authorization: `Bearer ${token}` } qo'shiladi.
       const response = await api.get(API_URL);
-      
-      // Backend ApiResponse.builder().data(responseList) formatida qaytargani uchun 
-      // to'g'ridan-to'g'ri .data.data ni qaytaramiz
       return response.data.data; 
     } catch (error) {
-      // Backenddan kelgan chiroyli xato xabarini ushlab olish yoki standart xato berish
       throw new Error(
         error.response?.data?.message || 
         "Tarmoqda xatolik yuz berdi. Xolodilniklarni yuklab bo'lmadi."
@@ -26,18 +17,14 @@ export const fridgeService = {
     }
   },
 
-  /**
-   * 2. Yangi xolodilnik qo'shish
-   */
+  // 2. Yangi xolodilnik qo'shish
   createFridge: async (fridgeData) => {
     try {
-      // Data ichida string bo'lib qolgan raqamlarni to'g'rilab yuboramiz (xavfsizlik uchun)
       const payload = {
         ...fridgeData,
         maxCapacity: parseFloat(fridgeData.maxCapacity),
         temperatureCelsius: fridgeData.temperatureCelsius ? parseFloat(fridgeData.temperatureCelsius) : null
       };
-
       const response = await api.post(API_URL, payload);
       return response.data;
     } catch (error) {
@@ -47,13 +34,63 @@ export const fridgeService = {
       );
     }
   },
+
+  // 3. Xolodilnikni tahrirlash (YANGI QO'SHILDI)
+  updateFridge: async (fridgeId, fridgeData) => {
+    try {
+      const payload = {
+        ...fridgeData,
+        maxCapacity: parseFloat(fridgeData.maxCapacity),
+        temperatureCelsius: fridgeData.temperatureCelsius ? parseFloat(fridgeData.temperatureCelsius) : null
+      };
+      const response = await api.put(`${API_URL}/${fridgeId}`, payload);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || 
+        "Xolodilnikni tahrirlashda xatolik yuz berdi."
+      );
+    }
+  },
+
+  // 4. Xolodilnikni o'chirish
   deleteFridge: async (fridgeId) => {
     try {
       const response = await api.delete(`${API_URL}/${fridgeId}`);
       return response.data;
     } catch (error) {
-      // Backenddan maxsus "Ichida yuk bor" degan xato kelsa ushlab ko'rsatamiz
       throw new Error(error.response?.data?.message || "Xolodilnikni o'chirish imkonsiz. Tarmoq xatosi.");
+    }
+  },
+
+  // ==========================================
+  // 5. KIRIM-CHIQIM TARIXINI OLISH
+  // ==========================================
+  getFridgeHistory: async (params) => {
+    try {
+      // params ichida startDate, endDate, filterType, search, page, size keladi
+      const response = await api.get(`${API_URL}/history`, { params });
+      return response.data.data; 
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || 
+        "Tarixni yuklashda xatolik yuz berdi."
+      );
+    }
+  },
+
+  // ==========================================
+  // 6. TRANZAKSIYA TURLARINI OLISH (YANGI QO'SHILDI)
+  // ==========================================
+  getTransactionTypes: async () => {
+    try {
+      const response = await api.get(`${API_URL}/fridge-transactions`);
+      return response.data.data; 
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || 
+        "Kirim-chiqim turlarini yuklashda xatolik yuz berdi."
+      );
     }
   }
 };

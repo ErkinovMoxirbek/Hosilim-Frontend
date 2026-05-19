@@ -22,8 +22,9 @@ import ReportPage from "../../brokerAndAccountant/ReportPage";
 import MyStocksPage from "../../brokerAndAccountant/MyStocksPage";
 
 // Haladelnik va Moliya
-import FridgeInventoryPage from "../../brokerAndAccountant/FridgeInventoryPage"; 
-import FridgesPage from "../../brokerAndAccountant/FridgesPage";
+import FridgeInventoryPage from "../../brokerAndAccountant/fridge/FridgeInventoryPage"; 
+import FridgesPage from "../../brokerAndAccountant/fridge/FridgesPage";
+import ColdStoragePage from "../../brokerAndAccountant/fridge/ColdStoragePage";
 import PaymentsPage from "../../brokerAndAccountant/payment/PaymentsPage";
 import PaymentHistoryPage from "../../brokerAndAccountant/payment/PaymentHistoryPage";
 
@@ -113,7 +114,7 @@ const BrokerLayout = () => {
               <Route path="inventory" element={<Navigate to="stocks" replace />} />
               <Route path="inventory/stocks" element={<FridgeInventoryPage />} />
               <Route path="inventory/manage" element={<FridgesPage />} />
-              <Route path="inventory/history" element={<ComingSoon title="Kirim-Chiqim Tarixi" />} />
+              <Route path="inventory/history" element={<ColdStoragePage />} />
 
               {/* YANGLIK: MOLIYA VA KASSA YO'LLARI */}
               <Route path="finance" element={<Navigate to="debts" replace />} />

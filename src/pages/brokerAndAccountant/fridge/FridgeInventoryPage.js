@@ -1,13 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Search, Clock, Layers,
   ThermometerSnowflake, ThermometerSun,
   ChevronDown, MapPin, Building2,
   X, AlertCircle, Loader2
 } from "lucide-react";
-import { fridgeService } from '../../services/fridgeService';
-import { stockService } from '../../services/stockService';
+import { fridgeService } from '../../../services/fridgeService';
+import { stockService } from '../../../services/stockService';
 
 // MyStocksPage dan olingan aksent rang tizimi
 const ACCENTS = ['#EF4444', '#F97316', '#F59E0B', '#84CC16', '#10B981', '#06B6D4', '#3B82F6', '#8B5CF6', '#D946EF', '#F43F5E'];
@@ -22,7 +21,6 @@ const getAccentColor = (name) => {
 };
 
 export default function FridgeInventoryPage() {
-  const navigate = useNavigate();
   const [fridges, setFridges] = useState([]);
   const [selectedFridge, setSelectedFridge] = useState(null);
   const [stocks, setStocks] = useState([]);
