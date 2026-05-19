@@ -165,11 +165,11 @@ export default function ReportPage() {
 
       {/* 🟢 SUMMARY CARDS (Eski dizayn, xatosiz sig'adigan qilingan) */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
-        <SummaryCard icon={Scale}        title="Jami sof vazn" value={`${fmtKg(totalSummary.weight)} kg`}   color="text-emerald-600" bg="bg-emerald-50" border="border-emerald-100" />
+        <SummaryCard icon={Scale}        title="Sof vazn" value={`${fmtKg(totalSummary.weight)} kg`}   color="text-emerald-600" bg="bg-emerald-50" border="border-emerald-100" />
         <SummaryCard icon={Box}          title="Savatlar soni"   value={`${totalSummary.baskets} ta`}          color="text-orange-600" bg="bg-orange-50"  border="border-orange-100" />
         <SummaryCard icon={Banknote}     title="Jami Summa"      value={`${fmt(totalSummary.amount)} UZS`}     color="text-blue-600"   bg="bg-blue-50"    border="border-blue-100" />
         <SummaryCard icon={CheckCircle2} title="To'langan"       value={`${fmt(totalSummary.paid)} UZS`}       color="text-teal-600"   bg="bg-teal-50"    border="border-teal-100" />
-        <SummaryCard icon={AlertCircle}  title="Qarz (Qoldiq)"   value={`${fmt(totalSummary.debt)} UZS`}       color="text-red-500"    bg="bg-red-50"     border="border-red-100" />
+        <SummaryCard icon={AlertCircle}  title="Qoldiq"   value={`${fmt(totalSummary.debt)} UZS`}       color="text-red-500"    bg="bg-red-50"     border="border-red-100" />
 
       
       </div>
@@ -179,7 +179,7 @@ export default function ReportPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
-              <tr className="bg-gray-50/80 border-b border-gray-200 text-gray-500 text-[11px] font-bold uppercase tracking-wider">
+              <tr className="bg-gray-50/80 border-b border-gray-200 text-gray-500 text-[11px] font-bold tracking-wider">
                 <th className="p-4 pl-6 w-10"></th>
                 <th className="p-4">Fermer</th>
                 <th className="p-4">Sof Vazn</th>
