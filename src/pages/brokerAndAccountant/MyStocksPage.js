@@ -340,7 +340,7 @@ export default function MyStocksPage() {
                       onChange={(e) => setTransferForm(prev => ({ ...prev, targetFridgeId: e.target.value }))}
                       className="w-full appearance-none p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-900 font-semibold text-[15px] cursor-pointer"
                     >
-                      <option value="" disabled>-- Xolodilnikni tanlang --</option>
+                      <option value="" disabled>Mahsulotni ko'chirish</option>
                       {fridges.map(f => (
                         <option key={f.id} value={f.id}>{f.name} ({f.temperatureCelsius}°C)</option>
                       ))}
@@ -374,12 +374,7 @@ export default function MyStocksPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 flex items-start gap-2.5">
-                  <AlertCircle size={16} className="mt-0.5 text-blue-500 shrink-0" />
-                  <p className="text-[11px] text-gray-600 leading-relaxed font-medium">
-                    Tizim <span className="font-bold text-gray-900">o'rtacha vazn</span> asosida ko'chirilayotgan savatlarning nettosini avtomatik hisoblaydi.
-                  </p>
-                </div>
+               
               </form>
             </div>
 
