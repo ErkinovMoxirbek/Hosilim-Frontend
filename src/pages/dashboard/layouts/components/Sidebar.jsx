@@ -62,7 +62,7 @@ export default function Sidebar({ user, onLogout }) {
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
       { id: "receive", label: "Qabullar", icon: ClipboardList, hasSubMenu: true },
       { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, hasSubMenu: true },
-      { id: "finance", label: "Moliya bo'limi", icon: Wallet, hasSubMenu: true }, // YANGLIK
+
       { id: "farmers", label: "Fermerlar", icon: Tractor, to: `${basePath}/farmers` },
       { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },
       { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 

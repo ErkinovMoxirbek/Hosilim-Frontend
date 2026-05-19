@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Search, Loader2, FileText, Download, ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { Search, Loader2, FileText, Download, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { paymentService } from '../../../services/paymentService';
 
 const fmt = (n) => Number(n || 0).toLocaleString('uz-UZ');
