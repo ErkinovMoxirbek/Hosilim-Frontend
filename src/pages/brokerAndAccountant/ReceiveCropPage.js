@@ -349,7 +349,7 @@ export default function ReceiveCropPage() {
       {/* ── Rejim tanlash ─────────────────────────────────────────────────── */}
       <div className="flex items-center bg-gray-100/80 p-1.5 rounded-2xl max-w-sm mx-auto mb-8 border border-gray-200 shadow-inner">
         {[
-          { key: MODE.CROP,         label: 'Hosil Qabul',       Icon: Scale,          active: 'bg-white text-emerald-600 shadow-sm border border-gray-100' },
+          { key: MODE.CROP,         label: 'Qabul',       Icon: Scale,          active: 'bg-white text-emerald-600 shadow-sm border border-gray-100' },
           { key: MODE.EMPTY_BASKET, label: "Bo'sh Savat",       Icon: ArrowRightLeft, active: 'bg-[#0B1A42] text-white shadow-sm' },
         ].map(({ key, label, Icon, active }) => (
           <button
@@ -373,7 +373,7 @@ export default function ReceiveCropPage() {
             <div className="bg-gray-50/50 p-5 rounded-2xl border border-gray-100">
               <SectionLabel
                 icon={UserCircle}
-                text={activeMode === MODE.CROP ? 'Hosil keltirgan fermer' : 'Savat qaytarayotgan fermer'}
+                text={activeMode === MODE.CROP ? 'fermer' : 'Savat qaytarayotgan fermer'}
                 iconClass={activeMode === MODE.CROP ? 'text-emerald-500' : 'text-blue-600'}
               />
               
@@ -526,8 +526,7 @@ export default function ReceiveCropPage() {
                 {/* 3. SAVAT */}
                 {form.farmerId && !isFarmerBasketsLoading && farmerBaskets.length > 0 && (
                   <div className={`border-2 rounded-2xl p-5 sm:p-6 space-y-5 transition-colors duration-300 ${form.basketName ? 'border-emerald-500 bg-emerald-50/20' : 'border-gray-200'}`}>
-                    <SectionLabel icon={Box} text="Savat ma'lumotlari" />
-
+                
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       {/* Savat turi */}
                       <div>
@@ -673,9 +672,7 @@ export default function ReceiveCropPage() {
                       {/* O'rtacha tortish */}
                       {weighingMode === WEIGH.AVERAGE && (
                         <div className="space-y-5">
-                          <InfoBanner type="info" icon={AlertCircle}>
-                            Namuna savatlarni torting. Tizim jami <strong>{form.basketCount || '0'}</strong> ta savat uchun umumiy vaznni avtomatik hisoblaydi.
-                          </InfoBanner>
+                          
                           <div className="grid grid-cols-2 gap-5">
                             <div>
                               <label className="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wide">

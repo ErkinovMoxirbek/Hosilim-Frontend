@@ -115,8 +115,8 @@ export default function Sidebar({ user, onLogout }) {
       title: "Haladelnik",
       icon: ThermometerSnowflake,
       items: [
-        { id: "stocks", label: "Xolodilnikdagi Yuklar", icon: Package, to: `${basePath}/inventory/stocks` },
-        { id: "manage", label: "Xolodilnik Boshqaruvi", icon: ServerCog, to: `${basePath}/inventory/manage` },
+        { id: "stocks", label: "Muzlatgichdagi Yuklar", icon: Package, to: `${basePath}/inventory/stocks` },
+        { id: "manage", label: "Muzlatgich Boshqaruvi", icon: ServerCog, to: `${basePath}/inventory/manage` },
         { id: "history", label: "Kirim-Chiqim Tarixi", icon: History, to: `${basePath}/inventory/history` },
       ]
     },

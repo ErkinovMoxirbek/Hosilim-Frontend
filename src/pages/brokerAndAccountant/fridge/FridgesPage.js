@@ -483,11 +483,9 @@ export default function FridgesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 bg-white px-6 py-5 rounded-2xl border border-gray-200 shadow-sm">
         <div>
-          <span className="text-[10px] uppercase tracking-widest text-blue-600 font-bold mb-1 flex items-center gap-1.5">
-            <Settings2 size={13} /> Infratuzilma
-          </span>
+          
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: '"Syne", sans-serif' }}>
-            Xolodilniklar Boshqaruvi
+            Muzlatgichlar boshqaruvi
           </h1>
         </div>
 

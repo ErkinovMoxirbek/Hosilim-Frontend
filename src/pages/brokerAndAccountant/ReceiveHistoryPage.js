@@ -126,9 +126,9 @@ export default function ReceiveHistoryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[#0B1A42] flex items-center gap-3">
-            <Download className="text-[#14A44D]" size={28} /> Qabul Tarixi
+           Qabul Tarixi
           </h1>
-          <p className="text-sm text-gray-500 mt-1">Fermerlardan qabul qilingan barcha hosillar ro'yxati</p>
+          <p className="text-sm text-gray-500 mt-1">Fermerlardan qabul qilingan barcha mahsulotlar ro'yxati</p>
         </div>
         <button
           onClick={() => fetchGroups(currentPage, debouncedSearch)}
@@ -157,11 +157,11 @@ export default function ReceiveHistoryPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr className="bg-gray-50/80 border-b border-gray-200 text-gray-500 text-[11px] font-bold uppercase tracking-wider">
+              <tr className="bg-gray-50/80 border-b border-gray-200 text-gray-500 text-[14px] font-bold  tracking-wider">
                 <th className="p-4 pl-6 w-10"></th>
                 <th className="p-4">Fermer</th>
-                <th className="p-4">Jami Netto Vazn</th>
-                <th className="p-4">Jami Summa</th>
+                <th className="p-4">Sof Vazn</th>
+                <th className="p-4">Summa</th>
                 <th className="p-4 text-center">Ishlatilgan Savatlar</th>
               </tr>
             </thead>

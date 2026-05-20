@@ -146,9 +146,7 @@ export default function FridgeInventoryPage() {
       {/* ── HEADER ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
-          <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1 block">
-            Sovutgich tizimi
-          </span>
+          
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
             Omborxona
           </h1>
@@ -314,7 +312,7 @@ export default function FridgeInventoryPage() {
                     </span>
                   </div>
                   <div className="p-3 flex flex-col">
-                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Umumiy vazn</span>
+                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">To'liq vazn</span>
                     <span className="font-bold text-gray-900 text-base" style={{ fontFamily: '"DM Mono", monospace' }}>
                       {stock.grossWeight} <span className="text-xs font-normal text-gray-400">kg</span>
                     </span>
@@ -443,7 +441,7 @@ export default function FridgeInventoryPage() {
                 <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 flex items-start gap-2.5">
                   <AlertCircle size={16} className="mt-0.5 text-blue-500 shrink-0" />
                   <p className="text-[11px] text-gray-600 leading-relaxed font-medium">
-                    Tizim <span className="font-bold text-gray-900">o'rtacha vazn</span> asosida ko'chirilayotgan savatlarning nettosini avtomatik hisoblaydi.
+                    Tizim <span className="font-bold text-gray-900">o'rtacha vazn</span> asosida ko'chirilayotgan savatlarning sof vaznini avtomatik hisoblaydi.
                   </p>
                 </div>
               </form>

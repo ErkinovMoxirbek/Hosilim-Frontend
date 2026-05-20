@@ -120,11 +120,9 @@ export default function ReportPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-[#0B1A42] flex items-center gap-2">
 
-            {isDaily ? 'Kunlik Hisobot' : 'Oraliq Hisobot'}
+            {isDaily ? 'Hisobotlar' : 'Oraliq Hisobot'}
           </h1>
-          <p className="text-sm text-gray-500 mt-1 font-medium ml-9">
-            {isDaily ? 'Qabul qilingan mahsulotlar statistikasi' : "Tanlangan davr oralig'idagi statistika"}
-          </p>
+         
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">

@@ -153,9 +153,6 @@ export default function MyStocksPage() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
-          <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1 block">
-            Qabul punkti
-          </span>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 font-['Syne',sans-serif] tracking-tight">
             Ombor Zaxirasi
           </h1>
@@ -250,13 +247,13 @@ export default function MyStocksPage() {
 
                 <div className="grid grid-cols-2 border-y border-gray-100 divide-x divide-gray-100 bg-gray-50/50">
                   <div className="p-3 flex flex-col">
-                    <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Netto</span>
+                    <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1">sof vazn</span>
                     <span className="font-['DM_Mono',monospace] font-bold text-gray-900 text-base">
                       {stock.netWeight ?? 0} <span className="text-xs font-normal text-gray-500">kg</span>
                     </span>
                   </div>
                   <div className="p-3 flex flex-col">
-                    <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Brutto</span>
+                    <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1">to'liq vazn</span>
                     <span className="font-['DM_Mono',monospace] font-bold text-gray-900 text-base">
                       {stock.grossWeight ?? 0} <span className="text-xs font-normal text-gray-500">kg</span>
                     </span>

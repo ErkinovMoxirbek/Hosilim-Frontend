@@ -131,12 +131,8 @@ export default function BasketCatalogPage() {
         {/* HEADER SECTION */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="p-3.5 bg-indigo-50 rounded-xl border border-indigo-100 text-indigo-600">
-              <Layers size={26} strokeWidth={2} />
-            </div>
             <div>
               <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Savatlar Ombori</h1>
-              <p className="text-sm text-slate-500 font-medium mt-1">Yashiklar nazorati</p>
             </div>
           </div>
           
