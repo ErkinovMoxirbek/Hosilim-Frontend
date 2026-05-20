@@ -679,7 +679,7 @@ export default function ReceiveCropPage() {
                           <div className="grid grid-cols-2 gap-5">
                             <div>
                               <label className="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wide">
-                                Savatlar soni
+                                Tarozidagi savatlar soni
                               </label>
                               <input
                                 type="number"
