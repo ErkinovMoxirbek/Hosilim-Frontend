@@ -97,11 +97,10 @@ export default function BasketTransactionsHistoryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-[#0B1A42] flex items-center gap-3">
-            <RefreshCcw className="text-blue-500" size={28} />
             Savat Transaksiyalari Tarixi
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Barcha savat harakatlarining to'liq tarixi
+            Savat harakatlarining to'liq tarixi
           </p>
         </div>
       </div>

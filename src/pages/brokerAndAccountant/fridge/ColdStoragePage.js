@@ -93,14 +93,10 @@ export default function ColdStoragePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-800 flex items-center gap-3">
-            <div className="p-3 bg-white shadow-sm text-blue-600 rounded-2xl border border-blue-100">
-              <ThermometerSnowflake size={26} />
-            </div>
+           
             Kamera (Ombor) Tarixi
           </h1>
-          <p className="text-sm text-slate-500 mt-2 ml-[60px] font-medium">
-            Muzlatkichdagi barcha kirim va chiqim harakatlari
-          </p>
+          
         </div>
       </div>
 
@@ -114,7 +110,7 @@ export default function ColdStoragePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 shadow-emerald-200 shadow-lg text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-20"><ArrowDownLeft size={100} /></div>
-          <h3 className="text-emerald-50 font-bold uppercase tracking-wider text-xs mb-1">Sahifadagi Kirim</h3>
+          <h3 className="text-emerald-50 font-bold uppercase tracking-wider text-xs mb-1">Kiritilgan mahsulot</h3>
           <div className="flex items-end gap-1">
             <span className="text-3xl font-black">{fmtKg(summary.totalIn)}</span>
             <span className="text-sm font-semibold text-emerald-100 mb-1">kg</span>
@@ -123,7 +119,7 @@ export default function ColdStoragePage() {
 
         <div className="bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl p-5 shadow-rose-200 shadow-lg text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-20"><ArrowUpRight size={100} /></div>
-          <h3 className="text-rose-50 font-bold uppercase tracking-wider text-xs mb-1">Sahifadagi Chiqim</h3>
+          <h3 className="text-rose-50 font-bold uppercase tracking-wider text-xs mb-1">Chiqarilgan mahsulot</h3>
           <div className="flex items-end gap-1">
             <span className="text-3xl font-black">{fmtKg(summary.totalOut)}</span>
             <span className="text-sm font-semibold text-rose-100 mb-1">kg</span>
@@ -132,7 +128,7 @@ export default function ColdStoragePage() {
 
         <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 -mr-4 -mt-4 text-slate-50"><Package size={100} /></div>
-          <h3 className="text-slate-400 font-bold uppercase tracking-wider text-xs mb-1">Sahifadagi Qoldiq</h3>
+          <h3 className="text-slate-400 font-bold uppercase tracking-wider text-xs mb-1">Ombordagi mahsulot</h3>
           <div className="flex items-end gap-1 relative z-10">
             <span className="text-3xl font-black text-slate-800">{fmtKg(currentBalance)}</span>
             <span className="text-sm font-semibold text-slate-400 mb-1">kg</span>
@@ -168,11 +164,11 @@ export default function ColdStoragePage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] font-black uppercase tracking-wider">
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[14px] font-black tracking-wider">
                 <th className="p-4 pl-6 w-12">Tur</th>
                 <th className="p-4">Sana</th>
                 <th className="p-4">Kamera / Meva</th>
-                <th className="p-4">Netto</th>
+                <th className="p-4">Sof vazn</th>
                 <th className="p-4">Savat / Kimdan</th>
                 <th className="p-4">Izoh</th>
                 <th className="p-4 text-center">Amal</th>

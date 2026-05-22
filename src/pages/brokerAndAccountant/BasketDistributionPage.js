@@ -260,7 +260,7 @@ export default function BasketDistributionPage() {
                       value={formData.quantity}
                       onChange={e => setFormData({ ...formData, quantity: e.target.value })}
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-300 focus:border-[#1B5E20] focus:ring-4 focus:ring-green-500/10 rounded-lg text-slate-900 outline-none transition-all font-bold text-lg"
-                      placeholder="Masalan: 100"
+                      
                       disabled={isSubmitting || !formData.basketId || !selectedFarmer} />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold pointer-events-none">dona</span>
                   </div>

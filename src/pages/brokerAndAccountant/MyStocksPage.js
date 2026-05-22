@@ -153,9 +153,6 @@ export default function MyStocksPage() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
-          <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1 block">
-            Qabul punkti
-          </span>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 font-['Syne',sans-serif] tracking-tight">
             Ombor Zaxirasi
           </h1>
@@ -250,13 +247,13 @@ export default function MyStocksPage() {
 
                 <div className="grid grid-cols-2 border-y border-gray-100 divide-x divide-gray-100 bg-gray-50/50">
                   <div className="p-3 flex flex-col">
-                    <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Netto</span>
+                    <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1">sof vazn</span>
                     <span className="font-['DM_Mono',monospace] font-bold text-gray-900 text-base">
                       {stock.netWeight ?? 0} <span className="text-xs font-normal text-gray-500">kg</span>
                     </span>
                   </div>
                   <div className="p-3 flex flex-col">
-                    <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Brutto</span>
+                    <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1">to'liq vazn</span>
                     <span className="font-['DM_Mono',monospace] font-bold text-gray-900 text-base">
                       {stock.grossWeight ?? 0} <span className="text-xs font-normal text-gray-500">kg</span>
                     </span>
@@ -340,7 +337,7 @@ export default function MyStocksPage() {
                       onChange={(e) => setTransferForm(prev => ({ ...prev, targetFridgeId: e.target.value }))}
                       className="w-full appearance-none p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-900 font-semibold text-[15px] cursor-pointer"
                     >
-                      <option value="" disabled>-- Xolodilnikni tanlang --</option>
+                      <option value="" disabled>Mahsulotni ko'chirish</option>
                       {fridges.map(f => (
                         <option key={f.id} value={f.id}>{f.name} ({f.temperatureCelsius}°C)</option>
                       ))}
@@ -374,12 +371,7 @@ export default function MyStocksPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 flex items-start gap-2.5">
-                  <AlertCircle size={16} className="mt-0.5 text-blue-500 shrink-0" />
-                  <p className="text-[11px] text-gray-600 leading-relaxed font-medium">
-                    Tizim <span className="font-bold text-gray-900">o'rtacha vazn</span> asosida ko'chirilayotgan savatlarning nettosini avtomatik hisoblaydi.
-                  </p>
-                </div>
+               
               </form>
             </div>
 

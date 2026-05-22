@@ -89,7 +89,6 @@ export default function FarmerPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[#0B1A42]">Mening fermerlarim</h1>
-          <p className="text-sm text-gray-500 mt-1">Sizning punktga biriktirilgan fermerlar va ularning hisob-kitoblari</p>
         </div>
         
         <button 
@@ -126,7 +125,7 @@ export default function FarmerPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50/50 border-b border-gray-100 text-[13px] uppercase tracking-wider text-gray-500 font-semibold">
+                <tr className="bg-gray-50/50 border-b border-gray-100 text-[14px]  tracking-wider text-gray-500 font-semibold">
                   <th className="px-6 py-4">Fermer</th>
                   <th className="px-6 py-4">Telefon raqam</th>
                   <th className="px-6 py-4">Holati va Tarixi</th>
