@@ -27,6 +27,7 @@ import FridgesPage from "../../brokerAndAccountant/fridge/FridgesPage";
 import ColdStoragePage from "../../brokerAndAccountant/fridge/ColdStoragePage";
 import PaymentsPage from "../../brokerAndAccountant/payment/PaymentsPage";
 import PaymentHistoryPage from "../../brokerAndAccountant/payment/PaymentHistoryPage";
+import ExportersManagement from "../../brokerAndAccountant/ExportersManagement";
 
 const BrokerLayout = () => {
   const { user, logout } = useAuth();
@@ -122,6 +123,7 @@ const BrokerLayout = () => {
               <Route path="finance/history" element={<PaymentHistoryPage />} />
 
               {/* BOSHQA YO'LLAR */}
+              <Route path="exporters" element={<ExportersManagement />} />
               <Route path="accountants" element={<AccountantsPage />} />
               <Route path="farmers" element={<FarmerPage />} />
               <Route path="pricing" element={<PricingPage />} />
