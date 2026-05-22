@@ -113,13 +113,10 @@ export default function BrokerDashboard() {
 
   return (
     <div className="p-6 lg:p-10 max-w-7xl mx-auto space-y-8 bg-[#F8FAFC] min-h-screen">
-      
       {/* Sarlavha */}
       <div>
         <h1 className="text-3xl font-black text-slate-900 tracking-tight">Bosh sahifa</h1>
-        <p className="text-slate-500 mt-1 font-medium text-sm">Tizimning umumiy xulosasi va tezkor amallar</p>
       </div>
-
       {/* --- STATISTIKA QISMI (Yangi nafis, ramkasiz dizayn) --- */}
       <div className="flex flex-col gap-5">
         
