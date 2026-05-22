@@ -3,7 +3,6 @@ import api from "../api/Axios";
 const API_URL = '/exporters';
 
 export const exporterService = {
-  // 1. O'ziga tegishli eksportyorlarni olish
   getMyExporters: async () => {
     try {
       const response = await api.get(API_URL);
@@ -16,7 +15,6 @@ export const exporterService = {
     }
   },
 
-  // 2. Yangi eksportyor qo'shish
   createExporter: async (exporterData) => {
     try {
       const response = await api.post(API_URL, exporterData);
@@ -29,7 +27,6 @@ export const exporterService = {
     }
   },
 
-  // 3. Eksportyorni tahrirlash
   updateExporter: async (id, exporterData) => {
     try {
       const response = await api.put(`${API_URL}/${id}`, exporterData);
@@ -42,7 +39,6 @@ export const exporterService = {
     }
   },
 
-  // 4. Eksportyorni o'chirish (Soft delete)
   deleteExporter: async (id) => {
     try {
       const response = await api.delete(`${API_URL}/${id}`);

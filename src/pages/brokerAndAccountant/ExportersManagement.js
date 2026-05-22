@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { exporterService } from '../../services/exporterService'; // Yo'lni o'zingizga moslang
+import { exporterService } from '../../services/exporterService'; 
 import {
   Search, Plus, Edit2, Trash2, RefreshCw, 
-  DollarSign, Save, X, Building2, MapPin, 
-  Phone, UserCheck, Globe, ShieldAlert, Briefcase
+  Save, X, MapPin, Phone, UserCheck, ShieldAlert, Briefcase
 } from 'lucide-react';
 
 export default function ExportersManagement() {
@@ -14,7 +13,7 @@ export default function ExportersManagement() {
   const [search, setSearch] = useState('');
   
   const [modal, setModal] = useState({ isOpen: false, type: null, data: null });
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({ name: '', surname: '', phoneNumber: '', address: '' });
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -35,13 +34,12 @@ export default function ExportersManagement() {
     fetchExporters();
   }, []);
 
-  // Filtrlash (Qidiruv)
+  // Filtrlash (Ism, Familiya yoki Telefon raqam bo'yicha)
   const filteredExporters = useMemo(() => {
-    return exporters.filter(exp => 
-      exp.companyName?.toLowerCase().includes(search.toLowerCase()) ||
-      exp.directorName?.toLowerCase().includes(search.toLowerCase()) ||
-      exp.phoneNumber?.includes(search)
-    );
+    return exporters.filter(exp => {
+      const fullName = `${exp.name} ${exp.surname}`.toLowerCase();
+      return fullName.includes(search.toLowerCase()) || exp.phoneNumber?.includes(search);
+    });
   }, [exporters, search]);
 
   // Statistikalar
@@ -69,21 +67,19 @@ export default function ExportersManagement() {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const errors = {};
-    if (!formData.companyName?.trim()) errors.companyName = 'Kompaniya nomi majburiy';
-    if (!formData.directorName?.trim()) errors.directorName = 'Direktor ismi majburiy';
+    if (!formData.name?.trim()) errors.name = 'Ism majburiy';
+    if (!formData.surname?.trim()) errors.surname = 'Familiya majburiy';
     if (!formData.phoneNumber?.trim()) errors.phoneNumber = 'Telefon raqam majburiy';
-    setFormErrors(errors);
     
+    setFormErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
     try {
       setSubmitting(true);
       const payload = {
-        companyName: formData.companyName,
-        directorName: formData.directorName,
+        name: formData.name,
+        surname: formData.surname,
         phoneNumber: formData.phoneNumber,
-        stirInn: formData.stirInn,
-        destinationCountry: formData.destinationCountry,
         address: formData.address,
       };
       
@@ -105,19 +101,21 @@ export default function ExportersManagement() {
     setModal({ isOpen: true, type, data });
     if (type === 'edit' && data) {
       setFormData({
-        companyName: data.companyName ?? '',
-        directorName: data.directorName ?? '',
+        name: data.name ?? '',
+        surname: data.surname ?? '',
         phoneNumber: data.phoneNumber ?? '',
-        stirInn: data.stirInn ?? '',
-        destinationCountry: data.destinationCountry ?? '',
         address: data.address ?? '',
       });
     } else {
-      setFormData({ companyName: '', directorName: '', phoneNumber: '', stirInn: '', destinationCountry: '', address: '' });
+      setFormData({ name: '', surname: '', phoneNumber: '', address: '' });
     }
   };
 
-  const closeModal = () => { setModal({ isOpen: false, type: null, data: null }); setFormErrors({}); };
+  const closeModal = () => { 
+    setModal({ isOpen: false, type: null, data: null }); 
+    setFormErrors({}); 
+  };
+  
   const formatCurrency = (amount) => new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', minimumFractionDigits: 0 }).format(amount || 0);
 
   return (
@@ -133,7 +131,7 @@ export default function ExportersManagement() {
               </div>
               Eksportyorlar
             </h1>
-            <p className="text-sm text-slate-500 mt-2 ml-[60px] font-medium">Hamkor xaridorlar va eksport kompaniyalari</p>
+            <p className="text-sm text-slate-500 mt-2 ml-[60px] font-medium">Hamkor xaridorlar va eksport qiluvchilar</p>
           </div>
           <div className="flex items-center space-x-3">
             <button onClick={fetchExporters} className="p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors shadow-sm">
@@ -175,7 +173,7 @@ export default function ExportersManagement() {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
-              placeholder="Kompaniya nomi, direktor yoki telefon bo'yicha qidirish..." 
+              placeholder="Ism, familiya yoki telefon bo'yicha qidirish..." 
               value={search} 
               onChange={(e) => setSearch(e.target.value)} 
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-sm focus:border-indigo-500 transition-colors outline-none" 
@@ -189,9 +187,9 @@ export default function ExportersManagement() {
             <table className="w-full text-left border-collapse min-w-[1000px]">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-400 text-[10px] font-black uppercase tracking-wider">
-                  <th className="p-4 pl-6">Kompaniya Nomi</th>
-                  <th className="p-4">Rahbar / Aloqa</th>
-                  <th className="p-4">Davlat / STIR</th>
+                  <th className="p-4 pl-6">Eksportyor</th>
+                  <th className="p-4">Telefon</th>
+                  <th className="p-4">Manzil</th>
                   <th className="p-4 text-right">Balans</th>
                   <th className="p-4 text-center">Status</th>
                   <th className="p-4 text-center">Amallar</th>
@@ -218,33 +216,23 @@ export default function ExportersManagement() {
                       <td className="p-4 pl-6">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-blue-100 text-indigo-600 flex justify-center items-center font-black">
-                            {exp.companyName.charAt(0).toUpperCase()}
+                            {(exp.name || '').charAt(0).toUpperCase()}{(exp.surname || '').charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <div className="font-extrabold text-slate-800 text-sm">{exp.companyName}</div>
-                            <div className="text-[10px] text-slate-400 font-bold tracking-wider mt-1 truncate max-w-[200px]" title={exp.address}>
-                              <MapPin size={10} className="inline mr-1" />{exp.address || 'Manzil kiritilmagan'}
-                            </div>
+                            <div className="font-extrabold text-slate-800 text-sm">{exp.name} {exp.surname}</div>
+                            <div className="text-[10px] text-slate-400 font-bold tracking-wider mt-1">ID: {exp.id}</div>
                           </div>
                         </div>
                       </td>
                       <td className="p-4">
-                        <div className="text-sm font-bold text-slate-700 mb-1 flex items-center">
-                          <UserCheck size={14} className="mr-1.5 text-slate-400" /> {exp.directorName}
-                        </div>
-                        <div className="text-xs font-semibold text-slate-500 flex items-center">
-                          <Phone size={12} className="mr-1.5 text-slate-400" /> {exp.phoneNumber}
+                        <div className="text-sm font-semibold text-slate-700 flex items-center">
+                          <Phone size={14} className="mr-1.5 text-slate-400" /> {exp.phoneNumber}
                         </div>
                       </td>
                       <td className="p-4">
-                        {exp.destinationCountry ? (
-                           <div className="text-xs font-bold text-slate-700 mb-1 flex items-center">
-                             <Globe size={14} className="mr-1.5 text-blue-500" /> {exp.destinationCountry}
-                           </div>
-                        ) : (
-                           <div className="text-xs font-medium text-slate-400 mb-1">-</div>
-                        )}
-                        <div className="text-xs font-bold text-slate-500">STIR: {exp.stirInn || 'yo\'q'}</div>
+                        <div className="text-xs font-medium text-slate-600 flex items-center max-w-[200px] truncate" title={exp.address}>
+                          <MapPin size={14} className="mr-1.5 text-slate-400 flex-shrink-0" /> {exp.address || 'Manzil kiritilmagan'}
+                        </div>
                       </td>
                       <td className="p-4 text-right">
                         <div className={`text-sm font-black ${exp.currentBalance < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
@@ -279,11 +267,11 @@ export default function ExportersManagement() {
         {/* MODAL (Qo'shish / O'zgartirish) */}
         {modal.isOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
               
               <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h3 className="text-lg font-black text-slate-800 flex items-center">
-                  <Building2 className="mr-2 text-indigo-600" size={20} />
+                  <UserCheck className="mr-2 text-indigo-600" size={20} />
                   {modal.type === 'edit' ? "Eksportyorni Tahrirlash" : "Yangi Eksportyor Qo'shish"}
                 </h3>
                 <button onClick={closeModal} className="p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-700 rounded-xl transition-colors">
@@ -293,36 +281,30 @@ export default function ExportersManagement() {
 
               <div className="p-6 overflow-y-auto">
                   <form id="exporterForm" onSubmit={handleFormSubmit} className="space-y-5">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div className="md:col-span-2">
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kompaniya Nomi <span className="text-rose-500">*</span></label>
-                        <input type="text" value={formData.companyName} onChange={(e) => setFormData({ ...formData, companyName: e.target.value })} className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl font-medium focus:border-indigo-500 outline-none ${formErrors.companyName ? 'border-rose-300' : 'border-slate-200'}`} placeholder="Agro Export LLC" />
-                      </div>
-                      
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Direktor / Vakil Ismi <span className="text-rose-500">*</span></label>
-                        <input type="text" value={formData.directorName} onChange={(e) => setFormData({ ...formData, directorName: e.target.value })} className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl font-medium focus:border-indigo-500 outline-none ${formErrors.directorName ? 'border-rose-300' : 'border-slate-200'}`} placeholder="Ivanov Ivan" />
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ism <span className="text-rose-500">*</span></label>
+                        <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl font-medium focus:border-indigo-500 outline-none ${formErrors.name ? 'border-rose-300' : 'border-slate-200'}`} placeholder="Sardor" />
+                        {formErrors.name && <span className="text-[10px] text-rose-500 mt-1">{formErrors.name}</span>}
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Telefon Raqam <span className="text-rose-500">*</span></label>
-                        <input type="text" value={formData.phoneNumber} onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })} className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl font-medium focus:border-indigo-500 outline-none ${formErrors.phoneNumber ? 'border-rose-300' : 'border-slate-200'}`} placeholder="+998901234567" />
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Familiya <span className="text-rose-500">*</span></label>
+                        <input type="text" value={formData.surname} onChange={(e) => setFormData({ ...formData, surname: e.target.value })} className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl font-medium focus:border-indigo-500 outline-none ${formErrors.surname ? 'border-rose-300' : 'border-slate-200'}`} placeholder="Alimov" />
+                        {formErrors.surname && <span className="text-[10px] text-rose-500 mt-1">{formErrors.surname}</span>}
                       </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Telefon Raqam <span className="text-rose-500">*</span></label>
+                      <input type="text" value={formData.phoneNumber} onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })} className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl font-medium focus:border-indigo-500 outline-none ${formErrors.phoneNumber ? 'border-rose-300' : 'border-slate-200'}`} placeholder="+998901234567" />
+                      {formErrors.phoneNumber && <span className="text-[10px] text-rose-500 mt-1">{formErrors.phoneNumber}</span>}
+                    </div>
 
-                      <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Eksport Davlati</label>
-                        <input type="text" value={formData.destinationCountry} onChange={(e) => setFormData({ ...formData, destinationCountry: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:border-indigo-500 outline-none" placeholder="Rossiya, Qozog'iston..." />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">STIR (ИНН)</label>
-                        <input type="text" maxLength={9} value={formData.stirInn} onChange={(e) => setFormData({ ...formData, stirInn: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:border-indigo-500 outline-none" placeholder="123456789" />
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Yuridik Manzili</label>
-                        <textarea value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} rows={2} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:border-indigo-500 outline-none" placeholder="Toshkent sh., Yunusobod tumani..." />
-                      </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Yashash Manzili</label>
+                      <textarea value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} rows={3} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:border-indigo-500 outline-none" placeholder="Toshkent sh., Yunusobod tumani..." />
                     </div>
                   </form>
               </div>
