@@ -61,7 +61,6 @@ export default function Sidebar({ user, onLogout }) {
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
       { id: "receive", label: "Qabullar", icon: ClipboardList, hasSubMenu: true },
       { id: "inventory", label: "Haladelnik", icon: ThermometerSnowflake, hasSubMenu: true },
-
       { id: "farmers", label: "Fermerlar", icon: Tractor, to: `${basePath}/farmers` },
       { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },
       { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 
@@ -74,6 +73,7 @@ export default function Sidebar({ user, onLogout }) {
       { id: "receive", label: "Qabullar", icon: ClipboardList, hasSubMenu: true },
       { id: "inventory", label: "Muzlatgich", icon: ThermometerSnowflake, hasSubMenu: true },
       { id: "finance", label: "Moliya bo'limi", icon: Wallet, hasSubMenu: true }, 
+      { id: "exporters", label: "Eksportyorlar", icon: Briefcase, to: `${basePath}/exporters` },
       { id: "farmers", label: "Fermerlar", icon: Tractor, to: `${basePath}/farmers` },
       { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
       { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },
@@ -125,7 +125,7 @@ export default function Sidebar({ user, onLogout }) {
       icon: Wallet,
       items: [
         { id: "debts", label: "To'lov", icon: Banknote, to: `${basePath}/finance/debts` },
-        { id: "report", label: "Hisobotlar", icon: BarChart3, to: `${basePath}/report` }, // HISOBOTLAR IKKINCHI QATORGA OLINDI
+        { id: "report", label: "Hisobotlar", icon: BarChart3, to: `${basePath}/finance/report` }, 
         { id: "history", label: "To'lovlar Tarixi", icon: FileText, to: `${basePath}/finance/history` },
       ]
     }
