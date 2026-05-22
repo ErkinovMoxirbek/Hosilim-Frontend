@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fridgeService } from '../../../services/fridgeService'; 
-import { stockService } from '../../../services/stockService'; // 🟢 Otmena qilish uchun ulandi
+import { stockService } from '../../../services/stockService'; 
 import { 
   ThermometerSnowflake, Search, Calendar, 
   ArrowDownLeft, ArrowUpRight, Package, Box, Filter, 
@@ -23,6 +23,9 @@ export default function ColdStoragePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
+  
+  // 🟢 YANGLIK: Qaysi yuk "Otmena" bo'layotganini ushlab turish uchun (Loading spinner uchun)
+  const [revertingId, setRevertingId] = useState(null);
 
   const fetchHistory = async () => {
     setIsLoading(true);
@@ -58,10 +61,13 @@ export default function ColdStoragePage() {
     const isConfirmed = window.confirm("Rostdan ham bu yukni xolodilnikdan zalga qaytarmoqchimisiz?");
     if (isConfirmed) {
       try {
+        setRevertingId(targetStockId); // 🟢 Spinnerni yoqamiz
         await stockService.revertFridgeTransfer(targetStockId);
-        fetchHistory(); // O'chgandan keyin jadvalni yangilaymiz
+        await fetchHistory(); // O'chgandan keyin jadvalni yangilaymiz
       } catch (error) {
         alert(error.message);
+      } finally {
+        setRevertingId(null); // 🟢 Spinnerni o'chiramiz
       }
     }
   };
@@ -104,7 +110,7 @@ export default function ColdStoragePage() {
         </div>
       )}
 
-      {/* 🟢 YANGILANGAN ZAMONAVIY KARTALAR */}
+      {/* KARTALAR */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 shadow-emerald-200 shadow-lg text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-20"><ArrowDownLeft size={100} /></div>
@@ -190,6 +196,8 @@ export default function ColdStoragePage() {
               ) : (
                 transactions.map((item) => {
                   const isKirim = item.type === 'IN';
+                  const isReverting = revertingId === item.stockId; // 🟢 Shu qator yuklanayotganini aniqlaymiz
+
                   return (
                     <tr key={item.id} className="hover:bg-slate-50 transition-colors group">
                       <td className="p-4 pl-6">
@@ -205,7 +213,6 @@ export default function ColdStoragePage() {
                       <td className="p-4">
                         <div className="flex items-center gap-2 mb-1">
                           <MapPin size={12} className="text-blue-500" />
-                          {/* 🟢 XOLODILNIK NOMI SHU YERDA CHIQADI */}
                           <span className="text-[11px] font-black uppercase text-blue-600 tracking-wider bg-blue-50 px-2 py-0.5 rounded-md">
                             {item.fridgeName || 'Noma\'lum Kamera'}
                           </span>
@@ -229,14 +236,19 @@ export default function ColdStoragePage() {
                         <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-1.5 rounded-lg block w-max max-w-[150px] truncate" title={item.comment}>{item.comment}</span>
                       </td>
                       <td className="p-4 text-center">
-                        {/* 🟢 OTMENA KNOPKASI (Faqat Kirim bo'lsa va stockId kelsa chiqadi) */}
+                        {/* 🟢 KUTISH EFFEKTI BILAN YANGILANGAN TUGMA */}
                         {isKirim && item.stockId ? (
                           <button 
                             onClick={() => handleRevert(item.stockId)} 
-                            className="p-2 text-rose-500 hover:bg-rose-100 rounded-xl transition-all opacity-0 group-hover:opacity-100" 
+                            disabled={isReverting}
+                            className={`p-2 text-rose-500 hover:bg-rose-100 rounded-xl transition-all ${isReverting ? 'opacity-50 cursor-wait' : 'opacity-0 group-hover:opacity-100'}`} 
                             title="Xatoni to'g'rilash (Zalga qaytarish)"
                           >
-                            <Undo2 size={18} strokeWidth={2.5} />
+                            {isReverting ? (
+                              <div className="animate-spin w-5 h-5 border-2 border-rose-500 border-t-transparent rounded-full mx-auto"></div>
+                            ) : (
+                              <Undo2 size={18} strokeWidth={2.5} />
+                            )}
                           </button>
                         ) : (
                           <span className="text-slate-300 text-xs">-</span>
