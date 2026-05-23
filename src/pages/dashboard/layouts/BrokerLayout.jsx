@@ -96,6 +96,7 @@ const BrokerLayout = () => {
               <Route index element={<BrokerDashboard />} />
 
               {/* HOSIL QABULI YO'LLARI */}
+              <Route path="finance/report" element={<ReportPage />} />
               <Route path="report" element={<ReportPage />} />
               <Route path="receive" element={<Navigate to="all" replace />} />
               <Route path="receive/new" element={<ReceiveCropPage />} />
