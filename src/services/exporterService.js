@@ -49,5 +49,34 @@ export const exporterService = {
         "Eksportyorni o'chirish imkonsiz. Tarmoq xatosi."
       );
     }
-  }
+  },
+  // Oraliq hisobot va yuklar tarixi
+  getExportersReport: async (params) => {
+    try {
+      const response = await api.get(`${API_URL}/report`, { params });
+      return response.data?.data || [];
+    } catch (error) {
+      throw new Error(error.response?.data?.message || "Hisobotni yuklashda xatolik");
+    }
+  },
+  getExporterTransactions: async (id, params) => {
+    try {
+      const response = await api.get(`${API_URL}/${id}/transactions`, { params });
+      return response.data?.data || [];
+    } catch (error) {
+      throw new Error("Tranzaksiyalarni yuklashda xatolik");
+    }
+  },
+  // Excel yuklab olish uchun
+  downloadExcelReport: async (params) => {
+    try {
+      const response = await api.get(`${API_URL}/report/excel`, {
+        params,
+        responseType: 'blob', // MUHIM: Bu fayl o'qish uchun!
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error("Excel yuklashda xatolik yuz berdi");
+    }
+  },
 };
