@@ -27,7 +27,10 @@ import FridgesPage from "../../brokerAndAccountant/fridge/FridgesPage";
 import ColdStoragePage from "../../brokerAndAccountant/fridge/ColdStoragePage";
 import PaymentsPage from "../../brokerAndAccountant/payment/PaymentsPage";
 import PaymentHistoryPage from "../../brokerAndAccountant/payment/PaymentHistoryPage";
+
+// 🟢 EKSPORTYOR SAHIFALARI
 import ExportersManagement from "../../brokerAndAccountant/ExportersManagement";
+import ExportHistoryPage from "../../brokerAndAccountant/ExportHistoryPage"; // Oldin yaratgan tariximiz
 
 const BrokerLayout = () => {
   const { user, logout } = useAuth();
@@ -40,9 +43,9 @@ const BrokerLayout = () => {
   }, [location.pathname]);
 
   const ComingSoon = ({ title }) => (
-    <div className="p-4 lg:p-8 bg-white rounded-lg lg:rounded-xl border border-gray-200 shadow-sm m-4 lg:m-0">
-      <h2 className="text-lg lg:text-xl font-bold text-[#0B1A42]">{title}</h2>
-      <p className="text-gray-500 mt-2">Bu sahifa ishlab chiqilmoqda...</p>
+    <div className="p-4 lg:p-8 bg-white rounded-lg lg:rounded-xl border border-gray-200 shadow-sm m-4 lg:m-0 h-[80vh] flex flex-col items-center justify-center text-center">
+      <h2 className="text-2xl font-black text-[#0B1A42] mb-2">{title}</h2>
+      <p className="text-gray-500 font-medium">Ushbu modul hozirda dasturchilar tomonidan ishlab chiqilmoqda...</p>
     </div>
   );
 
@@ -57,20 +60,13 @@ const BrokerLayout = () => {
           </h1>
           <p className="text-sm text-gray-600 capitalize">{String(user?.role || "").replace('_', ' ')}</p>
         </div>
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
-        >
+        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {/* Mobil menyu ochilganda orqa foni qoraytirish */}
       {isMobileMenuOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
+        <div className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
       )}
 
       <div className="flex flex-1 relative h-full overflow-hidden">
@@ -81,17 +77,13 @@ const BrokerLayout = () => {
         </div>
 
         {/* Mobile Sidebar */}
-        <div
-          className={`lg:hidden fixed inset-y-0 left-0 z-50 w-[270px] bg-white transform transition-transform duration-300 ease-in-out shadow-2xl ${
-            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-        >
+        <div className={`lg:hidden fixed inset-y-0 left-0 z-50 w-[270px] bg-white transform transition-transform duration-300 ease-in-out shadow-2xl ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
           <Sidebar user={user} onLogout={logout} />
         </div>
 
         {/* ASOSIY QISM (O'ng tomon) */}
         <div className="flex-1 flex flex-col h-full bg-zinc-50 relative overflow-hidden">
-          <main className="flex-1 overflow-y-auto bg-gray-50/50 lg">
+          <main className="flex-1 overflow-y-auto bg-[#F8FAFC]">
             <Routes>
               <Route index element={<BrokerDashboard />} />
 
@@ -118,13 +110,19 @@ const BrokerLayout = () => {
               <Route path="inventory/manage" element={<FridgesPage />} />
               <Route path="inventory/history" element={<ColdStoragePage />} />
 
-              {/* YANGLIK: MOLIYA VA KASSA YO'LLARI */}
+              {/* FERMER MOLIYASI */}
               <Route path="finance" element={<Navigate to="debts" replace />} />
               <Route path="finance/debts" element={<PaymentsPage />} />
               <Route path="finance/history" element={<PaymentHistoryPage />} />
 
+              {/* 🟢 EKSPORTYORLAR (HAMKORLAR) YO'LLARI */}
+              <Route path="exporters" element={<Navigate to="report" replace />} />
+              <Route path="exporters/report" element={<ExportersManagement />} />
+              <Route path="exporters/history" element={<ExportHistoryPage />} />
+              <Route path="exporters/payments" element={<ComingSoon title="Eksportyor To'lovlarni Qabul Qilish" />} />
+              <Route path="exporters/payment-history" element={<ComingSoon title="Eksportyor To'lovlar Tarixi" />} />
+
               {/* BOSHQA YO'LLAR */}
-              <Route path="exporters" element={<ExportersManagement />} />
               <Route path="accountants" element={<AccountantsPage />} />
               <Route path="farmers" element={<FarmerPage />} />
               <Route path="pricing" element={<PricingPage />} />

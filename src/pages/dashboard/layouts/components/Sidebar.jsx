@@ -8,7 +8,7 @@ import {
   RefreshCcw, XCircle, Database, Truck, Apple, BarChart3, 
   MapPin, Briefcase, Home, ClipboardList, 
   ThermometerSnowflake, Tractor, Tag, Megaphone, User,
-  ServerCog, Wallet, Banknote, FileText 
+  ServerCog, Wallet, Banknote, FileText, PackageCheck, CreditCard
 } from "lucide-react";
 
 function getBasePath(user) {
@@ -19,6 +19,16 @@ function getBasePath(user) {
   if (hasRole("ACCOUNTANT")) return "/dashboard/accountant";
   if (hasRole("BROKER")) return "/dashboard/broker";
   return "/dashboard/farmer";
+}
+
+// Rollarni chiroyli va rangli qilib chiqaruvchi funksiya
+const getRoleBadge = (role) => {
+  const r = String(role || "GUEST").toUpperCase();
+  if (r.includes('ADMIN')) return <span className="text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md text-[10px] font-black tracking-widest border border-rose-100">ADMIN</span>;
+  if (r.includes('BROKER')) return <span className="text-[#0081C9] bg-blue-50 px-2 py-0.5 rounded-md text-[10px] font-black tracking-widest border border-blue-100">BROKER</span>;
+  if (r.includes('ACCOUNTANT')) return <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md text-[10px] font-black tracking-widest border border-emerald-100">HISOBCHI</span>;
+  if (r.includes('FARMER')) return <span className="text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md text-[10px] font-black tracking-widest border border-orange-100">FERMER</span>;
+  return <span className="text-gray-600 bg-gray-50 px-2 py-0.5 rounded-md text-[10px] font-black tracking-widest border border-gray-200">{r}</span>;
 }
 
 export default function Sidebar({ user, onLogout }) {
@@ -32,12 +42,25 @@ export default function Sidebar({ user, onLogout }) {
 
   const [currentView, setCurrentView] = useState("main");
 
+  // 🟢 XATO SHU YERDA EDI! TARTIBI VA MANTIQ TOG'RILANDI
   useEffect(() => {
-    if (location.pathname.includes("/receive")) setCurrentView("receive");
-    else if (location.pathname.includes("/baskets")) setCurrentView("baskets");
-    else if (location.pathname.includes("/inventory")) setCurrentView("inventory");
-    else if (location.pathname.includes("/finance") || location.pathname.includes("/report")) setCurrentView("finance");
-    else setCurrentView("main");
+    const path = location.pathname;
+    
+    if (path.includes("/receive")) {
+      setCurrentView("receive");
+    } else if (path.includes("/baskets")) {
+      setCurrentView("baskets");
+    } else if (path.includes("/inventory")) {
+      setCurrentView("inventory");
+    } else if (path.includes("/exporters")) {
+      // 🟢 Exporters doim birinchi tekshiriladi
+      setCurrentView("exporters"); 
+    } else if (path.includes("/finance") || (path.includes("/report") && !path.includes("/exporters"))) {
+      // 🟢 Report faqat Exporters bo'lmaganda Finance ni ochadi
+      setCurrentView("finance");
+    } else {
+      setCurrentView("main");
+    }
   }, [location.pathname]);
 
   let mainItems = [];
@@ -45,6 +68,7 @@ export default function Sidebar({ user, onLogout }) {
   if (isAdmin) {
     mainItems = [
       { id: "dashboard", label: "Bosh sahifa", icon: Home, to: basePath },
+      { id: "exporters", label: "Eksport (Hamkorlar)", icon: Briefcase, hasSubMenu: true }, 
       { id: "announcements", label: "E'lonlar", icon: Megaphone, to: `${basePath}/announcements` }, 
       { id: "fruit-types", label: "Meva Katalogi", icon: Database, to: `${basePath}/fruit-types` },
       { id: "collection-points", label: "Yig'ish Punktlari", icon: MapPin, to: `${basePath}/collection-points` },
@@ -72,8 +96,8 @@ export default function Sidebar({ user, onLogout }) {
       { id: "baskets", label: "Savatlar", icon: ShoppingBasket, hasSubMenu: true },
       { id: "receive", label: "Qabullar", icon: ClipboardList, hasSubMenu: true },
       { id: "inventory", label: "Muzlatgich", icon: ThermometerSnowflake, hasSubMenu: true },
+      { id: "exporters", label: "Eksport (Hamkorlar)", icon: Briefcase, hasSubMenu: true }, 
       { id: "finance", label: "Moliya bo'limi", icon: Wallet, hasSubMenu: true }, 
-      { id: "exporters", label: "Eksportyorlar", icon: Briefcase, to: `${basePath}/exporters` },
       { id: "farmers", label: "Fermerlar", icon: Tractor, to: `${basePath}/farmers` },
       { id: "accountants", label: "Hisobchilar", icon: Users, to: `${basePath}/accountants` },
       { id: "pricing", label: "Narxlar", icon: Tag, to: `${basePath}/pricing` },
@@ -120,13 +144,29 @@ export default function Sidebar({ user, onLogout }) {
         { id: "history", label: "Kirim-Chiqim Tarixi", icon: History, to: `${basePath}/inventory/history` },
       ]
     },
+    exporters: {
+      title: "Eksport va Hamkorlar",
+      icon: Briefcase,
+      items: [
+        { id: "report", label: "Hamkorlar & Hisobot", icon: Users, to: `${basePath}/exporters/report` },
+        { id: "history", label: "Jo'natilgan Yuklar (Tarix)", icon: PackageCheck, to: `${basePath}/exporters/history` },
+        { id: "payments", label: "To'lov Qabul Qilish", icon: CreditCard, to: `${basePath}/exporters/payments` },
+        { id: "payment-history", label: "To'lovlar Tarixi", icon: FileText, to: `${basePath}/exporters/payment-history` },
+      ]
+    },
     finance: {
-      title: "Moliya va Kassa",
+      title: "Moliya bo'limi",
       icon: Wallet,
       items: [
+<<<<<<< HEAD
         { id: "debts", label: "To'lov", icon: Banknote, to: `${basePath}/finance/debts` },
         { id: "report", label: "Hisobotlar", icon: BarChart3, to: `${basePath}/finance/report` }, 
         { id: "history", label: "To'lovlar Tarixi", icon: FileText, to: `${basePath}/finance/history` },
+=======
+        { id: "debts", label: "Fermerga To'lov", icon: Banknote, to: `${basePath}/finance/debts` },
+        { id: "report", label: "Fermer Hisobotlar", icon: BarChart3, to: `${basePath}/report` },
+        { id: "history", label: "Fermer To'lov Tarixi", icon: FileText, to: `${basePath}/finance/history` },
+>>>>>>> bb7c3f3413f83bc9a4802ecdd3a0696bb9fabf7b
       ]
     }
   };
@@ -261,26 +301,26 @@ export default function Sidebar({ user, onLogout }) {
 
       {/* 3. Footer / User Profile */}
       <div className="p-4 mt-auto border-t border-gray-100 shrink-0 bg-white z-10 relative">
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-50/50 border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors mb-2">
-          <div className="w-9 h-9 rounded-lg bg-[#0B1A42] flex items-center justify-center text-white font-bold text-[14px]">
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-white border border-gray-200 cursor-pointer shadow-sm hover:shadow transition-all mb-3">
+          <div className="w-10 h-10 rounded-[10px] bg-[#0B1A42] flex items-center justify-center text-white font-black text-[16px] shadow-inner">
             {user?.name?.charAt(0) || "U"}
           </div>
-          <div className="flex flex-col flex-1 min-w-0">
-            <span className="text-[13px] font-bold text-[#0B1A42] truncate leading-tight">
+          <div className="flex flex-col flex-1 min-w-0 justify-center">
+            <span className="text-[14px] font-black text-[#0B1A42] truncate leading-tight mb-1">
               {user?.name || "Foydalanuvchi"}
             </span>
-            <span className="text-[11px] text-[#0081C9] mt-0.5 uppercase tracking-wider truncate font-semibold">
-              {String(user?.role || "GUEST").replace('_', ' ')}
-            </span>
+            <div>
+              {getRoleBadge(user?.role)}
+            </div>
           </div>
         </div>
 
         <button
           onClick={onLogout}
           style={{ textDecoration: 'none' }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors font-medium group border border-transparent"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-rose-600 hover:bg-rose-50 transition-colors font-medium group border border-transparent"
         >
-          <LogOut size={18} className="text-gray-400 group-hover:text-red-500 transition-colors" />
+          <LogOut size={18} className="text-gray-400 group-hover:text-rose-500 transition-colors" />
           <span>Tizimdan chiqish</span>
         </button>
       </div>
