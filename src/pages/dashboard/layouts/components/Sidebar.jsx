@@ -158,15 +158,11 @@ export default function Sidebar({ user, onLogout }) {
       title: "Moliya bo'limi",
       icon: Wallet,
       items: [
-<<<<<<< HEAD
-        { id: "debts", label: "To'lov", icon: Banknote, to: `${basePath}/finance/debts` },
-        { id: "report", label: "Hisobotlar", icon: BarChart3, to: `${basePath}/finance/report` }, 
-        { id: "history", label: "To'lovlar Tarixi", icon: FileText, to: `${basePath}/finance/history` },
-=======
+
         { id: "debts", label: "Fermerga To'lov", icon: Banknote, to: `${basePath}/finance/debts` },
         { id: "report", label: "Fermer Hisobotlar", icon: BarChart3, to: `${basePath}/report` },
         { id: "history", label: "Fermer To'lov Tarixi", icon: FileText, to: `${basePath}/finance/history` },
->>>>>>> bb7c3f3413f83bc9a4802ecdd3a0696bb9fabf7b
+
       ]
     }
   };

@@ -194,40 +194,6 @@ const KPI = memo(({ data }) => {
   ];
 
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        
-        {/* SARLAVHA */}
-        {/* ── HEADER RAMKASI ── */}
-<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 lg:p-6 bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 gap-4 font-inter">
-  
-  {/* Chap qism: Ikonka va Sarlavha */}
-  <div className="flex items-center gap-4">
-   
-    <div>
-      <h1 className="text-xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-none">
-        Eksportyorlar
-      </h1>
-      <p className="text-[13px] sm:text-sm text-slate-400 mt-1.5 font-medium">
-        Tizimdagi hamkorlar va mijozlar boshqaruvi
-      </p>
-    </div>
-  </div>
-
-  {/* O'ng qism: Harakat tugmasi */}
-  <div className="w-full sm:w-auto shrink-0 flex items-center gap-3">          
-    <button 
-      onClick={() => openModal('create')} 
-      className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-[13px] sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg transition-all active:scale-95"
-    >
-      <Plus size={18} strokeWidth={2.5} className="mr-2" /> 
-      Yangi Eksportyor
-    </button>
-  </div>
-
-</div>
-=======
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       {cards.map((c) => (
         <KPICard key={c.title} {...c} />
@@ -306,7 +272,6 @@ const ExporterRow = memo(
               {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             </button>
           </td>
->>>>>>> bb7c3f3413f83bc9a4802ecdd3a0696bb9fabf7b
 
           <td className="p-4">
             <div className="font-extrabold text-[#0B1A42] text-[15px]">{fullName}</div>
