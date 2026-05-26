@@ -29,12 +29,13 @@ const distributionService = {
     }
   },
 
-  // Barcha fermerlarni umumiy qarzi
-  getFarmerBalancesSummary: async (page = 0, size = 10) => {
+  // Barcha fermerlarni umumiy qarzi (Qidiruv bilan)
+  getFarmerBalancesSummary: async (search = '', page = 0, size = 15) => {
     try {
       const response = await api.get(`${BASE_URL}/balances/summary`, {
-        params: { page, size }
+        params: { search, page, size }
       });
+      // Backenddan kutilgan 'content' ro'yxati qaytadi
       return response.data?.data?.content || [];
     } catch (error) {
       console.error("Balans xulosalarini olishda xatolik:", error);

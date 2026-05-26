@@ -1,24 +1,38 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Phone, Package, Briefcase, AlertCircle, ChevronDown, ChevronUp, Loader2, Receipt } from 'lucide-react';
+import { Search, Phone, Package, ChevronDown, ChevronUp, Loader2, Receipt, AlertCircle } from 'lucide-react';
 import distributionService from '../../services/distributionService'; 
+
+// Debounce (Tez yozganda serverni qotirmaslik uchun)
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 const FarmerBalancesPage = () => {
   const [farmersSummary, setFarmersSummary] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   
+  const debouncedSearch = useDebounce(searchQuery, 500); // 🟢 500ms kutib keyin izlaydi
+
   const [expandedFarmerId, setExpandedFarmerId] = useState(null);
   const [loadingDetailsId, setLoadingDetailsId] = useState(null);
   const [farmerDetails, setFarmerDetails] = useState({});
 
+  // Izlash yozuvi o'zgarganda faqat Serverdan tortamiz
   useEffect(() => {
-    fetchSummary();
-  }, []);
+    fetchSummary(debouncedSearch);
+  }, [debouncedSearch]);
 
-  const fetchSummary = async () => {
+  const fetchSummary = async (query = '') => {
     try {
       setIsLoading(true);
-      const data = await distributionService.getFarmerBalancesSummary(0, 50);
+      // 🟢 Frontend array.filter() EMAS, balki Backendga search yuborilmoqda
+      const data = await distributionService.getFarmerBalancesSummary(query, 0, 50);
       setFarmersSummary(data || []);
     } catch (error) {
       console.error("Xatolik:", error);
@@ -27,15 +41,6 @@ const FarmerBalancesPage = () => {
     }
   };
 
-  const filteredFarmers = useMemo(() => {
-    if (!searchQuery.trim()) return farmersSummary;
-    const query = searchQuery.toLowerCase();
-    return farmersSummary.filter(f => 
-      f.farmerFullName?.toLowerCase().includes(query) || 
-      f.farmerPhone?.includes(query)
-    );
-  }, [farmersSummary, searchQuery]);
-
   const handleToggleFarmer = async (farmerId) => {
     if (expandedFarmerId === farmerId) {
       setExpandedFarmerId(null);
@@ -43,7 +48,6 @@ const FarmerBalancesPage = () => {
     }
 
     setExpandedFarmerId(farmerId);
-
     if (farmerDetails[farmerId]) return;
 
     try {
@@ -64,12 +68,7 @@ const FarmerBalancesPage = () => {
 
   const formatType = (type) => {
     if (!type) return "";
-    const types = {
-      "YOGOCH": "Yog'och",
-      "PLASTIK": "Plastik",
-      "KARTON": "Karton",
-      "TEMIR": "Temir"
-    };
+    const types = { "YOGOCH": "Yog'och", "PLASTIK": "Plastik", "KARTON": "Karton", "TEMIR": "Temir" };
     return types[type] || type;
   };
 
@@ -80,22 +79,13 @@ const FarmerBalancesPage = () => {
   return (
     <div className="p-4 md:p-6 lg:p-8 w-full max-w-[1400px] mx-auto min-h-screen flex flex-col font-inter text-slate-900 antialiased">
       
-      {/* ── HEADER (SAVAT TARQATISH USLUBIGA TO'LIQ MOSLANDI) ── */}
+      {/* ── HEADER ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div className="flex items-center gap-4">
-          {/* Savat tarqatish sahifasidagi kabi nafis yashil ikonka qutisi */}
-         
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-none">
-              Fermerlar qarzdorligi
-            </h1>
-            <p className="text-sm text-slate-400 mt-1.5 font-medium">
-              Fermerlarda qolib ketgan savatlar hisoboti
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-none">Fermerlar qarzdorligi</h1>
+          <p className="text-sm text-slate-400 mt-1.5 font-medium">Fermerlarda qolib ketgan savatlar hisoboti</p>
         </div>
 
-        {/* Statistika qutichasi (O'ng tomonda joylashgan qismi) */}
         <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-end">
           <div className="flex items-center gap-4 px-5 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
             <div className="text-center">
@@ -111,7 +101,7 @@ const FarmerBalancesPage = () => {
         </div>
       </div>
 
-      {/* ── QIDIRUV ── */}
+      {/* ── QIDIRUV (Serverdan) ── */}
       <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-6">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -131,7 +121,7 @@ const FarmerBalancesPage = () => {
           <Loader2 className="animate-spin text-emerald-600" size={32} />
           <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Yuklanmoqda...</span>
         </div>
-      ) : filteredFarmers.length === 0 ? (
+      ) : farmersSummary.length === 0 ? (
         <div className="bg-white p-16 rounded-3xl border border-slate-100 text-center flex flex-col items-center shadow-sm">
           <AlertCircle size={40} className="text-slate-200 mb-3" />
           <h3 className="text-base font-bold text-slate-900">Qarzdorlik topilmadi</h3>
@@ -139,7 +129,7 @@ const FarmerBalancesPage = () => {
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredFarmers.map((farmer) => {
+          {farmersSummary.map((farmer) => {
             const isExpanded = expandedFarmerId === farmer.farmerId;
             const isLoadingDetails = loadingDetailsId === farmer.farmerId;
             const detailData = farmerDetails[farmer.farmerId]; 
@@ -190,14 +180,13 @@ const FarmerBalancesPage = () => {
                   </div>
                 </button>
 
-                {/* Detallar */}
+                {/* Detallar (Haqiqiy Ma'lumot) */}
                 {isExpanded && detailData && !isLoadingDetails && (
                   <div className="bg-slate-50/60 border-t border-slate-100 px-6 py-5">
                     
                     <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/60">
                       <h4 className="text-xs font-bold text-slate-400 flex items-center gap-2">
-                        <Receipt size={14} />
-                        Savatlar bo'yicha hisob
+                        <Receipt size={14} /> Savatlar bo'yicha hisob
                       </h4>
                       <div className="text-right">
                         <span className="text-[11px] font-bold text-slate-400 mr-2">Umumiy qiymati:</span>
@@ -231,7 +220,7 @@ const FarmerBalancesPage = () => {
                               <span className="text-[8px] font-bold text-red-400 uppercase mt-0.5">ta</span>
                             </div>
                           </div>
-
+                          
                           <div className="flex items-center justify-between bg-slate-50/60 p-2.5 rounded-lg border border-slate-100/80 mt-1">
                             <div>
                               <p className="text-[10px] font-bold text-slate-400 mb-0.5">Asli narxi</p>
@@ -259,7 +248,6 @@ const FarmerBalancesPage = () => {
           })}
         </div>
       )}
-
     </div>
   );
 };

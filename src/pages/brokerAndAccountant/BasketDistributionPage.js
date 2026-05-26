@@ -26,28 +26,15 @@ export default function BasketDistributionPage() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedFarmer, setSelectedFarmer] = useState(null);
 
-  // O'ZGARISH: Boshlang'ich holatda ham yopiq turadi
   const [isStatsExpanded, setIsStatsExpanded] = useState(false); 
+
+  // 🟢 YANGLIK: Mock data olib tashlandi, Real data API dan keladi
+  const [debtDetails, setDebtDetails] = useState({ totalBaskets: 0, totalAmount: 0, baskets: [] });
+  const [isLoadingDebt, setIsLoadingDebt] = useState(false);
 
   const dropdownRef = useRef(null);
   const quantityInputRef = useRef(null);
   const historyListRef = useRef(null);
-
-  // MOCK DATA
-  const mockDebtDetails = {
-    totalBaskets: 300,
-    totalAmount: 1800000,
-    baskets: [
-      {
-        id: 1,
-        name: '8 lik savat',
-        material: 'PLASTIK',
-        quantity: 300,
-        unitPrice: 6000,
-        total: 1800000
-      }
-    ]
-  };
 
   const getInitials = (fullName) => {
     if (!fullName) return 'F';
@@ -103,15 +90,32 @@ export default function BasketDistributionPage() {
     setSelectedBasketStock(sel ? sel.quantity : 0);
   };
 
-  const handleSelectFarmer = (farmer) => {
+  // 🟢 YANGLIK: Fermerni tanlaganda haqiqiy qarzini tortib olib kelamiz
+  const handleSelectFarmer = async (farmer) => {
     setSelectedFarmer(farmer);
     setFormData({ ...formData, farmerId: farmer.id });
     setFarmerSearch(''); setSearchResults([]); setIsDropdownOpen(false);
-    
-    // O'ZGARISH: Fermer tanlanganda panel avtomatik yopiq holatda bo'ladi
     setIsStatsExpanded(false); 
+    
+    setIsLoadingDebt(true);
+    try {
+      const details = await distributionService.getFarmerBalanceDetails(farmer.id);
+      if (details) {
+        setDebtDetails({
+          totalBaskets: details.baskets?.reduce((sum, b) => sum + b.quantity, 0) || 0,
+          totalAmount: details.totalDebtSum || 0,
+          baskets: details.baskets || []
+        });
+      } else {
+        setDebtDetails({ totalBaskets: 0, totalAmount: 0, baskets: [] });
+      }
+    } catch (err) {
+      console.error(err);
+      setDebtDetails({ totalBaskets: 0, totalAmount: 0, baskets: [] });
+    } finally {
+      setIsLoadingDebt(false);
+    }
 
-    // TODO: Fetch debt data from backend here
     setTimeout(() => { if (quantityInputRef.current) quantityInputRef.current.focus(); }, 50);
   };
 
@@ -119,6 +123,13 @@ export default function BasketDistributionPage() {
     setSelectedFarmer(null); 
     setFormData({ ...formData, farmerId: '' }); 
     setIsStatsExpanded(false);
+    setDebtDetails({ totalBaskets: 0, totalAmount: 0, baskets: [] });
+  };
+
+  const formatType = (type) => {
+    if (!type) return "";
+    const types = { "YOGOCH": "Yog'och", "PLASTIK": "Plastik", "KARTON": "Karton", "TEMIR": "Temir" };
+    return types[type] || type;
   };
 
   const handleSubmit = async (e) => {
@@ -139,6 +150,10 @@ export default function BasketDistributionPage() {
         setSelectedBasketStock(updated);
         setFormData(prev => ({ ...prev, quantity: '' })); 
         if (historyListRef.current) historyListRef.current.scrollTop = 0;
+        
+        // Muvaffaqiyatdan keyin qarzni qayta yuklab qo'yamiz (yangilanadi)
+        handleSelectFarmer(selectedFarmer); 
+
         setTimeout(() => setSuccessId(null), 2500);
       }
     } catch (err) {
@@ -175,7 +190,7 @@ export default function BasketDistributionPage() {
           </div>
         ) : (
           <>
-            {/* YUQORI GRID: Forma va Tarix */}
+            {/* YUQORI GRID */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
               
               {/* ===== LEFT: FORM ===== */}
@@ -260,7 +275,6 @@ export default function BasketDistributionPage() {
                       value={formData.quantity}
                       onChange={e => setFormData({ ...formData, quantity: e.target.value })}
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-300 focus:border-[#1B5E20] focus:ring-4 focus:ring-green-500/10 rounded-lg text-slate-900 outline-none transition-all font-bold text-lg"
-                      
                       disabled={isSubmitting || !formData.basketId || !selectedFarmer} />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold pointer-events-none">dona</span>
                   </div>
@@ -361,22 +375,14 @@ export default function BasketDistributionPage() {
                     ))
                   )}
                 </div>
-
-                {distributions.length > 10 && (
-                  <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex-shrink-0">
-                    <button className="w-full flex items-center justify-center gap-1.5 text-[12px] font-bold text-[#1B5E20] hover:text-green-800 transition-colors uppercase tracking-wide">
-                      Barcha tarixni ko'rish <ChevronRight size={16} strokeWidth={2.5} />
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* ===== BOTTOM SECTION: Rasmdagi qarz va chek dizayni (Accordion) ===== */}
+            {/* ===== BOTTOM SECTION: HAQIQIY QARZ ===== */}
             {selectedFarmer && (
               <div className="mt-6 bg-white border border-green-500 rounded-xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
                 
-                {/* Accordion Sarlavhasi (Bosilganda ochilib/yopiladi) */}
+                {/* Accordion Sarlavhasi */}
                 <div 
                   onClick={() => setIsStatsExpanded(!isStatsExpanded)}
                   className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-green-50/30 gap-4 cursor-pointer hover:bg-green-50/60 transition-colors"
@@ -396,9 +402,12 @@ export default function BasketDistributionPage() {
                   <div className="flex items-center justify-between sm:justify-end gap-6 sm:border-l sm:border-slate-200 sm:pl-6">
                     <div className="text-right">
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Jami qarz</p>
-                      <p className="font-black text-red-500 text-xl flex items-center justify-end gap-1.5">
-                        <Package size={18} className="text-red-400" /> {mockDebtDetails.totalBaskets} ta
-                      </p>
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <p className="font-black text-red-500 text-xl flex items-center justify-end gap-1.5">
+                          {isLoadingDebt ? <Loader2 size={16} className="animate-spin text-red-400"/> : <Package size={18} className="text-red-400" />} 
+                          {debtDetails.totalBaskets} ta
+                        </p>
+                      </div>
                     </div>
                     <button className="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center transition-colors">
                       {isStatsExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
@@ -406,8 +415,8 @@ export default function BasketDistributionPage() {
                   </div>
                 </div>
 
-                {/* Kengaytirilgan ma'lumotlar (Chek) - Faqat ochiq holatda ko'rinadi */}
-                {isStatsExpanded && (
+                {/* Kengaytirilgan ma'lumotlar */}
+                {isStatsExpanded && !isLoadingDebt && (
                   <div className="border-t border-green-100">
                     <div className="px-5 py-4 bg-slate-50/50 flex items-center justify-between">
                       <div className="flex items-center gap-2 text-slate-700 font-bold text-sm">
@@ -416,51 +425,55 @@ export default function BasketDistributionPage() {
                       <div className="text-right">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Jami Summa:</p>
                         <p className="font-black text-[#1B5E20] text-lg leading-none">
-                          {mockDebtDetails.totalAmount.toLocaleString()} <span className="text-xs font-bold text-slate-500">so'm</span>
+                          {debtDetails.totalAmount?.toLocaleString()} <span className="text-xs font-bold text-slate-500">so'm</span>
                         </p>
                       </div>
                     </div>
 
                     <div className="p-5 pt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Savat Kartochkasi */}
-                      {mockDebtDetails.baskets.map((basket) => (
-                        <div key={basket.id} className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm hover:border-green-200 transition-colors">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center border border-blue-100 flex-shrink-0">
-                                <Box size={20} />
-                              </div>
-                              <div>
-                                <h4 className="font-bold text-slate-800">{basket.name}</h4>
-                                <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded mt-1 inline-block uppercase tracking-wider">
-                                  {basket.material}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="bg-red-50 text-red-500 rounded-lg px-3 py-1.5 text-center border border-red-100">
-                              <p className="font-black text-xl leading-none">{basket.quantity}</p>
-                              <p className="text-[9px] font-bold uppercase tracking-widest mt-1 text-red-400">Dona</p>
-                            </div>
-                          </div>
-                          
-                          <div className="bg-slate-50 rounded-lg p-3 flex items-center justify-between border border-slate-100">
-                            <div>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">1 Dona Narxi</p>
-                              <p className="font-bold text-slate-700 text-sm">{basket.unitPrice.toLocaleString()} <span className="text-[10px] font-bold text-slate-400 uppercase">so'm</span></p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Umumiy</p>
-                              <p className="font-black text-[#1B5E20] text-base">{basket.total.toLocaleString()} <span className="text-[10px] font-bold text-slate-400 uppercase">so'm</span></p>
-                            </div>
-                          </div>
+                      {debtDetails.baskets.length === 0 ? (
+                        <div className="col-span-2 text-center text-sm font-medium text-slate-500 py-6">
+                          Fermerda qarz topilmadi.
                         </div>
-                      ))}
+                      ) : (
+                        debtDetails.baskets.map((basket, idx) => (
+                          <div key={idx} className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm hover:border-green-200 transition-colors">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center border border-blue-100 flex-shrink-0">
+                                  <Box size={20} />
+                                </div>
+                                <div>
+                                  <h4 className="font-bold text-slate-800">{basket.name}</h4>
+                                  <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded mt-1 inline-block uppercase tracking-wider">
+                                    {formatType(basket.type)}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="bg-red-50 text-red-500 rounded-lg px-3 py-1.5 text-center border border-red-100">
+                                <p className="font-black text-xl leading-none">{basket.quantity}</p>
+                                <p className="text-[9px] font-bold uppercase tracking-widest mt-1 text-red-400">Dona</p>
+                              </div>
+                            </div>
+                            
+                            <div className="bg-slate-50 rounded-lg p-3 flex items-center justify-between border border-slate-100">
+                              <div>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">1 Dona Narxi</p>
+                                <p className="font-bold text-slate-700 text-sm">{basket.unitPrice?.toLocaleString()} <span className="text-[10px] font-bold text-slate-400 uppercase">so'm</span></p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Umumiy</p>
+                                <p className="font-black text-[#1B5E20] text-base">{basket.totalPrice?.toLocaleString()} <span className="text-[10px] font-bold text-slate-400 uppercase">so'm</span></p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 )}
               </div>
             )}
-            {/* ============================================================== */}
           </>
         )}
       </div>
