@@ -127,10 +127,10 @@ export default function AuthPage() {
     }
   };
 
-  return (
+ return (
     <div 
       className="min-h-screen flex flex-col font-sans relative bg-cover bg-center bg-no-repeat bg-fixed"
-      style={{ backgroundImage: "url('/assets/peach.jpg')" }}
+      style={{ backgroundImage: "url('/peach.jpg')" }}
     >
       {/* Qoraytirilgan fon pardasi */}
       <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm z-0 pointer-events-none"></div>
