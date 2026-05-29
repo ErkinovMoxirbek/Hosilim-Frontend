@@ -1,4 +1,4 @@
-import api from "../api/Axios"; // O'zingizdagi Axios instance yo'lini ko'rsating
+import api from "../../api/Axios"; // O'zingizdagi Axios instance yo'lini ko'rsating
 
 const API_URL = '/admin/collection-points';
 

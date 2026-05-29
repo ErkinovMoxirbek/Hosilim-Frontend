@@ -1,4 +1,4 @@
-import api from "../api/Axios";  
+import api from "../../api/Axios";  
 
 
 export class ApiError extends Error {
