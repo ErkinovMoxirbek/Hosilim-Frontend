@@ -19,7 +19,7 @@ export default function BrokersManagement() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: '', surname: '', phone: '', password: '', collectionPointId: ''
+    name: '', surname: '', phone: '',  collectionPointId: ''
   });
 
   // Debounce for search
@@ -55,7 +55,7 @@ export default function BrokersManagement() {
   const handleOpenModal = async () => {
     setModalOpen(true);
     setErrorMsg(null);
-    setFormData({ name: '', surname: '', phone: '', password: '', collectionPointId: '' });
+    setFormData({ name: '', surname: '', phone: '', collectionPointId: '' });
     
     // Oynani ochganda darhol bo'sh punktlarni tortib kelamiz
     try {
@@ -257,13 +257,6 @@ export default function BrokersManagement() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Parol <span className="text-rose-500">*</span></label>
-                  <div className="relative">
-                    <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input required type="text" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:border-indigo-500 outline-none" />
-                  </div>
-                </div>
 
                 <div className="pt-3 border-t border-slate-100">
                   <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Bo'sh Qabul Punktiga (Sexga) Ulash <span className="text-rose-500">*</span></label>

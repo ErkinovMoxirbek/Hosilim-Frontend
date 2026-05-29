@@ -6,7 +6,7 @@ import {
   Wallet, CreditCard, Landmark, X
 } from 'lucide-react';
 import cropService from '../../services/cropService';
-import { paymentService } from '../../services/paymentService'; 
+import { paymentService } from '../../services/paymentService';
 
 const getTodayString = () => new Date().toISOString().split('T')[0];
 const fmt = (n) => (n ?? 0).toLocaleString('uz-UZ');
@@ -38,7 +38,7 @@ export default function ReportPage() {
 
   const [groupedData, setGroupedData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [refreshTrigger, setRefreshTrigger] = useState(0); 
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [expandedId, setExpandedId] = useState(null);
   const [details, setDetails] = useState([]);
@@ -51,11 +51,21 @@ export default function ReportPage() {
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
   const [paymentForm, setPaymentForm] = useState({ amount: '', method: 'CASH', comment: '' });
 
+  const [fruitTypes, setFruitTypes] = useState([]);
+  const [fruitTypeId, setFruitTypeId] = useState(null);
+
+  useEffect(() => {
+    cropService.getFruitTypes().then(setFruitTypes);
+  }, []);
+
+
   useEffect(() => {
     const fetchGroupedData = async () => {
       setIsLoading(true);
       try {
-        const res = await cropService.getReportsGrouped(startDate, endDate, search, 0, 50);
+        const res = await cropService.getReportsGrouped(
+          startDate, endDate, search, 0, 50, fruitTypeId  // ← fruitTypeId qo'shildi
+        );
         setGroupedData(res.content || []);
       } catch (error) {
         console.error("Ma'lumotlarni yuklashda xato:", error);
@@ -63,9 +73,10 @@ export default function ReportPage() {
         setIsLoading(false);
       }
     };
-    const timer = setTimeout(fetchGroupedData, 500);
+    const timer = setTimeout(fetchGroupedData, 300);
     return () => clearTimeout(timer);
-  }, [startDate, endDate, search, refreshTrigger]);
+  }, [startDate, endDate, search, fruitTypeId, refreshTrigger]);  // ← fruitTypeId qo'shildi
+
 
   const toggleRow = async (farmerId) => {
     if (expandedId === farmerId) {
@@ -77,7 +88,9 @@ export default function ReportPage() {
     setExpandedId(farmerId);
     setIsDetailsLoading(true);
     try {
-      const res = await cropService.getReportsDetails(farmerId, startDate, endDate);
+      const res = await cropService.getReportsDetails(
+        farmerId, startDate, endDate, fruitTypeId
+      );
       setDetails(Array.isArray(res.transactions) ? res.transactions : []);
       setDetailsSummary({
         periodEarned: res.periodEarned ?? 0,
@@ -100,9 +113,9 @@ export default function ReportPage() {
       const url = window.URL.createObjectURL(new Blob([blobData]));
       const link = document.createElement('a');
       link.href = url;
-      const fileName = startDate === endDate 
-          ? `Kunlik_Hisobot_${startDate}.xlsx` 
-          : `Hisobot_${startDate}_dan_${endDate}.xlsx`;
+      const fileName = startDate === endDate
+        ? `Kunlik_Hisobot_${startDate}.xlsx`
+        : `Hisobot_${startDate}_dan_${endDate}.xlsx`;
       link.setAttribute('download', fileName);
       document.body.appendChild(link);
       link.click();
@@ -116,7 +129,7 @@ export default function ReportPage() {
   };
 
   const openPaymentModal = (farmer, e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     const debt = getPeriodBalance(farmer);
     setPaymentModal({ isOpen: true, farmer, suggestedAmount: debt });
     setPaymentForm({ amount: debt > 0 ? debt : '', method: 'CASH', comment: '' });
@@ -127,7 +140,7 @@ export default function ReportPage() {
     if (!paymentForm.amount || Number(paymentForm.amount) <= 0) {
       return alert("Summani to'g'ri kiriting!");
     }
-    
+
     try {
       setIsSubmittingPayment(true);
       await paymentService.makePayment({
@@ -137,17 +150,16 @@ export default function ReportPage() {
         transactionType: 'PAYMENT',
         receiptNumber: '',
         comment: `Hisobot sahifasidan oraliq to'lov`,
-        // 🟢 MUHIM JOYI: Sanalar ham Backendga ketyapti!
-        startDate: startDate, 
-        endDate: endDate      
+        startDate: startDate,
+        endDate: endDate
       });
-      
+
       setPaymentModal({ isOpen: false, farmer: null, suggestedAmount: 0 });
-      setRefreshTrigger(prev => prev + 1); 
-      
+      setRefreshTrigger(prev => prev + 1);
+
       if (expandedId === paymentModal.farmer.farmerId) {
-        toggleRow(paymentModal.farmer.farmerId); 
-        setTimeout(() => toggleRow(paymentModal.farmer.farmerId), 100); 
+        toggleRow(paymentModal.farmer.farmerId);
+        setTimeout(() => toggleRow(paymentModal.farmer.farmerId), 100);
       }
 
     } catch (err) {
@@ -189,6 +201,29 @@ export default function ReportPage() {
             <input type="text" placeholder="Fermerning F.I.O yoki raqami..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl font-medium text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all w-full" />
           </div>
 
+          {/* Meva turi filtri */}
+          <div className="relative w-full sm:w-52">
+            <select
+              value={fruitTypeId ?? ''}
+              onChange={(e) => {
+                setFruitTypeId(e.target.value || null);
+                setExpandedId(null);   // ochiq qatorni yopamiz
+              }}
+              className="w-full pl-4 pr-9 py-2.5 bg-gray-50 border border-gray-300 rounded-xl
+                   font-bold text-sm text-gray-700 outline-none appearance-none cursor-pointer
+                   focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+            >
+              <option value="">Barcha mevalar</option>
+              {fruitTypes.map(ft => (
+                <option key={ft.id} value={ft.id}>{ft.name + " " + ft.quality}</option>
+              ))}
+            </select>
+            <ChevronDown
+              size={14}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            />
+          </div>
+
           <button onClick={downloadExcel} disabled={isDownloading || groupedData.length === 0} className="flex items-center justify-center gap-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-200 hover:border-emerald-500 px-4 py-2.5 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto">
             {isDownloading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
             <span className="hidden sm:inline">Excel</span>
@@ -197,11 +232,11 @@ export default function ReportPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
-        <SummaryCard icon={Scale}        title="Sof vazn" value={`${fmtKg(totalSummary.weight)} kg`}   color="text-emerald-600" bg="bg-emerald-50" border="border-emerald-100" />
-        <SummaryCard icon={Box}          title="Savatlar soni"   value={`${totalSummary.baskets} ta`}          color="text-orange-600" bg="bg-orange-50"  border="border-orange-100" />
-        <SummaryCard icon={Banknote}     title="Jami Summa"      value={`${fmt(totalSummary.amount)} UZS`}     color="text-blue-600"   bg="bg-blue-50"    border="border-blue-100" />
-        <SummaryCard icon={CheckCircle2} title="To'langan"       value={`${fmt(totalSummary.paid)} UZS`}       color="text-teal-600"   bg="bg-teal-50"    border="border-teal-100" />
-        <SummaryCard icon={AlertCircle}  title="Qoldiq"   value={`${fmt(totalSummary.debt)} UZS`}       color="text-red-500"    bg="bg-red-50"     border="border-red-100" />
+        <SummaryCard icon={Scale} title="Sof vazn" value={`${fmtKg(totalSummary.weight)} kg`} color="text-emerald-600" bg="bg-emerald-50" border="border-emerald-100" />
+        <SummaryCard icon={Box} title="Savatlar soni" value={`${totalSummary.baskets} ta`} color="text-orange-600" bg="bg-orange-50" border="border-orange-100" />
+        <SummaryCard icon={Banknote} title="Jami Summa" value={`${fmt(totalSummary.amount)} UZS`} color="text-blue-600" bg="bg-blue-50" border="border-blue-100" />
+        <SummaryCard icon={CheckCircle2} title="To'langan" value={`${fmt(totalSummary.paid)} UZS`} color="text-teal-600" bg="bg-teal-50" border="border-teal-100" />
+        <SummaryCard icon={AlertCircle} title="Qoldiq" value={`${fmt(totalSummary.debt)} UZS`} color="text-red-500" bg="bg-red-50" border="border-red-100" />
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -216,7 +251,7 @@ export default function ReportPage() {
                 <th className="p-4">Jami Summa</th>
                 <th className="p-4">To'langan</th>
                 <th className="p-4">Qarz (Qoldiq)</th>
-                <th className="p-4 text-center">Amal</th> 
+                <th className="p-4 text-center">Amal</th>
               </tr>
             </thead>
             <tbody>
@@ -258,11 +293,11 @@ export default function ReportPage() {
                           )}
                         </td>
                         <td className="p-4 text-center">
-                           {!isFullyPaid && (
-                             <button onClick={(e) => openPaymentModal(farmer, e)} className="px-3 py-1.5 bg-slate-900 text-white text-[11px] font-black rounded-lg hover:bg-emerald-600 transition-all shadow-sm active:scale-95 uppercase tracking-wider">
-                               To'lov
-                             </button>
-                           )}
+                          {!isFullyPaid && (
+                            <button onClick={(e) => openPaymentModal(farmer, e)} className="px-3 py-1.5 bg-slate-900 text-white text-[11px] font-black rounded-lg hover:bg-emerald-600 transition-all shadow-sm active:scale-95 uppercase tracking-wider">
+                              To'lov
+                            </button>
+                          )}
                         </td>
                       </tr>
 
@@ -272,9 +307,9 @@ export default function ReportPage() {
                             <div className="p-4 pl-14 pr-6 py-4 space-y-3">
                               {detailsSummary && (
                                 <div className="grid grid-cols-3 gap-3">
-                                  <MiniCard label="Davr daromadi"    value={`${fmt(detailsSummary.periodEarned)} UZS`}    color="text-blue-600"   bg="bg-blue-50" />
-                                  <MiniCard label="Davr to'lovi"     value={`${fmt(detailsSummary.periodPaid)} UZS`}      color="text-teal-600"   bg="bg-teal-50" />
-                                  <MiniCard label="Davr farqi (qarz)" value={`${fmt(detailsSummary.periodDifference)} UZS`} color="text-red-500"  bg="bg-red-50" />
+                                  <MiniCard label="Davr daromadi" value={`${fmt(detailsSummary.periodEarned)} UZS`} color="text-blue-600" bg="bg-blue-50" />
+                                  <MiniCard label="Davr to'lovi" value={`${fmt(detailsSummary.periodPaid)} UZS`} color="text-teal-600" bg="bg-teal-50" />
+                                  <MiniCard label="Davr farqi (qarz)" value={`${fmt(detailsSummary.periodDifference)} UZS`} color="text-red-500" bg="bg-red-50" />
                                 </div>
                               )}
                               <div className="bg-white border border-blue-100 rounded-xl overflow-hidden shadow-sm">
@@ -346,7 +381,7 @@ export default function ReportPage() {
 
       {paymentModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => !isSubmittingPayment && setPaymentModal({isOpen:false, farmer:null, suggestedAmount:0})} />
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => !isSubmittingPayment && setPaymentModal({ isOpen: false, farmer: null, suggestedAmount: 0 })} />
           <div className="relative w-full max-w-[420px] bg-white rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-8">
               <div className="flex items-start justify-between mb-6">
@@ -354,7 +389,7 @@ export default function ReportPage() {
                   <h2 className="text-xl font-black text-slate-900 tracking-tight">Oraliq To'lov</h2>
                   <p className="text-sm font-bold text-emerald-600 mt-0.5">{paymentModal.farmer?.farmerFullName}</p>
                 </div>
-                <button onClick={() => !isSubmittingPayment && setPaymentModal({isOpen:false, farmer:null, suggestedAmount:0})} className="p-2 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all"><X size={20} /></button>
+                <button onClick={() => !isSubmittingPayment && setPaymentModal({ isOpen: false, farmer: null, suggestedAmount: 0 })} className="p-2 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all"><X size={20} /></button>
               </div>
 
               <div className="mb-6 p-5 bg-emerald-50 border border-emerald-100 rounded-[24px] flex items-center justify-between">
@@ -366,19 +401,19 @@ export default function ReportPage() {
                 <div>
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">To'lov summasi</label>
                   <div className="relative">
-                    <input 
-                      required 
-                      autoFocus 
+                    <input
+                      required
+                      autoFocus
                       type="text" // 🟢 YANGLIK: number o'rniga text qildik, probel ishlashi uchun
                       inputMode="numeric" // Telefonda faqat raqamlar klaviaturasi chiqishi uchun
-                      value={paymentForm.amount ? String(paymentForm.amount).replace(/\B(?=(\d{3})+(?!\d))/g, " ") : ''} 
+                      value={paymentForm.amount ? String(paymentForm.amount).replace(/\B(?=(\d{3})+(?!\d))/g, " ") : ''}
                       onChange={(e) => {
                         // 🟢 YANGLIK: Faqat raqamlarni ajratib olib state'ga saqlaymiz
                         const rawValue = e.target.value.replace(/\D/g, '');
                         setPaymentForm({ ...paymentForm, amount: rawValue });
-                      }} 
-                      placeholder="0" 
-                      className="w-full px-6 py-5 bg-slate-50 border border-slate-200 rounded-[20px] text-3xl font-mono font-black text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all tracking-wide" 
+                      }}
+                      placeholder="0"
+                      className="w-full px-6 py-5 bg-slate-50 border border-slate-200 rounded-[20px] text-3xl font-mono font-black text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all tracking-wide"
                     />
                     <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-slate-300 uppercase font-mono">uzs</span>
                   </div>

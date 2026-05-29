@@ -49,12 +49,25 @@ const cropService = {
     }
   },
 
-  getReportsGrouped: async (startDate, endDate, search = '', page = 0, size = 50) => {
+  // ← YANGI: Meva turlarini yuklash
+  getFruitTypes: async () => {
+    try {
+      const response = await api.get('/fruit-types/active');
+      return response.data?.data || [];
+    } catch (error) {
+      console.error("Meva turlarini yuklashda xato:", error);
+      return [];
+    }
+  },
+
+  // fruitTypeId parametri qo'shildi
+  getReportsGrouped: async (startDate, endDate, search = '', page = 0, size = 50, fruitTypeId = null) => {
     try {
       const params = { page, size };
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
       if (search) params.search = search;
+      if (fruitTypeId) params.fruitTypeId = fruitTypeId;  // ← YANGI
 
       const response = await api.get(`${BASE_URL}/report/grouped`, { params });
       return response.data?.data || { content: [], totalPages: 0 };
@@ -64,15 +77,15 @@ const cropService = {
     }
   },
 
-  // cropService.js — getReportsDetails
-  getReportsDetails: async (farmerId, startDate, endDate) => {
+  // fruitTypeId parametri qo'shildi
+  getReportsDetails: async (farmerId, startDate, endDate, fruitTypeId = null) => {
     try {
       const params = {};
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
+      if (fruitTypeId) params.fruitTypeId = fruitTypeId;  // ← YANGI
 
       const response = await api.get(`${BASE_URL}/report/${farmerId}/details`, { params });
-      // Backend: { data: { transactions: [], periodEarned, periodPaid, periodDifference } }
       return response.data?.data || { transactions: [], periodEarned: 0, periodPaid: 0, periodDifference: 0 };
     } catch (error) {
       console.error("Batafsil tarixni yuklashda xato:", error);
@@ -96,7 +109,7 @@ const cropService = {
   downloadReceipt: async (transactionId) => {
     try {
       const response = await api.get(`${BASE_URL}/${transactionId}/receipt/download`, {
-        responseType: 'blob' 
+        responseType: 'blob'
       });
       return response.data;
     } catch (error) {
