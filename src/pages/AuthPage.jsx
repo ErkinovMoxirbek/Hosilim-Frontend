@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 import { authService } from "../services/authService";
-import { useAuth } from "../hooks/useAuth"; // ✅ MUHIM
+import { useAuth } from "../hooks/useAuth"; 
 
 const RESEND_SECONDS = 60;
 
@@ -44,7 +44,7 @@ export default function AuthPage() {
   const otpRef = useRef(null);
   const abortRef = useRef(null);
 
-  // ✅ Agar user allaqachon login bo‘lsa, bu sahifada turmasin
+  
   useEffect(() => {
     if (!loading && user) {
       navigate("/dashboard", { replace: true });
