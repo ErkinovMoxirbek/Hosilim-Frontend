@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   Search, X, Wallet, CreditCard, Landmark, Loader2,
-  ArrowDownRight, ArrowUpRight, ChevronLeft, ChevronRight,
-  SlidersHorizontal, ArrowUpDown, ArrowUp, ArrowDown, Calendar
+  ChevronLeft, ChevronRight,
+  ArrowUpDown, ArrowUp, ArrowDown, Calendar
 } from "lucide-react";
 import { paymentService } from '../../../services/paymentService';
 

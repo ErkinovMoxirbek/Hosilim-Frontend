@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fridgeService } from '../../../services/fridgeService'; 
 import { stockService } from '../../../services/stockService'; 
 import { 
-  ThermometerSnowflake, Search, Calendar, 
+  Search, Calendar, 
   ArrowDownLeft, ArrowUpRight, Package, Box, Filter, 
   ChevronLeft, ChevronRight, Undo2, MapPin
 } from 'lucide-react';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, ChevronLeft, ChevronRight, Loader2, RefreshCcw, Download, Apple, Scale, DollarSign, List, ChevronDown, ChevronUp, Printer } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Loader2, RefreshCcw, Apple, Scale, DollarSign, List, ChevronDown, ChevronUp, Printer } from 'lucide-react';
 import cropService from '../../services/cropService';
 
 export default function ReceiveHistoryPage() {

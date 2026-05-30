@@ -4,7 +4,7 @@ import basketService from '../../services/basketService';
 import { useAuth } from '../../hooks/useAuth';
 import { 
   Loader2, Search, X, Check, Package, Clock, ChevronRight, User, 
-  ShoppingBasket, Hash, Phone, Receipt, Box, ChevronUp, ChevronDown 
+  ShoppingBasket, Hash, Phone, Receipt, Box, ChevronDown, ChevronUp
 } from 'lucide-react';
 
 export default function BasketDistributionPage() {

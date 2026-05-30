@@ -3,7 +3,7 @@ import { collectionPointService } from '../../services/admin/collectionPointServ
 import {
   MapPin, Search, Plus, MoreVertical, Eye, Edit2,
   Trash2, RefreshCw, CheckCircle, DollarSign, Save, X,
-  Users, Building2, Navigation, UserCheck, Clock, ShieldAlert, ChevronLeft, ChevronRight
+  Users, Building2, Navigation, Clock, ShieldAlert, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 export default function CollectionPointsManagement() {

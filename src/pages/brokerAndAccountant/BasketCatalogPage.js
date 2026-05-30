@@ -3,7 +3,7 @@ import basketService from '../../services/basketService';
 import { useAuth } from '../../hooks/useAuth'; 
 import { 
   Package, Plus, Scale, CheckCircle2, 
-  XCircle, Edit2, Trash2, X, Loader2, ArrowDownToLine, Layers
+  XCircle, Edit2, Trash2, X, Loader2, ArrowDownToLine
 } from 'lucide-react';
 
 export default function BasketCatalogPage() {

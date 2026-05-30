@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Search, Plus, RefreshCw, UserCheck, Phone, MapPin, Building2, 
-  ShieldAlert, UserPlus, X, Lock, User, Loader2, ChevronLeft, ChevronRight
+  Search, Plus, RefreshCw, UserCheck, Phone, Building2, 
+  ShieldAlert, UserPlus, X, User, Loader2, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { adminBrokerService } from '../../services/admin/adminBrokerService';
 

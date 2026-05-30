@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Search, Calendar, ChevronLeft, ChevronRight, Loader2, RefreshCcw, ArrowDownCircle, ArrowUpCircle, AlertCircle } from 'lucide-react';
+import { Box, Search, Calendar, ChevronLeft, ChevronRight, Loader2, ArrowDownCircle, ArrowUpCircle, AlertCircle } from 'lucide-react';
 import distributionService from '../../services/distributionService';
 
 // Transaction turini chiroyli ko'rsatish
