@@ -153,6 +153,7 @@ export default function Sidebar({ user, onLogout }) {
         { id: "balances",     label: "Fermerlar Qarzi",       icon: Briefcase,     to: `${basePath}/baskets/balances` },
         { id: "transaction",  label: "Savatlar Aylanmasi",    icon: RefreshCcw,    to: `${basePath}/baskets/transaction` },
         { id: "history",      label: "Umumiy Tarix",          icon: History,       to: `${basePath}/baskets/history` },
+        { id: "farmers",      label: "Fermerlar",             icon: Users,         to: `${basePath}/baskets/farmers` },
       ],
     },
     inventory: {

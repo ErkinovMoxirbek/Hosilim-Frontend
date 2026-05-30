@@ -103,6 +103,7 @@ const BrokerLayout = () => {
               <Route path="baskets/balances" element={<FarmerBalancesPage />} />
               <Route path="baskets/transaction" element={<TransactionBasketsPage />} />
               <Route path="baskets/history" element={<BasketHistoryPage />} />
+              <Route path="baskets/farmers" element={<FarmerPage />} />
 
               {/* HALADELNIK YO'LLARI */}
               <Route path="inventory" element={<Navigate to="stocks" replace />} />
