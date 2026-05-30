@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import fruitTypeService from '../../services/fruitTypeService';
 import { 
   Database, 
@@ -38,33 +38,8 @@ export default function FruitCatalogPage() {
     description: ''
   });
 
-  useEffect(() => {
-    fetchInitialData();
-  }, []);
-
-  // Qidiruv ishlashi uchun
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredFruits(fruits);
-    } else {
-      const lowerQ = searchQuery.toLowerCase();
-      setFilteredFruits(
-        fruits.filter(f => 
-          f.name?.toLowerCase().includes(lowerQ) || 
-          f.quality?.toLowerCase().includes(lowerQ) ||
-          (qualityMap[f.quality] && qualityMap[f.quality].toLowerCase().includes(lowerQ))
-        )
-      );
-    }
-  }, [searchQuery, fruits, qualityMap]);
-
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, type, message });
-    setTimeout(() => setToast({ show: false, type: '', message: '' }), 4000);
-  };
-
   // YANGI MANTIQ: Ikkala ma'lumotni (Meva va Navlarni) birdaniga tortish
-  const fetchInitialData = async () => {
+  const fetchInitialData = useCallback(async () => {
     setIsLoading(true);
     try {
       const [fruitsData, qualitiesData] = await Promise.all([
@@ -93,6 +68,31 @@ export default function FruitCatalogPage() {
     } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
+
+  // Qidiruv ishlashi uchun
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredFruits(fruits);
+    } else {
+      const lowerQ = searchQuery.toLowerCase();
+      setFilteredFruits(
+        fruits.filter(f => 
+          f.name?.toLowerCase().includes(lowerQ) || 
+          f.quality?.toLowerCase().includes(lowerQ) ||
+          (qualityMap[f.quality] && qualityMap[f.quality].toLowerCase().includes(lowerQ))
+        )
+      );
+    }
+  }, [searchQuery, fruits, qualityMap]);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: '', message: '' }), 4000);
   };
 
   // Faqat mevalarni qayta yuklash (Qo'shgandan keyin)

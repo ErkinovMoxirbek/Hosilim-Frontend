@@ -1,5 +1,5 @@
-import React, { useMemo, useEffect, useState } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import React, { useMemo, useState, useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 import AdminLayout from "./layouts/AdminLayout";

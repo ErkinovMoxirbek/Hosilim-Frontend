@@ -39,7 +39,6 @@ export default function Sidebar({ user, onLogout }) {
   const isAdmin      = basePath.includes("admin");
   const isAccountant = basePath.includes("accountant");
   const isBroker     = basePath.includes("broker");
-  const isFarmer     = basePath.includes("farmer");
 
   const [currentView, setCurrentView] = useState("main");
 
@@ -76,7 +75,7 @@ export default function Sidebar({ user, onLogout }) {
 
   if (isAdmin) {
     mainItems = [
-      { id: "dashboard",          label: "Bosh sahifa",         icon: Home,      to: basePath },
+      { id: "dashboard",          label: "Bosh sahifa",       icon: Home,      to: basePath },
       { id: "fruit-types",        label: "Meva Katalogi",       icon: Database,  to: `${basePath}/fruit-types` },
       { id: "collection-points",  label: "Yig'ish Punktlari",   icon: MapPin,    to: `${basePath}/collection-points` },
       { id: "brokers",            label: "Brokerlar",           icon: Truck,     to: `${basePath}/brokers` },
