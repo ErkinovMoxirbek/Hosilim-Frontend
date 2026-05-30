@@ -3,7 +3,7 @@ import distributionService from '../../services/distributionService';
 import basketService from '../../services/basketService';
 import { useAuth } from '../../hooks/useAuth';
 import { 
-  Loader2, Search, X, Check, Package, Clock, ChevronRight, User, 
+  Loader2, Search, X, Check, Package, Clock, User, 
   ShoppingBasket, Hash, Phone, Receipt, Box, ChevronDown, ChevronUp
 } from 'lucide-react';
 

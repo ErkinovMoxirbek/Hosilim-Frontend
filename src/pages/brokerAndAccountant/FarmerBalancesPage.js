@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Phone, Package, ChevronDown, ChevronUp, Loader2, Receipt, AlertCircle } from 'lucide-react';
+import { Search, Phone, Package, ChevronDown, Loader2, Receipt, AlertCircle } from 'lucide-react';
 import distributionService from '../../services/distributionService'; 
 
 // Debounce (Tez yozganda serverni qotirmaslik uchun)
