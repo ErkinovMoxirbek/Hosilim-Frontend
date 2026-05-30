@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { collectionPointService } from '../../services/collectionPointService'; 
+import { collectionPointService } from '../../services/admin/collectionPointService'; 
 import {
   MapPin, Search, Plus, MoreVertical, Eye, Edit2,
   Trash2, RefreshCw, CheckCircle, DollarSign, Save, X,
-  Users, TrendingUp, Building2, Navigation, UserCheck, Clock, ShieldAlert,ChevronLeft, ChevronRight
+  Users, Building2, Navigation, UserCheck, Clock, ShieldAlert, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 export default function CollectionPointsManagement() {
@@ -13,7 +13,7 @@ export default function CollectionPointsManagement() {
   const [tableLoading, setTableLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   
-  const [filters, setFilters] = useState({ search: '', region: 'ALL', ownerId: 'ALL', status: 'ALL' });
+  const [filters, setFilters] = useState({ search: '', region: 'ALL', status: 'ALL' });
   const [searchText, setSearchText] = useState('');
   
   const [pagination, setPagination] = useState({ page: 1, limit: 15, total: 0, totalPages: 0 });
@@ -21,7 +21,6 @@ export default function CollectionPointsManagement() {
   const [formData, setFormData] = useState({});
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [bigBrokers, setBigBrokers] = useState([]);
 
   // ======================= QIDIRUV (DEBOUNCE) =======================
   useEffect(() => {
@@ -45,7 +44,6 @@ export default function CollectionPointsManagement() {
         limit: pagination.limit,
         search: filters.search,
         region: filters.region,
-        ownerId: filters.ownerId,
         status: filters.status,
       };
 
@@ -71,17 +69,7 @@ export default function CollectionPointsManagement() {
     }
   }, [filters, pagination.page, pagination.limit]);
 
-  const fetchBigBrokers = useCallback(async () => {
-    try {
-      const res = await collectionPointService.getBigBrokers();
-      setBigBrokers(res?.items ?? res?.data ?? []);
-    } catch (err) {
-      console.error(err);
-    }
-  }, []);
-
   useEffect(() => { fetchPoints(); }, [fetchPoints]);
-  useEffect(() => { fetchBigBrokers(); }, [fetchBigBrokers]);
   useEffect(() => { setPagination(p => ({ ...p, page: 1 })); }, [filters]);
 
   // ======================= STATISTIKA =======================
@@ -97,7 +85,7 @@ export default function CollectionPointsManagement() {
 
   // ======================= FUNKSIYALAR =======================
   
-  // 🟢 TO'G'RILANGAN XARITA LINKI
+  // 🟢 XARITA LINKI TO'G'RILANDI
   const openInGoogleMaps = (lat, lng) => {
     const latitude = parseFloat(lat);
     const longitude = parseFloat(lng);
@@ -105,7 +93,7 @@ export default function CollectionPointsManagement() {
       alert("Koordinatalar noto'g'ri formatda");
       return;
     }
-    window.open(`https://maps.google.com/maps?q=${latitude},${longitude}`, '_blank');
+    window.open(`https://maps.google.com/?q=${latitude},${longitude}`, '_blank');
   };
 
   const handlePointAction = async (action, pointId) => {
@@ -147,7 +135,7 @@ export default function CollectionPointsManagement() {
         address: formData.address,
         latitude: formData.latitude ? Number(formData.latitude) : null,
         longitude: formData.longitude ? Number(formData.longitude) : null,
-        ownerId: formData.ownerId || null,
+        // 🟢 DIQQAT: Egasi (Owner) bu yerdan yuborilmaydi, faqat bino yaratiladi!
       };
       
       if (modal.type === 'create') {
@@ -169,11 +157,10 @@ export default function CollectionPointsManagement() {
     if (type === 'edit' && data) {
       setFormData({
         name: data.name ?? '', region: data.region ?? '', district: data.district ?? '',
-        address: data.address ?? '', latitude: data.latitude ?? '', longitude: data.longitude ?? '',
-        ownerId: data.currentOwnerId ?? '',
+        address: data.address ?? '', latitude: data.latitude ?? '', longitude: data.longitude ?? ''
       });
     } else {
-      setFormData({ name: '', region: '', district: '', address: '', latitude: '', longitude: '', ownerId: '' });
+      setFormData({ name: '', region: '', district: '', address: '', latitude: '', longitude: '' });
     }
   };
 
@@ -297,13 +284,14 @@ export default function CollectionPointsManagement() {
                         <div className="text-xs text-slate-500 truncate max-w-[200px]" title={point.address}>{point.address}</div>
                       </td>
                       <td className="p-4">
-                        {point.ownerName ? (
+                        {/* 🟢 TO'G'RILANDI: JSON dagi ownerFullName ishlatiladi */}
+                        {point.ownerFullName ? (
                           <>
-                            <div className="text-sm font-bold text-slate-800">{point.ownerName}</div>
+                            <div className="text-sm font-bold text-slate-800">{point.ownerFullName}</div>
                             <div className="text-xs text-slate-500 mt-1">{point.ownerPhone}</div>
                           </>
                         ) : (
-                          <span className="text-xs font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-md">Tayinlanmagan</span>
+                          <span className="text-[11px] font-bold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">Tayinlanmagan</span>
                         )}
                       </td>
                       <td className="p-4 text-right">
@@ -433,13 +421,14 @@ export default function CollectionPointsManagement() {
 
                       <div>
                         <h5 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-3">Egasi</h5>
-                        {modal.data.ownerName ? (
+                        {/* 🟢 TO'G'RILANDI: ownerFullName ishlatiladi */}
+                        {modal.data.ownerFullName ? (
                           <div className="flex items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
                             <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                              {modal.data.ownerName.charAt(0).toUpperCase()}
+                              {modal.data.ownerFullName.charAt(0).toUpperCase()}
                             </div>
                             <div className="ml-3">
-                              <div className="text-sm font-bold text-slate-800">{modal.data.ownerName}</div>
+                              <div className="text-sm font-bold text-slate-800">{modal.data.ownerFullName}</div>
                               <div className="text-xs text-slate-500">{modal.data.ownerPhone}</div>
                             </div>
                           </div>
@@ -494,7 +483,7 @@ export default function CollectionPointsManagement() {
                           ></iframe>
                           <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm border border-slate-200">
                             <div className="text-xs font-bold text-slate-700">
-                              📍 L: {parseFloat(modal.data.latitude).toFixed(6)} | l: {parseFloat(modal.data.longitude).toFixed(6)}
+                              📍 Kenglik: {parseFloat(modal.data.latitude).toFixed(6)} | Uzunlik: {parseFloat(modal.data.longitude).toFixed(6)}
                             </div>
                           </div>
                         </div>
@@ -512,11 +501,11 @@ export default function CollectionPointsManagement() {
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Viloyat <span className="text-rose-500">*</span></label>
-                        <input type="text" value={formData.region || ''} onChange={(e) => setFormData({ ...formData, region: e.target.value })} className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl font-medium focus:border-blue-500 outline-none ${formErrors.region ? 'border-rose-300' : 'border-slate-200'}`} placeholder="Toshkent" />
+                        <input type="text" value={formData.region || ''} onChange={(e) => setFormData({ ...formData, region: e.target.value })} className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl font-medium focus:border-blue-500 outline-none ${formErrors.region ? 'border-rose-300' : 'border-slate-200'}`} placeholder="Farg'ona" />
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tuman <span className="text-rose-500">*</span></label>
-                        <input type="text" value={formData.district || ''} onChange={(e) => setFormData({ ...formData, district: e.target.value })} className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl font-medium focus:border-blue-500 outline-none ${formErrors.district ? 'border-rose-300' : 'border-slate-200'}`} placeholder="Chilonzor" />
+                        <input type="text" value={formData.district || ''} onChange={(e) => setFormData({ ...formData, district: e.target.value })} className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl font-medium focus:border-blue-500 outline-none ${formErrors.district ? 'border-rose-300' : 'border-slate-200'}`} placeholder="Oltiariq" />
                       </div>
                       <div className="md:col-span-2">
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">To'liq Manzil <span className="text-rose-500">*</span></label>
@@ -541,16 +530,7 @@ export default function CollectionPointsManagement() {
                           </button>
                         )}
                       </div>
-
-                      <div className="md:col-span-2 pt-4 border-t border-slate-100">
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Punkt Egasi (Katta Broker)</label>
-                        <select value={formData.ownerId || ''} onChange={(e) => setFormData({ ...formData, ownerId: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:border-blue-500 outline-none cursor-pointer">
-                          <option value="">Tayinlanmagan</option>
-                          {bigBrokers.map(broker => (
-                            <option key={broker.id} value={broker.id}>{broker.name} ({broker.phone})</option>
-                          ))}
-                        </select>
-                      </div>
+                      {/* 🟢 OWNER TANLASH QISMI (Select) BUTUNLAY O'CHIRIB TASHLANDI */}
                     </div>
                   </form>
                 )}

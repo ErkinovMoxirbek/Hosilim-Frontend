@@ -1,39 +1,41 @@
-import React, { useMemo, useState } from "react";
-import { Routes, Route } from "react-router-dom";
-import { useAuth } from "../../../hooks/useAuth";
-import Sidebar from "./components/Sidebar";
+import React, { useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../../../hooks/useAuth"; // O'zingizning to'g'ri yo'lingizni ko'rsating
+import Sidebar from "./components/Sidebar"; // O'zingizning to'g'ri yo'lingizni ko'rsating
 
-// Sahifalar
 import AdminDashboard from "../../admin/AdminDashboard";
 import CollectionPointsPage from "../../admin/CollectionPointsPage";
-import AdminUsersManagement from "../../admin/AdminUsersManagement";
+import AdminUsersPage from "../../admin/AdminUsersPage";
 import AdminFruitCatalogPage from "../../admin/FruitCatalogPage";
 import AdminAnnouncementsPage from "../../admin/AnnouncementsPage";
+import AdminFarmersPage from "../../admin/AdminFarmersPage";
+import BrokersPage from "../../admin/BrokersPage";
+import AdminPointsGridPage from "../../admin/AdminPointsGridPage";
+import AdminReceivesTablePage from "../../admin/AdminReceivesTablePage";
+import AdminBasketPointsGridPage from "../../admin/AdminBasketPointsGridPage";
+import AdminBasketsTablePage from "../../admin/AdminBasketsTablePage";
+
+const ComingSoon = ({ title }) => (
+  <div className="p-4 lg:p-8 bg-white rounded-lg lg:rounded-xl border border-gray-200 text-center py-32 shadow-sm">
+    <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black">!</div>
+    <h2 className="text-xl lg:text-2xl font-black text-gray-900">{title}</h2>
+    <p className="text-gray-500 mt-2 font-medium">Bu sahifa admin nazorati uchun maxsus ishlab chiqilmoqda...</p>
+  </div>
+);
 
 const AdminLayout = () => {
   const { user, logout } = useAuth();
-
-  const [activeSection, setActiveSection] = useState("dashboard");
-  const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
-  const [activeSubSection, setActiveSubSection] = useState("all");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const ComingSoon = ({ title }) => (
-    <div className="p-4 lg:p-8 bg-white rounded-lg lg:rounded-xl border border-gray-200 text-center py-20">
-      <h2 className="text-lg lg:text-xl font-bold text-gray-900">{title}</h2>
-      <p className="text-gray-600 mt-2">Bu sahifa tez orada ishlab chiqiladi...</p>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen bg-[#F8FAFC]">
       {/* Mobile Header */}
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30">
         <div>
-          <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-lg font-black bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
             Hosilim Tizimi
           </h1>
-          <p className="text-sm text-gray-600">{user?.role}</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{String(user?.role || "").replace('_', ' ')}</p>
         </div>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -44,40 +46,61 @@ const AdminLayout = () => {
       </div>
 
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+        <div className="lg:hidden fixed inset-0 bg-slate-900/40 z-40 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
       )}
 
       <div className="flex">
         {/* Desktop Sidebar */}
-        <div className="hidden lg:block">
-          <Sidebar
-            user={user}
-            onLogout={logout}
-          />
+        <div className="hidden lg:block w-[280px] shrink-0 h-screen sticky top-0 z-10">
+          <Sidebar user={user} onLogout={logout} />
         </div>
 
         {/* Mobile Sidebar */}
-        <div className={`lg:hidden fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
-          <Sidebar
-            user={user}
-            onLogout={logout}
-          />
+        <div className={`lg:hidden fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
+          <Sidebar user={user} onLogout={logout} />
         </div>
 
-        <div className="flex-1 min-w-0 lg:ml-[270px]">
-          <main className="p-4 lg:p-8">
+        {/* MAIN CONTENT AREA */}
+        <div className="flex-1 min-w-0 bg-[#F8FAFC]">
+          <main className="p-0">
             <Routes>
+              {/* ASOSIY */}
               <Route path="/" element={<AdminDashboard />} />
-              <Route path="/announcements" element={<AdminAnnouncementsPage />} />
               <Route path="/fruit-types" element={<AdminFruitCatalogPage />} />
+              <Route path="/announcements" element={<AdminAnnouncementsPage />} />
+
+              {/* OBYEKTLAR VA KADRLAR */}
               <Route path="/collection-points" element={<CollectionPointsPage />} />
-              <Route path="/users" element={<AdminUsersManagement />} />
-              
-              <Route path="/brokers" element={<ComingSoon title="Brokerlarni Boshqarish" />} />
-              <Route path="/farmers" element={<ComingSoon title="Fermerlar Bazasi" />} />
-              <Route path="/transactions" element={<ComingSoon title="Moliyaviy Hisobotlar" />} />
-              <Route path="/analytics" element={<ComingSoon title="Tahlil va Statistika" />} />
-              <Route path="/settings" element={<ComingSoon title="Tizim Sozlamalari" />} />
+              <Route path="/brokers" element={<BrokersPage />} />
+              <Route path="/users" element={<AdminUsersPage />} />
+              <Route path="/farmers" element={<AdminFarmersPage />} />
+
+              {/* ADMIN MAXSUS (OMBORXONA) UCHUN PROKSI YO'LLAR */}
+              {/* 1. Umumiy sexlar ro'yxati (Sidebar dan bosilganda shu ochiladi) */}
+              <Route path="/admin-stock/receives" element={<AdminPointsGridPage />} />
+
+              {/* 2. Tanlangan sexning jadvali (Kartochka bosilganda shu ochiladi) */}
+              <Route path="/admin-stock/receives/:pointId" element={<AdminReceivesTablePage />} />
+              <Route path="/admin-stock/baskets" element={<AdminBasketPointsGridPage />} />
+              <Route path="/admin-stock/baskets/:pointId" element={<AdminBasketsTablePage />} />
+              <Route path="/admin-stock/fridges" element={<ComingSoon title="Barcha Xolodilniklar Holati" />} />
+
+              {/* EKSPORT (HAMKORLAR) */}
+              <Route path="/exporters/report" element={<ComingSoon title="Eksportyorlar Boshqaruvi" />} />
+              <Route path="/exporters/history" element={<ComingSoon title="Jo'natilgan Yuklar Tarixi" />} />
+              <Route path="/exporters/payments" element={<ComingSoon title="Eksportyor To'lovlari" />} />
+              <Route path="/exporters/payment-history" element={<ComingSoon title="To'lovlar Tarixi" />} />
+
+              {/* MOLIYA VA KASSA */}
+              <Route path="/finance/debts" element={<ComingSoon title="Fermerlar Qarzdorligi va To'lov" />} />
+              <Route path="/report" element={<ComingSoon title="Oraliq Moliya Hisobotlari" />} />
+              <Route path="/finance/history" element={<ComingSoon title="Kassa Tarixi" />} />
+
+              <Route path="/analytics" element={<ComingSoon title="Kengaytirilgan Tahlil va Statistika" />} />
+              <Route path="/settings" element={<ComingSoon title="Tizim Sozlamalari va Zaxira" />} />
+
+              {/* NOT FOUND ROUTE */}
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
         </div>
