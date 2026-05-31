@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import distributionService from '../../services/distributionService';
 import basketService from '../../services/basketService';
+import farmerService from '../../services/farmerService';
 import { useAuth } from '../../hooks/useAuth';
-import { 
-  Loader2, Search, X, Check, Package, Clock, User, 
-  ShoppingBasket, Hash, Phone, Receipt, Box, ChevronDown, ChevronUp
+import {
+  Loader2, Search, X, Check, Package, Clock, User,
+  ShoppingBasket, Hash, Phone, Receipt, Box, ChevronDown, ChevronUp, Plus
 } from 'lucide-react';
 
 export default function BasketDistributionPage() {
@@ -13,6 +14,13 @@ export default function BasketDistributionPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successId, setSuccessId] = useState(null);
+
+  // QuickAdd state
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [quickAddFirstName, setQuickAddFirstName] = useState('');
+  const [quickAddLastName, setQuickAddLastName] = useState('');
+  const [quickAddPhone, setQuickAddPhone] = useState('');
+  const [isQuickAdding, setIsQuickAdding] = useState(false);
 
   const { user } = useAuth();
   const canDistribute = user?.role?.includes('BROKER') || user?.role?.includes('ACCOUNTANT');
@@ -26,15 +34,20 @@ export default function BasketDistributionPage() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedFarmer, setSelectedFarmer] = useState(null);
 
-  const [isStatsExpanded, setIsStatsExpanded] = useState(false); 
-
-  // 🟢 YANGLIK: Mock data olib tashlandi, Real data API dan keladi
+  const [isStatsExpanded, setIsStatsExpanded] = useState(false);
   const [debtDetails, setDebtDetails] = useState({ totalBaskets: 0, totalAmount: 0, baskets: [] });
   const [isLoadingDebt, setIsLoadingDebt] = useState(false);
 
   const dropdownRef = useRef(null);
   const quantityInputRef = useRef(null);
   const historyListRef = useRef(null);
+  // quickAdd ochiq bo'lsa dropdown yopilmasligi uchun ref
+  const quickAddOpenRef = useRef(false);
+
+  // quickAddOpen o'zgarganda ref ni ham yangilaymiz
+  useEffect(() => {
+    quickAddOpenRef.current = quickAddOpen;
+  }, [quickAddOpen]);
 
   const getInitials = (fullName) => {
     if (!fullName) return 'F';
@@ -43,24 +56,39 @@ export default function BasketDistributionPage() {
     return fullName.substring(0, 2).toUpperCase();
   };
 
-  useEffect(() => {
-    fetchInitialData();
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsDropdownOpen(false);
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+  // Click outside handler — quickAdd ochiq bo'lsa ISHLAMASIN
+  const handleClickOutside = useCallback((event) => {
+    if (quickAddOpenRef.current) return; // <-- asosiy fix
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsDropdownOpen(false);
+    }
   }, []);
 
   useEffect(() => {
-    if (farmerSearch.trim().length < 2) { setSearchResults([]); setIsSearchingFarmer(false); return; }
+    fetchInitialData();
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [handleClickOutside]);
+
+  useEffect(() => {
+    if (farmerSearch.trim().length < 2) {
+      setSearchResults([]);
+      setIsSearchingFarmer(false);
+      setQuickAddOpen(false);
+      return;
+    }
     setIsSearchingFarmer(true);
     const timer = setTimeout(async () => {
       try {
         const results = await distributionService.searchFarmers(farmerSearch.trim());
         setSearchResults(Array.isArray(results) ? results : []);
-      } catch (e) { console.error(e); }
-      finally { setIsSearchingFarmer(false); setIsDropdownOpen(true); }
+        setQuickAddOpen(false); // yangi qidiruv kelsa quick add ni yopamiz
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsSearchingFarmer(false);
+        setIsDropdownOpen(true);
+      }
     }, 500);
     return () => clearTimeout(timer);
   }, [farmerSearch]);
@@ -73,14 +101,19 @@ export default function BasketDistributionPage() {
         basketService.getBaskets()
       ]);
       setDistributions(Array.isArray(distData) ? distData : []);
-      const available = Array.isArray(basketsData?.content) ? basketsData.content.filter(b => b.isActive) : [];
+      const available = Array.isArray(basketsData?.content)
+        ? basketsData.content.filter(b => b.isActive)
+        : [];
       setBaskets(available);
       if (available.length > 0) {
         setFormData(prev => ({ ...prev, basketId: available[0].id.toString() }));
         setSelectedBasketStock(available[0].quantity || 0);
       }
-    } catch (e) { console.error(e); }
-    finally { setIsLoading(false); }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBasketChange = (e) => {
@@ -90,13 +123,25 @@ export default function BasketDistributionPage() {
     setSelectedBasketStock(sel ? sel.quantity : 0);
   };
 
-  // 🟢 YANGLIK: Fermerni tanlaganda haqiqiy qarzini tortib olib kelamiz
-  const handleSelectFarmer = async (farmer) => {
+  // API dan kelgan farmer turli field nomlar bilan kelishi mumkin.
+  // name/surname/phone — ichki standart, shu formatga normalizatsiya qilamiz.
+  const normalizeFarmer = (farmer) => ({
+    ...farmer,
+    name:    farmer.name    || farmer.firstName  || '',
+    surname: farmer.surname || farmer.lastName   || '',
+    phone:   farmer.phone   || farmer.phoneNumber || '',
+  });
+
+  const handleSelectFarmer = async (rawFarmer) => {
+    const farmer = normalizeFarmer(rawFarmer);
     setSelectedFarmer(farmer);
-    setFormData({ ...formData, farmerId: farmer.id });
-    setFarmerSearch(''); setSearchResults([]); setIsDropdownOpen(false);
-    setIsStatsExpanded(false); 
-    
+    setFormData(prev => ({ ...prev, farmerId: farmer.id }));
+    setFarmerSearch('');
+    setSearchResults([]);
+    setIsDropdownOpen(false);
+    setQuickAddOpen(false);
+    setIsStatsExpanded(false);
+
     setIsLoadingDebt(true);
     try {
       const details = await distributionService.getFarmerBalanceDetails(farmer.id);
@@ -116,19 +161,57 @@ export default function BasketDistributionPage() {
       setIsLoadingDebt(false);
     }
 
-    setTimeout(() => { if (quantityInputRef.current) quantityInputRef.current.focus(); }, 50);
+    setTimeout(() => {
+      if (quantityInputRef.current) quantityInputRef.current.focus();
+    }, 50);
   };
 
-  const handleClearFarmer = () => { 
-    setSelectedFarmer(null); 
-    setFormData({ ...formData, farmerId: '' }); 
+  const handleClearFarmer = () => {
+    setSelectedFarmer(null);
+    setFormData(prev => ({ ...prev, farmerId: '' }));
     setIsStatsExpanded(false);
     setDebtDetails({ totalBaskets: 0, totalAmount: 0, baskets: [] });
   };
 
+  // Tez qo'shish — openQuickAdd bosqichi
+  const openQuickAdd = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setQuickAddFirstName(farmerSearch);
+    setQuickAddLastName('');
+    setQuickAddPhone('');
+    setQuickAddOpen(true);
+  };
+
+  const cancelQuickAdd = (e) => {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    setQuickAddOpen(false);
+    // Dropdown ochiq qolsin, faqat quick add yopilsin
+  };
+
+  const handleQuickAdd = async (e) => {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (!quickAddFirstName.trim()) return;
+    setIsQuickAdding(true);
+    try {
+      const newFarmer = await farmerService.createShadowFarmer({
+        firstName: quickAddFirstName.trim(),
+        lastName: quickAddLastName.trim(),
+        phone: quickAddPhone.trim() || undefined,
+      });
+      if (newFarmer) {
+        await handleSelectFarmer(newFarmer);
+      }
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Xatolik yuz berdi');
+    } finally {
+      setIsQuickAdding(false);
+    }
+  };
+
   const formatType = (type) => {
-    if (!type) return "";
-    const types = { "YOGOCH": "Yog'och", "PLASTIK": "Plastik", "KARTON": "Karton", "TEMIR": "Temir" };
+    if (!type) return '';
+    const types = { YOGOCH: "Yog'och", PLASTIK: 'Plastik', KARTON: 'Karton', TEMIR: 'Temir' };
     return types[type] || type;
   };
 
@@ -136,7 +219,8 @@ export default function BasketDistributionPage() {
     e.preventDefault();
     if (!formData.farmerId || !formData.basketId || !formData.quantity) return;
     if (parseInt(formData.quantity) > selectedBasketStock) {
-      alert(`Omborda faqat ${selectedBasketStock} ta tara qoldi!`); return;
+      alert(`Omborda faqat ${selectedBasketStock} ta tara qoldi!`);
+      return;
     }
     setIsSubmitting(true);
     try {
@@ -146,19 +230,20 @@ export default function BasketDistributionPage() {
         setSuccessId(newId);
         setDistributions(prev => [{ ...newDist, id: newId }, ...prev]);
         const updated = selectedBasketStock - parseInt(formData.quantity);
-        setBaskets(prev => prev.map(b => b.id.toString() === formData.basketId ? { ...b, quantity: updated } : b));
+        setBaskets(prev =>
+          prev.map(b => b.id.toString() === formData.basketId ? { ...b, quantity: updated } : b)
+        );
         setSelectedBasketStock(updated);
-        setFormData(prev => ({ ...prev, quantity: '' })); 
+        setFormData(prev => ({ ...prev, quantity: '' }));
         if (historyListRef.current) historyListRef.current.scrollTop = 0;
-        
-        // Muvaffaqiyatdan keyin qarzni qayta yuklab qo'yamiz (yangilanadi)
-        handleSelectFarmer(selectedFarmer); 
-
+        handleSelectFarmer(selectedFarmer);
         setTimeout(() => setSuccessId(null), 2500);
       }
     } catch (err) {
       alert(err?.response?.data?.message || "Xatolik yuz berdi. Qayta urinib ko'ring.");
-    } finally { setIsSubmitting(false); }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!canDistribute) {
@@ -190,9 +275,8 @@ export default function BasketDistributionPage() {
           </div>
         ) : (
           <>
-            {/* YUQORI GRID */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-              
+
               {/* ===== LEFT: FORM ===== */}
               <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col gap-6">
 
@@ -201,47 +285,145 @@ export default function BasketDistributionPage() {
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
                     Fermerni tanlang <span className="text-red-500">*</span>
                   </label>
+
                   {selectedFarmer ? (
-                    <div className="flex items-center justify-between px-4 py-3 bg-green-50/50 border border-green-200 rounded-lg transition-all duration-300">
+                    <div className="flex items-center justify-between px-4 py-3 bg-green-50/50 border border-green-200 rounded-lg">
                       <div>
-                        <span className="font-bold text-green-900 block">{selectedFarmer.name} {selectedFarmer.surname}</span>
+                        <span className="font-bold text-green-900 block">
+                          {selectedFarmer.name} {selectedFarmer.surname}
+                        </span>
                         <span className="text-sm font-medium text-green-700">{selectedFarmer.phone}</span>
                       </div>
-                      <button type="button" onClick={handleClearFarmer}
-                        className="p-2 bg-white text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md shadow-sm border border-green-100 transition-colors">
+                      <button
+                        type="button"
+                        onClick={handleClearFarmer}
+                        className="p-2 bg-white text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md shadow-sm border border-green-100 transition-colors"
+                      >
                         <X size={18} strokeWidth={2.5} />
                       </button>
                     </div>
                   ) : (
                     <div className="relative">
+                      {/* Search input */}
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         {isSearchingFarmer
                           ? <Loader2 size={18} className="text-[#1B5E20] animate-spin" />
                           : <Search size={18} className="text-slate-400" />}
                       </div>
                       <input
-                        type="text" autoComplete="off" value={farmerSearch}
+                        type="text"
+                        autoComplete="off"
+                        value={farmerSearch}
                         onChange={e => setFarmerSearch(e.target.value)}
-                        onFocus={() => { if (farmerSearch.length >= 2) setIsDropdownOpen(true); }}
+                        onFocus={() => {
+                          if (farmerSearch.length >= 2) setIsDropdownOpen(true);
+                        }}
                         placeholder="Kamida 2 ta harf yoki raqam yozing..."
                         className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 focus:border-[#1B5E20] focus:ring-4 focus:ring-green-500/10 rounded-lg text-slate-900 outline-none transition-all font-medium"
                       />
+
+                      {/* Dropdown */}
                       {isDropdownOpen && farmerSearch.length >= 2 && (
-                        <div className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-xl border border-slate-200 max-h-60 overflow-y-auto">
+                        <div className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-xl border border-slate-200 max-h-72 overflow-y-auto">
+
                           {isSearchingFarmer ? (
                             <div className="p-4 text-center text-slate-500 text-sm flex items-center justify-center gap-2">
-                              <Loader2 size={16} className="animate-spin text-[#1B5E20]" /> Bazada izlanmoqda...
+                              <Loader2 size={16} className="animate-spin text-[#1B5E20]" />
+                              Bazada izlanmoqda...
                             </div>
-                          ) : searchResults.length === 0 ? (
-                            <div className="p-4 text-center text-slate-500 text-sm font-medium">Fermer topilmadi.</div>
-                          ) : searchResults.map(f => (
-                            <div key={f.id}
-                              onMouseDown={e => { e.preventDefault(); handleSelectFarmer(f); }}
-                              className="flex flex-col px-4 py-3 hover:bg-green-50/50 border-b border-slate-100 last:border-0 cursor-pointer transition-colors">
-                              <span className="font-bold text-slate-800">{f.name} {f.surname}</span>
-                              <span className="text-sm font-medium text-slate-500">{f.phone}</span>
+
+                          ) : searchResults.length > 0 ? (
+                            /* Natijalar ro'yxati */
+                            searchResults.map(f => (
+                              <div
+                                key={f.id}
+                                onMouseDown={e => { e.preventDefault(); handleSelectFarmer(f); }}
+                                className="flex flex-col px-4 py-3 hover:bg-green-50/50 border-b border-slate-100 last:border-0 cursor-pointer transition-colors"
+                              >
+                                <span className="font-bold text-slate-800">{f.name || f.firstName} {f.surname || f.lastName}</span>
+                                <span className="text-sm font-medium text-slate-500">{f.phone || f.phoneNumber}</span>
+                              </div>
+                            ))
+
+                          ) : !quickAddOpen ? (
+                            /* Topilmadi + tez qo'shish tugmasi */
+                            <div className="p-4 text-center">
+                              <p className="text-sm text-slate-500 font-medium mb-3">
+                                «{farmerSearch}» topilmadi
+                              </p>
+                              <button
+                                onMouseDown={openQuickAdd}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-50 hover:bg-green-100 text-[#1B5E20] font-semibold rounded-lg border border-green-200 transition-colors text-sm"
+                              >
+                                <Plus size={16} />
+                                «{farmerSearch}» ni tez qo'shish
+                              </button>
                             </div>
-                          ))}
+
+                          ) : (
+                            /* ===== QUICK ADD FORMA ===== */
+                            <div
+                              className="p-4 space-y-3"
+                              onMouseDown={e => e.stopPropagation()} // butun forma ichida click outside ni bloklash
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                  Yangi fermer qo'shish
+                                </p>
+                                <button
+                                  onMouseDown={cancelQuickAdd}
+                                  className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+
+                              <input
+                                autoFocus
+                                type="text"
+                                placeholder="Ism *"
+                                value={quickAddFirstName}
+                                onChange={e => setQuickAddFirstName(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter') handleQuickAdd(e); }}
+                                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:border-[#1B5E20] focus:ring-2 focus:ring-green-500/10 outline-none font-medium"
+                              />
+                              <input
+                                type="text"
+                                placeholder="Familiya (ixtiyoriy)"
+                                value={quickAddLastName}
+                                onChange={e => setQuickAddLastName(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter') handleQuickAdd(e); }}
+                                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:border-[#1B5E20] focus:ring-2 focus:ring-green-500/10 outline-none"
+                              />
+                              <input
+                                type="text"
+                                placeholder="+998__ ___ __ __ (ixtiyoriy)"
+                                value={quickAddPhone}
+                                onChange={e => setQuickAddPhone(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter') handleQuickAdd(e); }}
+                                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:border-[#1B5E20] focus:ring-2 focus:ring-green-500/10 outline-none font-mono"
+                              />
+
+                              <div className="flex gap-2 pt-1">
+                                <button
+                                  onMouseDown={cancelQuickAdd}
+                                  className="flex-1 py-2 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                                >
+                                  Bekor
+                                </button>
+                                <button
+                                  onMouseDown={handleQuickAdd}
+                                  disabled={isQuickAdding || !quickAddFirstName.trim()}
+                                  className="flex-1 py-2 text-sm font-bold bg-[#1B5E20] text-white rounded-lg hover:bg-green-800 disabled:opacity-50 flex items-center justify-center gap-1.5 transition-colors"
+                                >
+                                  {isQuickAdding
+                                    ? <Loader2 size={14} className="animate-spin" />
+                                    : <Check size={14} />}
+                                  Qo'shish
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -255,12 +437,19 @@ export default function BasketDistributionPage() {
                       Tara turi <span className="text-red-500">*</span>
                     </label>
                     <span className="text-xs font-medium px-2 py-1 bg-slate-100 rounded text-slate-600">
-                      Omborda: <span className={`font-bold ${selectedBasketStock < 50 ? 'text-red-600' : 'text-green-600'}`}>{selectedBasketStock}</span>
+                      Omborda:{' '}
+                      <span className={`font-bold ${selectedBasketStock < 50 ? 'text-red-600' : 'text-green-600'}`}>
+                        {selectedBasketStock}
+                      </span>
                     </span>
                   </div>
-                  <select required value={formData.basketId} onChange={handleBasketChange}
+                  <select
+                    required
+                    value={formData.basketId}
+                    onChange={handleBasketChange}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-300 focus:border-[#1B5E20] focus:ring-4 focus:ring-green-500/10 rounded-lg font-medium text-slate-900 outline-none transition-all cursor-pointer"
-                    disabled={isSubmitting || baskets.length === 0}>
+                    disabled={isSubmitting || baskets.length === 0}
+                  >
                     {baskets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
                 </div>
@@ -271,21 +460,34 @@ export default function BasketDistributionPage() {
                     Berilayotgan soni <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <input ref={quantityInputRef} type="number" min="1" max={selectedBasketStock || 999999} required
+                    <input
+                      ref={quantityInputRef}
+                      type="number"
+                      min="1"
+                      max={selectedBasketStock || 999999}
+                      required
                       value={formData.quantity}
                       onChange={e => setFormData({ ...formData, quantity: e.target.value })}
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-300 focus:border-[#1B5E20] focus:ring-4 focus:ring-green-500/10 rounded-lg text-slate-900 outline-none transition-all font-bold text-lg"
-                      disabled={isSubmitting || !formData.basketId || !selectedFarmer} />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold pointer-events-none">dona</span>
+                      disabled={isSubmitting || !formData.basketId || !selectedFarmer}
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold pointer-events-none">
+                      dona
+                    </span>
                   </div>
                 </div>
 
                 {/* Submit */}
                 <div className="pt-2 border-t border-slate-100">
-                  <button type="button" onClick={handleSubmit}
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
                     disabled={isSubmitting || !selectedFarmer || !formData.quantity}
-                    className="w-full px-8 py-3.5 bg-[#1B5E20] text-white rounded-lg font-bold hover:bg-green-800 focus:ring-4 focus:ring-green-500/30 disabled:opacity-50 disabled:hover:bg-[#1B5E20] transition-all flex justify-center items-center gap-2 shadow-sm">
-                    {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <Check size={20} strokeWidth={2.5} />}
+                    className="w-full px-8 py-3.5 bg-[#1B5E20] text-white rounded-lg font-bold hover:bg-green-800 focus:ring-4 focus:ring-green-500/30 disabled:opacity-50 disabled:hover:bg-[#1B5E20] transition-all flex justify-center items-center gap-2 shadow-sm"
+                  >
+                    {isSubmitting
+                      ? <Loader2 size={20} className="animate-spin" />
+                      : <Check size={20} strokeWidth={2.5} />}
                     Jarayonni tasdiqlash
                   </button>
                 </div>
@@ -326,13 +528,16 @@ export default function BasketDistributionPage() {
                     </div>
                   ) : (
                     distributions.slice(0, 10).map((dist, idx) => (
-                      <div key={dist.id}
-                        className={`grid grid-cols-12 gap-2 items-center px-5 py-3.5 border-b border-slate-100 last:border-0 transition-all duration-500 ${successId === dist.id
-                          ? 'bg-green-50 border-l-4 border-l-green-500'
-                          : idx % 2 === 0
-                            ? 'hover:bg-slate-50/80'
-                            : 'bg-slate-50/30 hover:bg-slate-50/80'
-                          }`}>
+                      <div
+                        key={dist.id}
+                        className={`grid grid-cols-12 gap-2 items-center px-5 py-3.5 border-b border-slate-100 last:border-0 transition-all duration-500 ${
+                          successId === dist.id
+                            ? 'bg-green-50 border-l-4 border-l-green-500'
+                            : idx % 2 === 0
+                              ? 'hover:bg-slate-50/80'
+                              : 'bg-slate-50/30 hover:bg-slate-50/80'
+                        }`}
+                      >
                         <div className="col-span-5 flex items-center gap-3 min-w-0">
                           <div className="w-9 h-9 rounded-full bg-green-50 flex-shrink-0 flex items-center justify-center text-[#1B5E20] font-bold text-[12px] border border-green-100 shadow-sm">
                             {getInitials(dist.farmerFullName)}
@@ -378,12 +583,11 @@ export default function BasketDistributionPage() {
               </div>
             </div>
 
-            {/* ===== BOTTOM SECTION: HAQIQIY QARZ ===== */}
+            {/* ===== BOTTOM: QARZ DETALLARI ===== */}
             {selectedFarmer && (
               <div className="mt-6 bg-white border border-green-500 rounded-xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-                
-                {/* Accordion Sarlavhasi */}
-                <div 
+
+                <div
                   onClick={() => setIsStatsExpanded(!isStatsExpanded)}
                   className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-green-50/30 gap-4 cursor-pointer hover:bg-green-50/60 transition-colors"
                 >
@@ -392,30 +596,31 @@ export default function BasketDistributionPage() {
                       {getInitials(selectedFarmer.name + ' ' + selectedFarmer.surname)}
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-800 text-lg">{selectedFarmer.name} {selectedFarmer.surname}</h3>
+                      <h3 className="font-bold text-slate-800 text-lg">
+                        {selectedFarmer.name} {selectedFarmer.surname}
+                      </h3>
                       <p className="text-sm text-slate-500 flex items-center gap-1.5 mt-0.5">
                         <Phone size={14} className="text-slate-400" /> {selectedFarmer.phone}
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between sm:justify-end gap-6 sm:border-l sm:border-slate-200 sm:pl-6">
                     <div className="text-right">
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Jami qarz</p>
-                      <div className="flex items-center gap-1.5 justify-end">
-                        <p className="font-black text-red-500 text-xl flex items-center justify-end gap-1.5">
-                          {isLoadingDebt ? <Loader2 size={16} className="animate-spin text-red-400"/> : <Package size={18} className="text-red-400" />} 
-                          {debtDetails.totalBaskets} ta
-                        </p>
-                      </div>
+                      <p className="font-black text-red-500 text-xl flex items-center justify-end gap-1.5">
+                        {isLoadingDebt
+                          ? <Loader2 size={16} className="animate-spin text-red-400" />
+                          : <Package size={18} className="text-red-400" />}
+                        {debtDetails.totalBaskets} ta
+                      </p>
                     </div>
-                    <button className="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center transition-colors">
+                    <button className="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center">
                       {isStatsExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
                     </button>
                   </div>
                 </div>
 
-                {/* Kengaytirilgan ma'lumotlar */}
                 {isStatsExpanded && !isLoadingDebt && (
                   <div className="border-t border-green-100">
                     <div className="px-5 py-4 bg-slate-50/50 flex items-center justify-between">
@@ -425,7 +630,8 @@ export default function BasketDistributionPage() {
                       <div className="text-right">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Jami Summa:</p>
                         <p className="font-black text-[#1B5E20] text-lg leading-none">
-                          {debtDetails.totalAmount?.toLocaleString()} <span className="text-xs font-bold text-slate-500">so'm</span>
+                          {debtDetails.totalAmount?.toLocaleString()}{' '}
+                          <span className="text-xs font-bold text-slate-500">so'm</span>
                         </p>
                       </div>
                     </div>
@@ -455,15 +661,21 @@ export default function BasketDistributionPage() {
                                 <p className="text-[9px] font-bold uppercase tracking-widest mt-1 text-red-400">Dona</p>
                               </div>
                             </div>
-                            
+
                             <div className="bg-slate-50 rounded-lg p-3 flex items-center justify-between border border-slate-100">
                               <div>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">1 Dona Narxi</p>
-                                <p className="font-bold text-slate-700 text-sm">{basket.unitPrice?.toLocaleString()} <span className="text-[10px] font-bold text-slate-400 uppercase">so'm</span></p>
+                                <p className="font-bold text-slate-700 text-sm">
+                                  {basket.unitPrice?.toLocaleString()}{' '}
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase">so'm</span>
+                                </p>
                               </div>
                               <div className="text-right">
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Umumiy</p>
-                                <p className="font-black text-[#1B5E20] text-base">{basket.totalPrice?.toLocaleString()} <span className="text-[10px] font-bold text-slate-400 uppercase">so'm</span></p>
+                                <p className="font-black text-[#1B5E20] text-base">
+                                  {basket.totalPrice?.toLocaleString()}{' '}
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase">so'm</span>
+                                </p>
                               </div>
                             </div>
                           </div>
