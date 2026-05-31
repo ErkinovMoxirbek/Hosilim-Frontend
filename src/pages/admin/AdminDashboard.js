@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Users, Apple, DollarSign, Eye, CheckCircle,
   AlertTriangle, Clock, MapPin, Download, Send,
@@ -21,14 +21,7 @@ const AdminDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('today');
 
-  useEffect(() => {
-    fetchData();
-    // Auto refresh har 30 soniyada
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
-  }, [selectedPeriod]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const token = localStorage.getItem("authToken");
       const headers = {
@@ -105,7 +98,14 @@ const AdminDashboard = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [selectedPeriod]);
+
+  useEffect(() => {
+    fetchData();
+    // Auto refresh har 30 soniyada
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const showNotification = (message, type = 'info') => {
     alert(message); // Haqiqiy loyihada toast yoki notification kutubxonasi ishlatilishi mumkin
@@ -459,7 +459,6 @@ const AdminDashboard = () => {
 
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
-                          {/* Approve/Reject olib tashlandi — tizimda tasdiqlash yo‘q */}
                           <button
                             className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
                             title="Batafsil"
@@ -480,7 +479,6 @@ const AdminDashboard = () => {
             )}
           </div>
         </div>
-
 
         {/* Activities */}
         <div className="bg-white rounded-xl shadow-sm border">

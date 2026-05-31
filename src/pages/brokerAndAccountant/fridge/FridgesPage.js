@@ -3,7 +3,7 @@ import {
   Search, Plus, MapPin, User, Phone,
   ThermometerSnowflake, ThermometerSun,
   Server, X, Loader2, AlertCircle, Trash2,
-  Settings2, AlertTriangle, CheckCircle2,
+  AlertTriangle, CheckCircle2
 } from "lucide-react";
 import { fridgeService } from "../../../services/fridgeService";
 
@@ -19,11 +19,10 @@ function ToastMessage({ message, type = "success", onClose }) {
   return (
     <div
       role="alert"
-      className={`fixed top-4 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-2 px-5 py-3 rounded-2xl shadow-xl border text-sm font-bold ${
-        type === "error"
+      className={`fixed top-4 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-2 px-5 py-3 rounded-2xl shadow-xl border text-sm font-bold ${type === "error"
           ? "bg-red-50 text-red-700 border-red-200"
           : "bg-emerald-50 text-emerald-700 border-emerald-200"
-      }`}
+        }`}
     >
       {type === "error" ? <AlertCircle size={16} /> : <CheckCircle2 size={16} />}
       {message}
@@ -97,14 +96,13 @@ function Field({ id, label, required, error, children }) {
 }
 
 const inputCls = (err) =>
-  `w-full px-3 py-2.5 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all ${
-    err ? "border-red-400 bg-red-50/30" : "border-gray-200"
+  `w-full px-3 py-2.5 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all ${err ? "border-red-400 bg-red-50/30" : "border-gray-200"
   }`;
 
 function AddFridgeDrawer({ isOpen, onClose, onSubmit, isSubmitting }) {
   const EMPTY = { name: "", address: "", maxCapacity: "", temperatureCelsius: "", managerName: "", managerPhone: "" };
   const [formData, setFormData] = useState(EMPTY);
-  const [errors, setErrors]     = useState({});
+  const [errors, setErrors] = useState({});
   const firstRef = useRef(null);
 
   useEffect(() => {
@@ -132,9 +130,9 @@ function AddFridgeDrawer({ isOpen, onClose, onSubmit, isSubmitting }) {
 
   const validate = () => {
     const errs = {};
-    if (!formData.name.trim())        errs.name        = "Nom kiriting";
-    if (!formData.address.trim())     errs.address     = "Manzil kiriting";
-    if (!formData.maxCapacity)        errs.maxCapacity = "Sig'imni kiriting";
+    if (!formData.name.trim()) errs.name = "Nom kiriting";
+    if (!formData.address.trim()) errs.address = "Manzil kiriting";
+    if (!formData.maxCapacity) errs.maxCapacity = "Sig'imni kiriting";
     else if (Number(formData.maxCapacity) <= 0) errs.maxCapacity = "Musbat son bo'lishi kerak";
     if (formData.managerPhone && !/^\+?\d{9,15}$/.test(formData.managerPhone.replace(/\s+/g, "")))
       errs.managerPhone = "Noto'g'ri format";
@@ -146,18 +144,18 @@ function AddFridgeDrawer({ isOpen, onClose, onSubmit, isSubmitting }) {
     e.preventDefault();
     if (!validate()) return;
     const payload = {
-      name:               formData.name.trim(),
-      address:            formData.address.trim(),
-      maxCapacity:        parseFloat(formData.maxCapacity),
+      name: formData.name.trim(),
+      address: formData.address.trim(),
+      maxCapacity: parseFloat(formData.maxCapacity),
       temperatureCelsius: formData.temperatureCelsius ? parseFloat(formData.temperatureCelsius) : undefined,
-      managerName:        formData.managerName?.trim()  || undefined,
-      managerPhone:       formData.managerPhone?.trim() || undefined,
+      managerName: formData.managerName?.trim() || undefined,
+      managerPhone: formData.managerPhone?.trim() || undefined,
     };
     try {
       await onSubmit(payload);
       setFormData(EMPTY);
       setErrors({});
-    } catch (_) {}
+    } catch (_) { }
   };
 
   if (!isOpen) return null;
@@ -291,18 +289,18 @@ function AddFridgeDrawer({ isOpen, onClose, onSubmit, isSubmitting }) {
 ───────────────────────────────────────── */
 function FridgeCard({ fridge, onDelete }) {
   const current = fridge.currentCapacity ?? 0;
-  const max     = fridge.maxCapacity ?? 1;
-  const pct     = Math.min(Math.round((current / max) * 100), 100);
-  const isFull  = pct >= 95;
-  const isCold  = (fridge.temperatureCelsius ?? 0) < 0;
+  const max = fridge.maxCapacity ?? 1;
+  const pct = Math.min(Math.round((current / max) * 100), 100);
+  const isFull = pct >= 95;
+  const isCold = (fridge.temperatureCelsius ?? 0) < 0;
 
   const statusBadge = {
-    ACTIVE:      <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">Ishlamoqda</span>,
+    ACTIVE: <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">Ishlamoqda</span>,
     MAINTENANCE: <span className="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">Ta'mirda</span>,
-    FULL:        <span className="bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">To'lgan</span>,
+    FULL: <span className="bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">To'lgan</span>,
   }[fridge.status] ?? (
-    <span className="bg-gray-100 text-gray-600 border border-gray-200 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">Noma'lum</span>
-  );
+      <span className="bg-gray-100 text-gray-600 border border-gray-200 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">Noma'lum</span>
+    );
 
   const barColor = isFull ? "bg-red-500" : pct > 75 ? "bg-amber-400" : "bg-blue-500";
 
@@ -335,8 +333,8 @@ function FridgeCard({ fridge, onDelete }) {
         <div className="space-y-2">
           {[
             { icon: <MapPin size={14} />, value: fridge.address },
-            { icon: <User size={14} />,   value: fridge.managerName  || "Biriktirilmagan" },
-            { icon: <Phone size={14} />,  value: fridge.managerPhone || "---", mono: true },
+            { icon: <User size={14} />, value: fridge.managerName || "Biriktirilmagan" },
+            { icon: <Phone size={14} />, value: fridge.managerPhone || "---", mono: true },
           ].map((row, i) => (
             <div key={i} className="flex items-center gap-2.5 text-sm text-gray-600">
               <span className="text-gray-400 shrink-0">{row.icon}</span>
@@ -346,9 +344,8 @@ function FridgeCard({ fridge, onDelete }) {
         </div>
 
         {/* Harorat */}
-        <div className={`flex items-center justify-between px-3 py-2.5 rounded-xl border text-sm ${
-          isCold ? "bg-blue-50/60 border-blue-100" : "bg-orange-50/60 border-orange-100"
-        }`}>
+        <div className={`flex items-center justify-between px-3 py-2.5 rounded-xl border text-sm ${isCold ? "bg-blue-50/60 border-blue-100" : "bg-orange-50/60 border-orange-100"
+          }`}>
           <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">Harorat</span>
           <div className={`flex items-center gap-1.5 font-bold font-mono ${isCold ? "text-blue-600" : "text-orange-600"}`}>
             {isCold ? <ThermometerSnowflake size={15} /> : <ThermometerSun size={15} />}
@@ -384,13 +381,13 @@ function FridgeCard({ fridge, onDelete }) {
    MAIN PAGE
 ───────────────────────────────────────── */
 export default function FridgesPage() {
-  const [fridges,     setFridges]     = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [error,       setError]       = useState(null);
-  const [searchTerm,  setSearchTerm]  = useState("");
+  const [fridges, setFridges] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [toast,       setToast]       = useState({ show: false, message: "", type: "success" });
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, fridgeId: null, fridgeName: "" });
 
   const fetchFridges = async () => {
@@ -446,7 +443,7 @@ export default function FridgesPage() {
   };
 
   const filteredFridges = fridges.filter(f =>
-    (f.name?.toLowerCase()    || "").includes(searchTerm.toLowerCase()) ||
+    (f.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
     (f.address?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   );
 
@@ -483,7 +480,7 @@ export default function FridgesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 bg-white px-6 py-5 rounded-2xl border border-gray-200 shadow-sm">
         <div>
-          
+
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: '"Syne", sans-serif' }}>
             Muzlatgichlar boshqaruvi
           </h1>

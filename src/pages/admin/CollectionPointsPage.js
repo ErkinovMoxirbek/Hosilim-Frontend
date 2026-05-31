@@ -3,7 +3,7 @@ import { collectionPointService } from '../../services/admin/collectionPointServ
 import {
   MapPin, Search, Plus, MoreVertical, Eye, Edit2,
   Trash2, RefreshCw, CheckCircle, DollarSign, Save, X,
-  Users, Building2, Navigation, UserCheck, Clock, ShieldAlert, ChevronLeft, ChevronRight
+  Users, Building2, Navigation, Clock, ShieldAlert, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 export default function CollectionPointsManagement() {
@@ -477,6 +477,7 @@ export default function CollectionPointsManagement() {
                         </div>
                         <div className="relative bg-slate-100 rounded-xl overflow-hidden border border-slate-200" style={{ height: '300px' }}>
                           <iframe
+                            title="Xarita"
                             width="100%" height="100%" frameBorder="0" style={{ border: 0 }} referrerPolicy="no-referrer-when-downgrade"
                             src={`https://maps.google.com/maps?q=${parseFloat(modal.data.latitude)},${parseFloat(modal.data.longitude)}&z=14&output=embed`}
                             allowFullScreen

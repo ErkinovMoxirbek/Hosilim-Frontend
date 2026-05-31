@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Search, RefreshCw, Users, Phone, MapPin, 
+  Search, RefreshCw, Users, Phone, 
   ChevronLeft, ChevronRight, Tractor, ShieldAlert, Building
 } from 'lucide-react';
 import { adminFarmerService } from '../../services/admin/adminFarmerService'; 

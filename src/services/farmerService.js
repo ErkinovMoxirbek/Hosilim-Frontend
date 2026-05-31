@@ -36,6 +36,23 @@ const farmerService = {
     const response = await api.post(`${API_URL}/quick-add`, payload);
     
     return response.data?.data || response.data;
+  },
+
+  // Fermerni tahrirlash
+  updateFarmer: async (id, data) => {
+    const payload = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phoneNumber: data.phone
+    };
+    const response = await api.put(`${API_URL}/${id}`, payload);
+    return response.data?.data;
+  },
+
+  // Fermerni o'chirish
+  deleteFarmer: async (id) => {
+    const response = await api.delete(`${API_URL}/${id}`);
+    return response.data;
   }
 };
 
