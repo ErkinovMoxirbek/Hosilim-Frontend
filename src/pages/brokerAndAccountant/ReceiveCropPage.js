@@ -6,18 +6,26 @@ import priceService from '../../services/priceService';
 import cropService from '../../services/cropService';
 import {
   Scale, UserCircle, Apple, Box, Calculator, CheckCircle2,
-  Loader2, AlertCircle, Printer, ArrowRightLeft, X, Layers, Search
+  Loader2, AlertCircle, Printer, ArrowRightLeft, X, Layers,
+  Search, TrendingUp, Pencil
 } from 'lucide-react';
 
 // ─── Konstantalar ────────────────────────────────────────────────────────────
-const MODE = { CROP: 'CROP', EMPTY_BASKET: 'EMPTY_BASKET' };
+const MODE  = { CROP: 'CROP', EMPTY_BASKET: 'EMPTY_BASKET' };
 const WEIGH = { FULL: 'FULL', AVERAGE: 'AVERAGE' };
 
 const INITIAL_FORM = {
-  farmerId: null,
-  priceId: null,
-  basketName: null,
+  farmerId:    null,
+  priceId:     null,
+  basketName:  null,
   basketCount: '',
+};
+
+const INITIAL_QUICK_EDIT = {
+  open:        false,
+  fruitTypeId: null,
+  label:       '',
+  amount:      '',
 };
 
 // ─── Yordamchi UI komponentlar ───────────────────────────────────────────────
@@ -49,45 +57,51 @@ function InfoBanner({ type = 'info', icon: Icon = AlertCircle, children }) {
 // ─── Asosiy sahifa ────────────────────────────────────────────────────────────
 
 export default function ReceiveCropPage() {
-  // ── Holat ──────────────────────────────────────────────────────────────────
-  const [isPageLoading, setIsPageLoading]     = useState(true);
-  const [isSubmitting, setIsSubmitting]       = useState(false);
-  const [isCalculating, setIsCalculating]     = useState(false);
-  const [successMessage, setSuccessMessage]   = useState(null);
 
-  const [activeMode, setActiveMode]           = useState(MODE.CROP);
-  const [weighingMode, setWeighingMode]       = useState(WEIGH.FULL);
+  // ── Holat ──────────────────────────────────────────────────────────────────
+  const [isPageLoading, setIsPageLoading]   = useState(true);
+  const [isSubmitting, setIsSubmitting]     = useState(false);
+  const [isCalculating, setIsCalculating]   = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  const [activeMode, setActiveMode]         = useState(MODE.CROP);
+  const [weighingMode, setWeighingMode]     = useState(WEIGH.FULL);
 
   // Ma'lumotlar
-  const [prices, setPrices]                   = useState([]);
-  const [farmerBaskets, setFarmerBaskets]     = useState([]); 
+  const [prices, setPrices]                             = useState([]);
+  const [farmerBaskets, setFarmerBaskets]               = useState([]);
   const [isFarmerBasketsLoading, setIsFarmerBasketsLoading] = useState(false);
 
   // Forma
-  const [form, setForm]                       = useState(INITIAL_FORM);
+  const [form, setForm]       = useState(INITIAL_FORM);
   const updateForm = (patch) => setForm(prev => ({ ...prev, ...patch }));
 
   // Qidiruv holatlari
-  const [farmerSearch, setFarmerSearch]       = useState('');
-  const [searchResults, setSearchResults]     = useState([]);
+  const [farmerSearch, setFarmerSearch]     = useState('');
+  const [searchResults, setSearchResults]   = useState([]);
   const [isSearchingFarmer, setIsSearchingFarmer] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen]   = useState(false);
-  const [selectedFarmer, setSelectedFarmer]   = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedFarmer, setSelectedFarmer] = useState(null);
   const dropdownRef = useRef(null);
 
   // Tortish
-  const [weightBatches, setWeightBatches]     = useState([]);
-  const [currentWeight, setCurrentWeight]     = useState('');
-  const [sampleCount, setSampleCount]         = useState('');
-  const [sampleWeight, setSampleWeight]       = useState('');
+  const [weightBatches, setWeightBatches] = useState([]);
+  const [currentWeight, setCurrentWeight] = useState('');
+  const [sampleCount, setSampleCount]     = useState('');
+  const [sampleWeight, setSampleWeight]   = useState('');
 
   // Kvitansiya
-  const [receipt, setReceipt]                 = useState(null);
+  const [receipt, setReceipt] = useState(null);
+
+  // ── Tezkor narx o'zgartirish ────────────────────────────────────────────────
+  const [quickEdit, setQuickEdit]     = useState(INITIAL_QUICK_EDIT);
+  const [isQuickSaving, setIsQuickSaving] = useState(false);
+  const [quickError, setQuickError]   = useState(null);
 
   // ── Bosish orqali yopish (Dropdown) ────────────────────────────────────────
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsDropdownOpen(false);
       }
     };
@@ -95,7 +109,7 @@ export default function ReceiveCropPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ── Statik ma'lumotlarni yuklash (Faqat narxlar) ───────────────────────────
+  // ── Statik ma'lumotlarni yuklash ───────────────────────────────────────────
   useEffect(() => {
     (async () => {
       setIsPageLoading(true);
@@ -103,21 +117,20 @@ export default function ReceiveCropPage() {
         const pricesRes = await priceService.getActivePrices();
         setPrices(Array.isArray(pricesRes) ? pricesRes : []);
       } catch (err) {
-        console.error('Statik ma\'lumotlarni yuklashda xato:', err);
+        console.error("Narxlarni yuklashda xato:", err);
       } finally {
         setIsPageLoading(false);
       }
     })();
   }, []);
 
-  // ── Farmer qidirish mantig'i (Debounce) ────────────────────────────────────
+  // ── Farmer qidirish (Debounce) ──────────────────────────────────────────────
   useEffect(() => {
     if (farmerSearch.trim().length < 2) {
       setSearchResults([]);
       setIsSearchingFarmer(false);
       return;
     }
-    
     setIsSearchingFarmer(true);
     const timer = setTimeout(async () => {
       try {
@@ -131,11 +144,10 @@ export default function ReceiveCropPage() {
         setIsDropdownOpen(true);
       }
     }, 500);
-
     return () => clearTimeout(timer);
   }, [farmerSearch]);
 
-  // ── Farmer tanlanganida uning savatlarini yuklash ──────────────────────────
+  // ── Farmer tanlanganida savatlarni yuklash ─────────────────────────────────
   useEffect(() => {
     if (!form.farmerId) {
       setFarmerBaskets([]);
@@ -147,10 +159,8 @@ export default function ReceiveCropPage() {
         const balances = await distributionService.getFarmerBalances(form.farmerId);
         const data = Array.isArray(balances) ? balances : [];
         setFarmerBaskets(data);
-
-        // 🟢 UX: Agar fermerda faqat 1 turdagi savat bo'lsa, avtomat tanlaymiz
         if (data.length === 1) {
-          updateForm({ basketName: data[0].basketName || data[0].basketName });
+          updateForm({ basketName: data[0].basketName });
         }
       } catch (err) {
         console.error('Fermer savatlarini yuklashda xato:', err);
@@ -161,14 +171,12 @@ export default function ReceiveCropPage() {
     })();
   }, [form.farmerId]);
 
-  // ── 🟢 TOZALANGAN MANTIQ: Select options faqat fermer savatlaridan ────────
+  // ── Select options ─────────────────────────────────────────────────────────
   const basketOptions = useMemo(() => {
     if (!form.farmerId || farmerBaskets.length === 0) return [];
-    
     return farmerBaskets.map(b => ({
-      // Eslatma: Backenddan basketName kelsa o'shani olamiz, kelmasa ismini value qilamiz
-      value: b.basketName || b.basketName, 
-      label: b.basketName
+      value: b.basketName,
+      label: b.basketName,
     }));
   }, [farmerBaskets, form.farmerId]);
 
@@ -178,42 +186,34 @@ export default function ReceiveCropPage() {
       label: `${p.fruitTypeName} (${p.quality}) — ${p.amount?.toLocaleString()} so'm/kg`,
     })), [prices]);
 
-  // ── Tanlangan savat bo'yicha ruxsat etilgan maksimal son (LIMIT) ───────────
+  // ── Tanlangan savat uchun maksimal son ─────────────────────────────────────
   const maxAllowedBaskets = useMemo(() => {
     if (!form.basketName || farmerBaskets.length === 0) return 0;
-
-    const farmerBasket = farmerBaskets.find(b => 
-      b.basketName === form.basketName || b.basketName === form.basketName
-    );
-
-    return farmerBasket ? farmerBasket.quantity : 0;
+    const found = farmerBaskets.find(b => b.basketName === form.basketName);
+    return found ? found.quantity : 0;
   }, [form.basketName, farmerBaskets]);
 
-  // ── Kvitansiya hisob-kitobi ──────────────────────────────────────────────
+  // ── Kvitansiya hisob-kitobi ─────────────────────────────────────────────────
   const isReadyToCalculate = useMemo(() => {
     if (activeMode !== MODE.CROP) return false;
     if (!form.farmerId || !form.priceId || !form.basketName) return false;
     if (farmerBaskets.length === 0) return false;
-
     if (weighingMode === WEIGH.FULL)    return weightBatches.length > 0;
     if (weighingMode === WEIGH.AVERAGE) return form.basketCount > 0 && sampleCount > 0 && sampleWeight > 0;
     return false;
   }, [activeMode, form, weighingMode, weightBatches, sampleCount, sampleWeight, farmerBaskets]);
 
   useEffect(() => {
-    if (!isReadyToCalculate) {
-      setReceipt(null);
-      return;
-    }
+    if (!isReadyToCalculate) { setReceipt(null); return; }
     const timer = setTimeout(async () => {
       setIsCalculating(true);
       try {
         const payload = {
-          farmerId:         form.farmerId,
-          priceId:          form.priceId,
-          hasBasket:        true,
-          basketName:         form.basketName,
-          basketCount:      parseInt(form.basketCount || 0),
+          farmerId:          form.farmerId,
+          priceId:           form.priceId,
+          hasBasket:         true,
+          basketName:        form.basketName,
+          basketCount:       parseInt(form.basketCount || 0),
           weighingMode,
           weightBatches,
           sampleBasketCount: parseInt(sampleCount || 0),
@@ -229,16 +229,58 @@ export default function ReceiveCropPage() {
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [isReadyToCalculate, form.farmerId, form.priceId, form.basketName, form.basketCount, weighingMode, weightBatches, sampleCount, sampleWeight]);
+  }, [isReadyToCalculate, form.farmerId, form.priceId, form.basketName, form.basketCount,
+      weighingMode, weightBatches, sampleCount, sampleWeight]);
 
-  // ── Amallar ───────────────────────────────────────────────────────────────
+  // ── TEZKOR NARX O'ZGARTIRISH ───────────────────────────────────────────────
+  const openQuickEdit = () => {
+    const selected = prices.find(p => p.priceId === form.priceId);
+    if (!selected) return;
+    setQuickError(null);
+    setQuickEdit({
+      open:        true,
+      fruitTypeId: selected.fruitTypeId,
+      label:       `${selected.fruitTypeName} — ${selected.quality}`,
+      amount:      selected.amount?.toString() ?? '',
+    });
+  };
+
+  const handleQuickPriceSave = async () => {
+    const newAmount = parseFloat(quickEdit.amount);
+    if (!newAmount || newAmount <= 0) {
+      setQuickError("Iltimos, to'g'ri narx kiriting!");
+      return;
+    }
+    setIsQuickSaving(true);
+    setQuickError(null);
+    try {
+      await priceService.setPrice({
+        fruitTypeId: quickEdit.fruitTypeId,
+        amount:      newAmount,
+      });
+
+      // Narxlar ro'yxatini yangilash
+      const fresh = await priceService.getActivePrices();
+      const freshArr = Array.isArray(fresh) ? fresh : [];
+      setPrices(freshArr);
+
+      // Yangilangan narxni avtomatik tanlash
+      const updated = freshArr.find(p => p.fruitTypeId === quickEdit.fruitTypeId);
+      if (updated) updateForm({ priceId: updated.priceId });
+
+      setQuickEdit(INITIAL_QUICK_EDIT);
+    } catch (err) {
+      setQuickError(err.response?.data?.message || 'Narx saqlanmadi. Qayta urinib ko\'ring.');
+    } finally {
+      setIsQuickSaving(false);
+    }
+  };
+
+  // ── Boshqa amallar ─────────────────────────────────────────────────────────
   const addWeight = (e) => {
     e?.preventDefault();
     const val = parseFloat(currentWeight);
-    if (val > 0) {
-      setWeightBatches(prev => [...prev, val]);
-      setCurrentWeight('');
-    }
+    if (val > 0) { setWeightBatches(prev => [...prev, val]); setCurrentWeight(''); }
   };
 
   const removeWeight = (idx) => setWeightBatches(prev => prev.filter((_, i) => i !== idx));
@@ -255,22 +297,16 @@ export default function ReceiveCropPage() {
     setFarmerBaskets([]);
   };
 
-  const switchMode = (mode) => {
-    setActiveMode(mode);
-    resetAll();
-  };
+  const switchMode = (mode) => { setActiveMode(mode); resetAll(); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!form.farmerId) return alert('Iltimos, fermerni tanlang!');
-
     if (activeMode === MODE.CROP) {
       if (!form.basketName)          return alert('Savat turini tanlang!');
-      if (farmerBaskets.length === 0) return alert('Bu fermerda savat yo\'q!');
-      if (!receipt)                return alert('Hisob-kitob to\'liq emas!');
+      if (farmerBaskets.length === 0) return alert("Bu fermerda savat yo'q!");
+      if (!receipt)                  return alert("Hisob-kitob to'liq emas!");
     }
-
     if (activeMode === MODE.EMPTY_BASKET) {
       if (!form.basketName || !form.basketCount) return alert('Savat turi va sonini kiriting!');
     }
@@ -282,7 +318,7 @@ export default function ReceiveCropPage() {
           farmerId:          form.farmerId,
           priceId:           form.priceId,
           hasBasket:         true,
-          basketName:          form.basketName,
+          basketName:        form.basketName,
           basketCount:       parseInt(form.basketCount),
           weighingMode,
           weightBatches,
@@ -294,12 +330,11 @@ export default function ReceiveCropPage() {
       } else {
         await distributionService.returnEmptyBaskets({
           farmerId:  form.farmerId,
-          basketName:  form.basketName,
+          basketName: form.basketName,
           quantity:  parseInt(form.basketCount),
         });
         setSuccessMessage("Bo'sh savatlar muvaffaqiyatli qabul qilindi!");
       }
-
       resetAll();
       setTimeout(() => setSuccessMessage(null), 6000);
     } catch (err) {
@@ -313,8 +348,7 @@ export default function ReceiveCropPage() {
   const farmerHasNoBaskets = form.farmerId && !isFarmerBasketsLoading && farmerBaskets.length === 0;
   const isSubmitDisabled   = isSubmitting || isCalculating ||
     (activeMode === MODE.CROP && (!receipt || !form.basketName || farmerHasNoBaskets));
-
-  const totalBatchWeight = weightBatches.reduce((s, w) => s + w, 0);
+  const totalBatchWeight   = weightBatches.reduce((s, w) => s + w, 0);
 
   // ── Sahifa yuklanayotgan holat ─────────────────────────────────────────────
   if (isPageLoading) {
@@ -349,8 +383,8 @@ export default function ReceiveCropPage() {
       {/* ── Rejim tanlash ─────────────────────────────────────────────────── */}
       <div className="flex items-center bg-gray-100/80 p-1.5 rounded-2xl max-w-sm mx-auto mb-8 border border-gray-200 shadow-inner">
         {[
-          { key: MODE.CROP,         label: 'Qabul',       Icon: Scale,          active: 'bg-white text-emerald-600 shadow-sm border border-gray-100' },
-          { key: MODE.EMPTY_BASKET, label: "Bo'sh Savat",       Icon: ArrowRightLeft, active: 'bg-[#0B1A42] text-white shadow-sm' },
+          { key: MODE.CROP,         label: 'Qabul',        Icon: Scale,          active: 'bg-white text-emerald-600 shadow-sm border border-gray-100' },
+          { key: MODE.EMPTY_BASKET, label: "Bo'sh Savat",  Icon: ArrowRightLeft, active: 'bg-[#0B1A42] text-white shadow-sm' },
         ].map(({ key, label, Icon, active }) => (
           <button
             key={key}
@@ -373,10 +407,10 @@ export default function ReceiveCropPage() {
             <div className="bg-gray-50/50 p-5 rounded-2xl border border-gray-100">
               <SectionLabel
                 icon={UserCircle}
-                text={activeMode === MODE.CROP ? 'fermer' : 'Savat qaytarayotgan fermer'}
+                text={activeMode === MODE.CROP ? 'Fermer' : 'Savat qaytarayotgan fermer'}
                 iconClass={activeMode === MODE.CROP ? 'text-emerald-500' : 'text-blue-600'}
               />
-              
+
               <div className="relative" ref={dropdownRef}>
                 {selectedFarmer ? (
                   <div className="flex items-center justify-between px-5 py-4 bg-emerald-50 border border-emerald-200 rounded-xl shadow-sm">
@@ -388,8 +422,8 @@ export default function ReceiveCropPage() {
                         {selectedFarmer.phoneNumber}
                       </span>
                     </div>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => {
                         setSelectedFarmer(null);
                         updateForm({ farmerId: null, basketName: null, basketCount: '' });
@@ -404,25 +438,22 @@ export default function ReceiveCropPage() {
                 ) : (
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      {isSearchingFarmer ? (
-                        <Loader2 size={20} className="text-emerald-500 animate-spin" />
-                      ) : (
-                        <Search size={20} className="text-gray-400" />
-                      )}
+                      {isSearchingFarmer
+                        ? <Loader2 size={20} className="text-emerald-500 animate-spin" />
+                        : <Search size={20} className="text-gray-400" />
+                      }
                     </div>
                     <input
-                      type="text" 
-                      autoComplete="off" 
+                      type="text"
+                      autoComplete="off"
                       value={farmerSearch}
                       onChange={e => setFarmerSearch(e.target.value)}
                       onFocus={() => { if (farmerSearch.length >= 2) setIsDropdownOpen(true); }}
                       placeholder="Kamida 2 ta harf yoki raqam yozing..."
                       className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-xl text-gray-900 outline-none transition-all font-medium text-base shadow-sm"
                     />
-                    
-                    {/* Qidiruv natijalari */}
                     {isDropdownOpen && farmerSearch.length >= 2 && (
-                      <div className="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-xl border border-gray-100 max-h-64 overflow-y-auto overflow-x-hidden">
+                      <div className="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-xl border border-gray-100 max-h-64 overflow-y-auto">
                         {isSearchingFarmer ? (
                           <div className="p-5 text-center text-gray-500 text-sm flex items-center justify-center gap-2">
                             <Loader2 size={18} className="animate-spin text-emerald-500" /> Baza tekshirilmoqda...
@@ -431,10 +462,10 @@ export default function ReceiveCropPage() {
                           <div className="p-5 text-center text-gray-500 text-sm font-medium">Fermer topilmadi.</div>
                         ) : (
                           searchResults.map(f => (
-                            <div 
+                            <div
                               key={f.id}
-                              onMouseDown={e => { 
-                                e.preventDefault(); 
+                              onMouseDown={e => {
+                                e.preventDefault();
                                 setSelectedFarmer(f);
                                 updateForm({ farmerId: f.id, basketName: null, basketCount: '' });
                                 setFarmerSearch('');
@@ -456,7 +487,7 @@ export default function ReceiveCropPage() {
                 )}
               </div>
 
-              {/* FERMER OMBORI UI */}
+              {/* Fermer savatlari */}
               {form.farmerId && (
                 <div className="mt-4">
                   {isFarmerBasketsLoading ? (
@@ -489,9 +520,7 @@ export default function ReceiveCropPage() {
                       </div>
                     </div>
                   ) : (
-                    <InfoBanner type="error">
-                      Bu fermerda tarqatilgan savat yo'q!
-                    </InfoBanner>
+                    <InfoBanner type="error">Bu fermerda tarqatilgan savat yo'q!</InfoBanner>
                   )}
                 </div>
               )}
@@ -500,45 +529,70 @@ export default function ReceiveCropPage() {
             {/* ── HOSIL QABUL rejimi ─────────────────────────────────────── */}
             {activeMode === MODE.CROP && (
               <>
-                {/* 2. NARX */}
+                {/* 2. NARX — tezkor o'zgartirish tugmasi bilan */}
                 <div>
                   <SectionLabel icon={Apple} text="Meva turi va narx" />
-                  <Select
-                    options={priceOptions}
-                    placeholder="Mevani tanlang..."
-                    value={priceOptions.find(o => o.value === form.priceId) ?? null}
-                    onChange={(sel) => updateForm({ priceId: sel?.value ?? null })}
-                    className="text-sm font-medium"
-                    isDisabled={farmerHasNoBaskets}
-                    styles={{
-                      control: (base, state) => ({
-                        ...base,
-                        padding: '2px',
-                        borderRadius: '0.75rem',
-                        borderColor: state.isFocused ? '#10B981' : '#D1D5DB',
-                        boxShadow: state.isFocused ? '0 0 0 4px rgba(16, 185, 129, 0.1)' : 'none',
-                        '&:hover': { borderColor: '#10B981' }
-                      })
-                    }}
-                  />
+                  <div className="flex gap-2 items-center">
+                    <div className="flex-1">
+                      <Select
+                        options={priceOptions}
+                        placeholder="Mevani tanlang..."
+                        value={priceOptions.find(o => o.value === form.priceId) ?? null}
+                        onChange={(sel) => updateForm({ priceId: sel?.value ?? null })}
+                        className="text-sm font-medium"
+                        isDisabled={farmerHasNoBaskets}
+                        styles={{
+                          control: (base, state) => ({
+                            ...base,
+                            padding: '2px',
+                            borderRadius: '0.75rem',
+                            borderColor: state.isFocused ? '#10B981' : '#D1D5DB',
+                            boxShadow: state.isFocused ? '0 0 0 4px rgba(16,185,129,0.1)' : 'none',
+                            '&:hover': { borderColor: '#10B981' },
+                          }),
+                        }}
+                      />
+                    </div>
+
+                    {/* ── TEZKOR NARX O'ZGARTIRISH TUGMASI ── */}
+                    {form.priceId && (
+                      <button
+                        type="button"
+                        onClick={openQuickEdit}
+                        title="Narxni hozir o'zgartirish"
+                        className="flex-shrink-0 flex items-center gap-1.5 px-3 py-3 bg-amber-50 border border-amber-200 text-amber-600 rounded-xl hover:bg-amber-100 hover:border-amber-300 active:scale-95 transition-all font-bold text-xs whitespace-nowrap shadow-sm"
+                      >
+                        <Pencil size={15} />
+                        <span className="hidden sm:inline">Narxni o'zgartir</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Tanlangan narx haqida eslatma */}
+                  {form.priceId && (() => {
+                    const sel = prices.find(p => p.priceId === form.priceId);
+                    return sel ? (
+                      <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-lg">
+                        <CheckCircle2 size={14} className="text-emerald-500 flex-shrink-0" />
+                        <span className="text-xs font-semibold text-emerald-700">
+                          Joriy narx: <strong>{sel.amount?.toLocaleString()} UZS/kg</strong>
+                          {' '}— boshqa narxda qabul qilmoqchi bo'lsangiz "Narxni o'zgartir" tugmasini bosing.
+                        </span>
+                      </div>
+                    ) : null;
+                  })()}
                 </div>
 
                 {/* 3. SAVAT */}
                 {form.farmerId && !isFarmerBasketsLoading && farmerBaskets.length > 0 && (
                   <div className={`border-2 rounded-2xl p-5 sm:p-6 space-y-5 transition-colors duration-300 ${form.basketName ? 'border-emerald-500 bg-emerald-50/20' : 'border-gray-200'}`}>
-                
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      {/* Savat turi */}
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wide">
-                          Savat turi
-                        </label>
+                        <label className="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wide">Savat turi</label>
                         <Select
                           options={basketOptions}
                           value={basketOptions.find(o => o.value === form.basketName) ?? null}
-                          onChange={(sel) => {
-                            updateForm({ basketName: sel?.value ?? null, basketCount: '' });
-                          }}
+                          onChange={(sel) => updateForm({ basketName: sel?.value ?? null, basketCount: '' })}
                           placeholder="Tanlang..."
                           className="text-sm font-medium"
                           styles={{
@@ -546,19 +600,15 @@ export default function ReceiveCropPage() {
                               ...base,
                               borderRadius: '0.75rem',
                               borderColor: state.isFocused ? '#10B981' : '#D1D5DB',
-                              boxShadow: state.isFocused ? '0 0 0 4px rgba(16, 185, 129, 0.1)' : 'none',
-                              '&:hover': { borderColor: '#10B981' }
-                            })
+                              boxShadow: state.isFocused ? '0 0 0 4px rgba(16,185,129,0.1)' : 'none',
+                              '&:hover': { borderColor: '#10B981' },
+                            }),
                           }}
                         />
                       </div>
-
-                      {/* Savat soni (LIMIT BILAN) */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wide">
-                            Kelgan savat soni
-                          </label>
+                          <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wide">Kelgan savat soni</label>
                           {maxAllowedBaskets > 0 && (
                             <span className="text-[10px] font-extrabold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md">
                               Maks: {maxAllowedBaskets} ta
@@ -572,17 +622,8 @@ export default function ReceiveCropPage() {
                           value={form.basketCount}
                           onChange={e => {
                             let val = parseInt(e.target.value, 10);
-                            
-                            if (isNaN(val)) {
-                              updateForm({ basketCount: '' });
-                              return;
-                            }
-
-                            // Limitdan oshib ketsa, maksimalga tushiramiz
-                            if (val > maxAllowedBaskets) {
-                              val = maxAllowedBaskets;
-                            }
-                            
+                            if (isNaN(val)) { updateForm({ basketCount: '' }); return; }
+                            if (val > maxAllowedBaskets) val = maxAllowedBaskets;
                             updateForm({ basketCount: val.toString() });
                           }}
                           disabled={!form.basketName}
@@ -597,11 +638,9 @@ export default function ReceiveCropPage() {
                 {/* 4. TORTISH REJIMI */}
                 {form.farmerId && farmerBaskets.length > 0 && form.basketName && (
                   <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-
-                    {/* Tab */}
                     <div className="flex bg-gray-50/80 border-b border-gray-200">
                       {[
-                        { key: WEIGH.FULL,    label: "To'liq / Qismlab",  Icon: Scale,  activeColor: 'text-emerald-600 border-emerald-500 bg-white' },
+                        { key: WEIGH.FULL,    label: "To'liq / Qismlab",     Icon: Scale,  activeColor: 'text-emerald-600 border-emerald-500 bg-white' },
                         { key: WEIGH.AVERAGE, label: "O'rtacha (Namunaviy)", Icon: Layers, activeColor: 'text-orange-600 border-orange-500 bg-white' },
                       ].map(({ key, label, Icon, activeColor }) => (
                         <button
@@ -616,8 +655,6 @@ export default function ReceiveCropPage() {
                     </div>
 
                     <div className="p-5 sm:p-6 bg-white">
-
-                      {/* To'liq tortish */}
                       {weighingMode === WEIGH.FULL && (
                         <div className="space-y-4">
                           <div className="flex gap-3">
@@ -653,10 +690,10 @@ export default function ReceiveCropPage() {
                                   Jami: {totalBatchWeight.toFixed(1)} kg
                                 </span>
                               </div>
-                              <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                              <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
                                 {weightBatches.map((w, i) => (
                                   <div key={i} className="flex items-center gap-2 bg-white border border-emerald-200 pl-3 pr-1.5 py-1.5 rounded-lg text-sm font-bold text-gray-700 shadow-sm group">
-                                    <span className="text-gray-400 text-xs font-medium w-4">{i + 1}.</span> 
+                                    <span className="text-gray-400 text-xs font-medium w-4">{i + 1}.</span>
                                     <span className="w-12 text-right">{w} kg</span>
                                     <button type="button" onClick={() => removeWeight(i)} className="p-1 hover:bg-red-50 text-red-400 rounded-md transition-colors opacity-0 group-hover:opacity-100">
                                       <X size={14} strokeWidth={3} />
@@ -669,15 +706,11 @@ export default function ReceiveCropPage() {
                         </div>
                       )}
 
-                      {/* O'rtacha tortish */}
                       {weighingMode === WEIGH.AVERAGE && (
                         <div className="space-y-5">
-                          
                           <div className="grid grid-cols-2 gap-5">
                             <div>
-                              <label className="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wide">
-                                Tarozidagi savatlar soni
-                              </label>
+                              <label className="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wide">Tarozidagi savatlar soni</label>
                               <input
                                 type="number"
                                 min="1"
@@ -688,9 +721,7 @@ export default function ReceiveCropPage() {
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wide">
-                                Mahsulot vazni
-                              </label>
+                              <label className="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wide">Mahsulot vazni</label>
                               <div className="relative">
                                 <input
                                   type="number"
@@ -704,7 +735,6 @@ export default function ReceiveCropPage() {
                               </div>
                             </div>
                           </div>
-
                           {receipt?.grossWeight > 0 && (
                             <div className="flex justify-between items-center pt-4 border-t border-orange-100">
                               <span className="text-sm font-bold text-gray-500">Hisoblab topilgan jami vazni:</span>
@@ -713,7 +743,6 @@ export default function ReceiveCropPage() {
                           )}
                         </div>
                       )}
-
                     </div>
                   </div>
                 )}
@@ -729,7 +758,6 @@ export default function ReceiveCropPage() {
                   </div>
                   <h3 className="font-black text-lg">Qaytarilayotgan savatlar</h3>
                 </div>
-                
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <SectionLabel icon={Box} text="Savat turi" iconClass="text-blue-600" />
@@ -737,28 +765,22 @@ export default function ReceiveCropPage() {
                       options={basketOptions}
                       placeholder="Savatni tanlang..."
                       value={basketOptions.find(o => o.value === form.basketName) ?? null}
-                      onChange={(sel) => {
-                        updateForm({ basketName: sel?.value ?? null, basketCount: '' });
-                      }}
+                      onChange={(sel) => updateForm({ basketName: sel?.value ?? null, basketCount: '' })}
                       className="text-sm font-medium"
                       styles={{
                         control: (base, state) => ({
                           ...base,
                           borderRadius: '0.75rem',
                           borderColor: state.isFocused ? '#2563EB' : '#D1D5DB',
-                          boxShadow: state.isFocused ? '0 0 0 4px rgba(37, 99, 235, 0.1)' : 'none',
-                          '&:hover': { borderColor: '#2563EB' }
-                        })
+                          boxShadow: state.isFocused ? '0 0 0 4px rgba(37,99,235,0.1)' : 'none',
+                          '&:hover': { borderColor: '#2563EB' },
+                        }),
                       }}
                     />
                   </div>
-                  
-                  {/* Savat soni (LIMIT BILAN) */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wide">
-                        Savatlar soni
-                      </label>
+                      <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wide">Savatlar soni</label>
                       {maxAllowedBaskets > 0 && (
                         <span className="text-[10px] font-extrabold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md">
                           Maks: {maxAllowedBaskets} ta
@@ -773,10 +795,7 @@ export default function ReceiveCropPage() {
                       value={form.basketCount}
                       onChange={e => {
                         let val = parseInt(e.target.value, 10);
-                        if (isNaN(val)) {
-                          updateForm({ basketCount: '' });
-                          return;
-                        }
+                        if (isNaN(val)) { updateForm({ basketCount: '' }); return; }
                         if (val > maxAllowedBaskets) val = maxAllowedBaskets;
                         updateForm({ basketCount: val.toString() });
                       }}
@@ -795,8 +814,6 @@ export default function ReceiveCropPage() {
         {/* ── Kvitansiya paneli ────────────────────────────────────────────── */}
         <div className="lg:col-span-1">
           <div className="bg-[#0B1A42] rounded-2xl shadow-xl p-6 sm:p-7 text-white sticky top-6 border border-blue-900/50">
-
-            {/* Sarlavha */}
             <div className="flex items-center justify-between mb-7 border-b border-white/10 pb-4">
               <span className="flex items-center gap-2.5 text-base font-black uppercase tracking-wide">
                 {activeMode === MODE.CROP
@@ -807,7 +824,6 @@ export default function ReceiveCropPage() {
               {isCalculating && <Loader2 size={18} className="animate-spin text-emerald-400" />}
             </div>
 
-            {/* CROP kvitansiya */}
             {activeMode === MODE.CROP && (
               receipt ? (
                 <div className="space-y-4 text-sm font-medium">
@@ -820,8 +836,7 @@ export default function ReceiveCropPage() {
                   <ReceiptRow label="Narx (1 kg)" value={`${receipt.unitPrice?.toLocaleString()} UZS`} />
                   <div className="mt-8 pt-6 border-t border-white/10 bg-white/5 -mx-6 -mb-6 p-6 rounded-b-2xl">
                     <p className="text-gray-400 text-[11px] uppercase tracking-widest mb-2 font-extrabold flex items-center justify-between">
-                      Fermer hisobiga:
-                      <CheckCircle2 size={14} className="text-emerald-500" />
+                      Fermer hisobiga: <CheckCircle2 size={14} className="text-emerald-500" />
                     </p>
                     <div className="text-4xl font-black break-all text-white leading-none">
                       {receipt.totalAmount?.toLocaleString()}
@@ -833,22 +848,16 @@ export default function ReceiveCropPage() {
                 <div className="py-16 flex flex-col items-center text-center opacity-40">
                   <Calculator size={56} className="mb-4 text-emerald-400/50" />
                   <p className="text-sm font-medium leading-relaxed max-w-[200px]">
-                    {!form.farmerId
-                      ? 'Avval qidiruv orqali fermerni tanlang'
-                      : farmerHasNoBaskets
-                      ? 'Bu fermerda savat yo\'q'
-                      : !form.priceId
-                      ? 'Meva turini tanlang'
-                      : !form.basketName
-                      ? 'Savatni tanlang'
-                      : 'Vazn kiriting'
-                    }
+                    {!form.farmerId         ? 'Avval qidiruv orqali fermerni tanlang'
+                    : farmerHasNoBaskets    ? "Bu fermerda savat yo'q"
+                    : !form.priceId         ? 'Meva turini tanlang'
+                    : !form.basketName      ? 'Savatni tanlang'
+                    : 'Vazn kiriting'}
                   </p>
                 </div>
               )
             )}
 
-            {/* EMPTY_BASKET kvitansiya */}
             {activeMode === MODE.EMPTY_BASKET && (
               <div className="space-y-5 text-sm">
                 <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center space-y-2">
@@ -863,7 +872,6 @@ export default function ReceiveCropPage() {
               </div>
             )}
 
-            {/* Submit tugmasi */}
             <button
               type="submit"
               form="mainForm"
@@ -880,6 +888,105 @@ export default function ReceiveCropPage() {
         </div>
 
       </div>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          TEZKOR NARX O'ZGARTIRISH MODALI
+          ═══════════════════════════════════════════════════════════════════ */}
+      {quickEdit.open && (
+        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+
+            {/* Modal header */}
+            <div className="p-5 border-b border-amber-100 flex justify-between items-start bg-amber-50/60">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="bg-amber-100 p-1.5 rounded-lg">
+                    <TrendingUp size={16} className="text-amber-600" />
+                  </div>
+                  <h3 className="font-black text-gray-900">Narxni o'zgartirish</h3>
+                </div>
+                <p className="text-sm text-amber-700 font-semibold pl-8">{quickEdit.label}</p>
+              </div>
+              <button
+                onClick={() => { setQuickEdit(INITIAL_QUICK_EDIT); setQuickError(null); }}
+                disabled={isQuickSaving}
+                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal body */}
+            <div className="p-6 space-y-4">
+
+              {/* Narx input */}
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                  Yangi narx (1 kg uchun)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="1"
+                    autoFocus
+                    value={quickEdit.amount}
+                    onChange={e => {
+                      setQuickError(null);
+                      setQuickEdit(prev => ({ ...prev, amount: e.target.value }));
+                    }}
+                    onKeyDown={e => e.key === 'Enter' && !isQuickSaving && handleQuickPriceSave()}
+                    className={`w-full pl-5 pr-16 py-4 border-2 rounded-xl text-2xl font-black text-gray-900 outline-none transition-all ${quickError ? 'border-red-400 focus:border-red-400 bg-red-50/30' : 'border-gray-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10'}`}
+                    placeholder="0"
+                  />
+                  <span className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 font-black text-sm pointer-events-none">UZS</span>
+                </div>
+              </div>
+
+              {/* Xato xabari */}
+              {quickError && (
+                <div className="flex items-center gap-2 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium">
+                  <AlertCircle size={16} className="flex-shrink-0" />
+                  {quickError}
+                </div>
+              )}
+
+              {/* Eslatma */}
+              <div className="flex items-start gap-2 px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-lg">
+                <AlertCircle size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Eski narx avtomatik arxivlanadi va oldingi qabullarga ta'sir qilmaydi.
+                  Yangi narx darhol kuchga kiradi.
+                </p>
+              </div>
+
+              {/* Tugmalar */}
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setQuickEdit(INITIAL_QUICK_EDIT); setQuickError(null); }}
+                  disabled={isQuickSaving}
+                  className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="button"
+                  onClick={handleQuickPriceSave}
+                  disabled={isQuickSaving || !quickEdit.amount || parseFloat(quickEdit.amount) <= 0}
+                  className="flex-1 py-3 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+                >
+                  {isQuickSaving
+                    ? <><Loader2 size={16} className="animate-spin" /> Saqlanmoqda...</>
+                    : <><CheckCircle2 size={16} /> Saqlash</>
+                  }
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
