@@ -6,7 +6,7 @@ import {
 import {
   ShoppingCart, Users, Package, DollarSign,
   Scale, Filter, ChevronDown, Calendar, TrendingUp,
-  TrendingDown, Minus, RefreshCw, AlertCircle
+  TrendingDown, Minus, RefreshCw, AlertCircle,ShoppingBasket
 } from 'lucide-react';
 import { brokerDashboardService } from '../../services/brokerDashboardService';
 
@@ -195,7 +195,7 @@ export default function BrokerDashboard() {
   const statCards = [
     { label: "Qabul qilingan og'irlik", value: stats ? fmt(stats.totalAcceptedWeight) : '—', unit: 'kg',    icon: Scale,       color: 'text-blue-500',    bg: 'bg-blue-50',    growth: stats?.weightGrowthPercent },
     { label: 'Mahsulot qiymati',        value: stats ? fmt(stats.totalIncome)          : '—', unit: "so'm", icon: DollarSign,  color: 'text-emerald-500', bg: 'bg-emerald-50', growth: stats?.incomeGrowthPercent },
-    { label: 'Fermerlar',               value: stats ? fmt(stats.activeFarmers)         : '—', unit: 'nafar', icon: Users,      color: 'text-purple-500',  bg: 'bg-purple-50',  growth: null },
+    { label: 'Qabul qilingan savatlar', value: stats ? fmt(stats.receivedBaskets)      : '—', unit: 'ta',   icon: ShoppingBasket, color: 'text-purple-500',  bg: 'bg-purple-50',  growth: null },
     { label: 'Tarqatilgan savatlar',    value: stats ? fmt(stats.distributedBaskets)    : '—', unit: 'ta',   icon: ShoppingCart,color: 'text-amber-500',   bg: 'bg-amber-50',   growth: null },
     { label: 'Ombordagi zaxira',        value: stats ? fmt(stats.totalInventory)        : '—', unit: 'kg',   icon: Package,    color: 'text-rose-500',    bg: 'bg-rose-50',    growth: null },
   ];
