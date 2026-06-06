@@ -44,5 +44,23 @@ export const adminStockService = {
     } catch (error) {
       throw new Error("Savatlar tarixini yuklashda xatolik");
     }
+  },
+
+  getPointsFridgeSummary: async (search = '', page = 0, size = 12) => {
+    try {
+      const response = await api.get(`${BASE_URL}/fridges-summary`, { params: { search, page, size } });
+      return response.data?.data || { content: [], totalElements: 0, totalPages: 0 };
+    } catch (error) {
+      throw new Error("Xolodilniklar statistikasini yuklashda xatolik");
+    }
+  },
+
+  getFridgeStocksByPoint: async (pointId, search = '', page = 0, size = 15) => {
+    try {
+      const response = await api.get(`${BASE_URL}/fridges`, { params: { pointId, search, page, size } });
+      return response.data?.data || { content: [], totalElements: 0, totalPages: 0 };
+    } catch (error) {
+      throw new Error("Xolodilnik zaxiralarini yuklashda xatolik");
+    }
   }
 };

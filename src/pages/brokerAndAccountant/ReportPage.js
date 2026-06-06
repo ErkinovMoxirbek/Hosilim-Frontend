@@ -58,13 +58,12 @@ export default function ReportPage() {
     cropService.getFruitTypes().then(setFruitTypes);
   }, []);
 
-
   useEffect(() => {
     const fetchGroupedData = async () => {
       setIsLoading(true);
       try {
         const res = await cropService.getReportsGrouped(
-          startDate, endDate, search, 0, 50, fruitTypeId  // ← fruitTypeId qo'shildi
+          startDate, endDate, search, 0, 50, fruitTypeId
         );
         setGroupedData(res.content || []);
       } catch (error) {
@@ -75,8 +74,7 @@ export default function ReportPage() {
     };
     const timer = setTimeout(fetchGroupedData, 300);
     return () => clearTimeout(timer);
-  }, [startDate, endDate, search, fruitTypeId, refreshTrigger]);  // ← fruitTypeId qo'shildi
-
+  }, [startDate, endDate, search, fruitTypeId, refreshTrigger]);
 
   const toggleRow = async (farmerId) => {
     if (expandedId === farmerId) {
@@ -201,13 +199,12 @@ export default function ReportPage() {
             <input type="text" placeholder="Fermerning F.I.O yoki raqami..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl font-medium text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all w-full" />
           </div>
 
-          {/* Meva turi filtri */}
           <div className="relative w-full sm:w-52">
             <select
               value={fruitTypeId ?? ''}
               onChange={(e) => {
                 setFruitTypeId(e.target.value || null);
-                setExpandedId(null);   // ochiq qatorni yopamiz
+                setExpandedId(null);
               }}
               className="w-full pl-4 pr-9 py-2.5 bg-gray-50 border border-gray-300 rounded-xl
                    font-bold text-sm text-gray-700 outline-none appearance-none cursor-pointer
@@ -335,32 +332,42 @@ export default function ReportPage() {
                                       {details.length === 0 ? (
                                         <tr><td colSpan="7" className="p-6 text-center text-xs text-gray-400">Ma'lumot topilmadi</td></tr>
                                       ) : (
-                                        details.map((item, idx) => (
-                                          <tr key={item.id ?? idx} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                                        details.map((item, idx) => {
+                                          const isCancelled = item.status === 'CANCELLED';
+                                          return (
+                                          <tr key={item.id ?? idx} className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 ${isCancelled ? 'bg-red-50/20 opacity-60' : ''}`}>
                                             <td className="p-3 pl-4 text-xs text-gray-500 font-medium whitespace-nowrap">{formatDateTime(item.createdAt)}</td>
                                             <td className="p-3">
                                               <div className="flex items-center gap-2">
-                                                <FileText size={13} className="text-orange-500 shrink-0" />
+                                                <FileText size={13} className={`shrink-0 ${isCancelled ? 'text-gray-400' : 'text-orange-500'}`} />
                                                 <div>
-                                                  <div className="font-semibold text-gray-800 text-xs">{item.fruitName}</div>
+                                                  <div className={`font-semibold text-xs ${isCancelled ? 'line-through text-gray-400' : 'text-gray-800'}`}>{item.fruitName}</div>
                                                   <div className="text-[10px] text-gray-400 mt-0.5">{fmt(item.unitPrice)} so'm/kg</div>
                                                 </div>
                                               </div>
                                             </td>
-                                            <td className="p-3"><span className="font-bold text-emerald-600 text-xs">{fmtKg(item.netWeight)} kg</span></td>
+                                            <td className="p-3"><span className={`font-bold text-xs ${isCancelled ? 'line-through text-gray-400' : 'text-emerald-600'}`}>{fmtKg(item.netWeight)} kg</span></td>
                                             <td className="p-3">
                                               {(item.basketCount ?? 0) > 0 ? (
-                                                <div className="text-xs text-gray-600">
+                                                <div className={`text-xs ${isCancelled ? 'text-gray-400 line-through' : 'text-gray-600'}`}>
                                                   <span className="font-bold">{item.basketCount}x</span>
-                                                  <span className="text-gray-400 ml-1 truncate max-w-[100px] inline-block align-bottom">{item.basketName}</span>
+                                                  <span className="ml-1 truncate max-w-[100px] inline-block align-bottom">{item.basketName}</span>
                                                 </div>
                                               ) : <span className="text-gray-300 text-xs">—</span>}
                                             </td>
-                                            <td className="p-3"><span className="font-bold text-[#0B1A42] text-xs">{fmt(item.totalAmount)}<span className="text-[9px] text-gray-400 ml-1">UZS</span></span></td>
-                                            <td className="p-3"><span className="font-bold text-teal-600 text-xs">{fmt(item.paidAmount)}<span className="text-[9px] text-gray-400 ml-1">UZS</span></span></td>
-                                            <td className="p-3"><PaymentBadge isPaid={item.isPaid} /></td>
+                                            <td className="p-3"><span className={`font-bold text-xs ${isCancelled ? 'line-through text-gray-400' : 'text-[#0B1A42]'}`}>{fmt(item.totalAmount)}<span className="text-[9px] text-gray-400 ml-1">UZS</span></span></td>
+                                            <td className="p-3"><span className={`font-bold text-xs ${isCancelled ? 'line-through text-gray-400' : 'text-teal-600'}`}>{fmt(item.paidAmount)}<span className="text-[9px] text-gray-400 ml-1">UZS</span></span></td>
+                                            <td className="p-3">
+                                              {isCancelled ? (
+                                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                                  <X size={10} /> Bekor qilingan
+                                                </span>
+                                              ) : (
+                                                <PaymentBadge isPaid={item.isPaid} />
+                                              )}
+                                            </td>
                                           </tr>
-                                        ))
+                                        )})
                                       )}
                                     </tbody>
                                   </table>
@@ -404,11 +411,10 @@ export default function ReportPage() {
                     <input
                       required
                       autoFocus
-                      type="text" // 🟢 YANGLIK: number o'rniga text qildik, probel ishlashi uchun
-                      inputMode="numeric" // Telefonda faqat raqamlar klaviaturasi chiqishi uchun
+                      type="text"
+                      inputMode="numeric"
                       value={paymentForm.amount ? String(paymentForm.amount).replace(/\B(?=(\d{3})+(?!\d))/g, " ") : ''}
                       onChange={(e) => {
-                        // 🟢 YANGLIK: Faqat raqamlarni ajratib olib state'ga saqlaymiz
                         const rawValue = e.target.value.replace(/\D/g, '');
                         setPaymentForm({ ...paymentForm, amount: rawValue });
                       }}
