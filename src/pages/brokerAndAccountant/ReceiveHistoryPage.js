@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Search, ChevronLeft, ChevronRight, Loader2, RefreshCcw, Apple, Scale,
-  DollarSign, List, ChevronDown, ChevronUp, Printer,
-  X, XCircle, Package, AlertTriangle
+  DollarSign, List, ChevronDown, ChevronUp, Printer, Calendar, Download,
+  X, XCircle, Package, AlertTriangle, Filter
 } from 'lucide-react';
 import cropService from '../../services/cropService';
 
@@ -29,38 +29,68 @@ const MODAL_CONFIG = {
 
 export default function ReceiveHistoryPage() {
   const [groups, setGroups] = useState([]);
+  const [fruitTypes, setFruitTypes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
   const [accordionState, setAccordionState] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 15;
 
-  // ── Modal state ───────────────────────────────────────────────────────────
+  // ── Filtr State'lari ──────────────────────────────────────────────────────
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [selectedFruit, setSelectedFruit] = useState('');
+
+  // ── Modal State ───────────────────────────────────────────────────────────
   const [modal, setModal] = useState({ isOpen: false, type: null, tx: null, farmerId: null });
   const [form, setForm] = useState({ reason: '', newBasketCount: 0 });
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState('');
-  const [maxAllowed, setMaxAllowed] = useState(null); // Limit uchun state
-  // ─────────────────────────────────────────────────────────────────────────
+  const [maxAllowed, setMaxAllowed] = useState(null); 
 
+  // Meva turlarini yuklash
+  useEffect(() => {
+    cropService.getFruitTypes().then(setFruitTypes).catch(console.error);
+  }, []);
+
+  // Qidiruv uchun debouncer
   useEffect(() => {
     const t = setTimeout(() => { setDebouncedSearch(searchQuery); setCurrentPage(0); }, 400);
     return () => clearTimeout(t);
   }, [searchQuery]);
 
-  useEffect(() => { fetchGroups(currentPage, debouncedSearch); }, [currentPage, debouncedSearch]);
+  // Har safar filtrlar yoki page o'zgarganda yuklash
+  useEffect(() => { 
+    fetchGroups(currentPage, debouncedSearch, startDate, endDate, selectedFruit); 
+  }, [currentPage, debouncedSearch, startDate, endDate, selectedFruit]);
 
-  const fetchGroups = async (page, search) => {
+  const fetchGroups = async (page, search, start, end, fruit) => {
     setIsLoading(true);
     setAccordionState({});
     try {
-      const data = await cropService.getGroupedHistory(search, page, pageSize);
+      // 🟢 YANGLIK: Oddiy getGroupedHistory o'rniga Hisobot API siga murojaat qilamiz
+      const data = await cropService.getReportsGrouped(start, end, search, page, pageSize, fruit);
       setGroups(data.content || []);
       setTotalPages(data.totalPages || 1);
-    } catch { setGroups([]); }
-    finally { setIsLoading(false); }
+    } catch { 
+      setGroups([]); 
+    } finally { 
+      setIsLoading(false); 
+    }
+  };
+
+  const loadDetails = (farmerId) => {
+    // 🟢 YANGLIK: Detallar uchun ham Hisobot API siga murojaat qilamiz, shunda filtrlarga tushganlari chiqadi
+    cropService.getReportsDetails(farmerId, startDate, endDate, selectedFruit)
+      .then(res => {
+        // Backend'dagi javob { transactions: [], periodEarned: ..., ... } formatida
+        const txs = res.transactions || [];
+        setAccordionState(s => ({ ...s, [farmerId]: { isOpen: true, details: txs, isLoadingDetails: false } }));
+      })
+      .catch(() => setAccordionState(s => ({ ...s, [farmerId]: { isOpen: true, details: [], isLoadingDetails: false } })));
   };
 
   const toggleRow = useCallback(async (farmerId) => {
@@ -71,12 +101,25 @@ export default function ReceiveHistoryPage() {
       loadDetails(farmerId);
       return { ...prev, [farmerId]: { isOpen: true, details: null, isLoadingDetails: true } };
     });
-  }, []);
+  }, [startDate, endDate, selectedFruit]); // Filtrlar o'zgarganda qayta chaqirishi uchun
 
-  const loadDetails = (farmerId) => {
-    cropService.getFarmerDetails(farmerId)
-      .then(d => setAccordionState(s => ({ ...s, [farmerId]: { isOpen: true, details: d || [], isLoadingDetails: false } })))
-      .catch(() => setAccordionState(s => ({ ...s, [farmerId]: { isOpen: true, details: [], isLoadingDetails: false } })));
+  // ── Excel Yuklash ─────────────────────────────────────────────────────────
+  const handleExportExcel = async () => {
+    setIsExporting(true);
+    try {
+      const blobData = await cropService.downloadExcelReport(startDate, endDate, debouncedSearch, selectedFruit);
+      const url = window.URL.createObjectURL(new Blob([blobData]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Qabul_Hisobot_${startDate || 'all'}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (e) {
+      alert("Excel yuklashda xatolik yuz berdi");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   // ── Modal handlers ────────────────────────────────────────────────────────
@@ -87,7 +130,6 @@ export default function ReceiveHistoryPage() {
     setModalError('');
     setMaxAllowed(null);
 
-    // Agar savatni tahrirlash bo'lsa, backenddan limitni so'raymiz
     if (type === 'editQuantity') {
       setModalLoading(true);
       try {
@@ -111,7 +153,7 @@ export default function ReceiveHistoryPage() {
   const refreshFarmer = (farmerId) => {
     setAccordionState(prev => ({ ...prev, [farmerId]: { ...prev[farmerId], details: null, isLoadingDetails: true } }));
     loadDetails(farmerId);
-    fetchGroups(currentPage, debouncedSearch);
+    fetchGroups(currentPage, debouncedSearch, startDate, endDate, selectedFruit);
   };
 
   const handleSubmit = async () => {
@@ -136,7 +178,6 @@ export default function ReceiveHistoryPage() {
     } finally { setModalLoading(false); }
   };
 
-  // Live hisob (+ va - uchun moslashgan)
   const preview = (() => {
     if (modal.type !== 'editQuantity') return null;
     const tx = modal.tx;
@@ -153,7 +194,6 @@ export default function ReceiveHistoryPage() {
     
     return { newCount, newTara, newGross, newNet, newTotal, diff: newTotal - tx.totalAmount };
   })();
-  // ─────────────────────────────────────────────────────────────────────────
 
   const formatDate = (ds) => {
     if (!ds) return '-';
@@ -178,34 +218,73 @@ export default function ReceiveHistoryPage() {
   return (
     <div className="p-3 md:p-6 max-w-7xl mx-auto pb-10">
       
-      {/* Sarlavha */}
+      {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-[#0B1A42]">Qabul Tarixi</h1>
-          <p className="text-xs md:text-sm text-gray-500 mt-1">Fermerlardan qabul qilingan barcha mahsulotlar ro'yxati</p>
-        </div>
-        <button onClick={() => fetchGroups(currentPage, debouncedSearch)}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm font-bold shadow-sm hover:bg-gray-50 active:scale-95 transition-all w-fit">
-          <RefreshCcw size={16} /> Yangilash
-        </button>
-      </div>
-
-      {/* Qidiruv */}
-      <div className="bg-white p-3 md:p-4 rounded-xl border border-gray-200 shadow-sm mb-6">
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-          <input type="text" placeholder="Fermer ismi yoki telefon raqami orqali qidirish..."
-            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#14A44D]/20 focus:border-[#14A44D] transition-all font-medium" />
+          <h1 className="text-xl md:text-2xl font-bold text-[#0B1A42] flex items-center gap-2">
+            Oraliq Hisobot <span className="text-gray-300">|</span> Qabul Tarixi
+          </h1>
+          <p className="text-xs md:text-sm text-gray-500 mt-1">Fermerlardan qabul qilingan mahsulotlarning oraliq hisoboti</p>
         </div>
       </div>
 
-      {/* Asosiy Jadval (Gorizontal skroll bilan) */}
+      {/* ── FILTERLAR (Sana, Meva, Qidiruv, Excel) ─────────────────────────── */}
+      <div className="bg-white p-3 md:p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-wrap gap-3 items-center justify-between">
+        
+        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+          {/* Qidiruv */}
+          <div className="relative w-full sm:w-[240px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input type="text" placeholder="F.I.O yoki telefon..."
+              value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#14A44D]/20 focus:border-[#14A44D] transition-all font-medium" />
+          </div>
+
+          {/* Sana oralig'i */}
+          <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-0.5 px-2 focus-within:border-[#14A44D] transition-colors flex-1 sm:flex-none">
+            <Calendar size={16} className="text-gray-400 mr-1" />
+            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="bg-transparent border-none outline-none font-bold text-gray-700 text-sm py-2 cursor-pointer w-[120px]" />
+            <span className="text-gray-300 mx-1">–</span>
+            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="bg-transparent border-none outline-none font-bold text-gray-700 text-sm py-2 cursor-pointer w-[120px]" />
+            {(startDate || endDate) && (
+              <button onClick={() => { setStartDate(''); setEndDate(''); }} className="ml-2 p-1 text-red-400 hover:bg-red-50 rounded transition-colors"><X size={14}/></button>
+            )}
+          </div>
+
+          {/* Meva Filtri */}
+          <div className="relative flex-1 sm:flex-none">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <select value={selectedFruit} onChange={(e) => setSelectedFruit(e.target.value)}
+              className="w-full sm:w-[160px] pl-9 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#14A44D]/20 focus:border-[#14A44D] appearance-none cursor-pointer">
+              <option value="">Barcha mevalar</option>
+              {fruitTypes.map(f => (
+                <option key={f.id} value={f.id}>{f.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Tugmalar (Excel va Yangilash) */}
+        <div className="flex items-center gap-2 w-full xl:w-auto mt-2 xl:mt-0">
+          <button onClick={handleExportExcel} disabled={isLoading || isExporting}
+            className="flex-1 xl:flex-none items-center justify-center gap-2 px-4 py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg text-sm font-bold shadow-sm hover:bg-emerald-100 active:scale-95 transition-all flex disabled:opacity-50">
+            {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />} Excel
+          </button>
+          
+          <button onClick={() => fetchGroups(currentPage, debouncedSearch, startDate, endDate, selectedFruit)} disabled={isLoading}
+            className="flex-1 xl:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm font-bold shadow-sm hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-50">
+            <RefreshCcw size={16} className={isLoading ? "animate-spin" : ""} /> Yangilash
+          </button>
+        </div>
+
+      </div>
+
+      {/* ── ASOSIY JADVAL ──────────────────────────────────────────────────────── */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden w-full">
         <div className="overflow-x-auto w-full scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
           <table className="w-full text-left border-collapse min-w-[700px] md:min-w-[900px]">
             <thead>
-              <tr className="bg-gray-50/80 border-b border-gray-200 text-gray-500 text-[13px] font-bold tracking-wider">
+              <tr className="bg-gray-50/80 border-b border-gray-200 text-gray-500 text-[12px] md:text-[13px] font-bold tracking-wider">
                 <th className="p-3 pl-4 md:pl-6 w-10"></th>
                 <th className="p-3 whitespace-nowrap">Fermer</th>
                 <th className="p-3 whitespace-nowrap">Sof Vazn</th>
@@ -217,13 +296,13 @@ export default function ReceiveHistoryPage() {
               {isLoading ? (
                 <tr><td colSpan="5" className="p-16 text-center text-gray-400">
                   <Loader2 className="animate-spin mx-auto mb-3 text-[#14A44D]" size={32} />
-                  <p className="font-medium text-sm">Ma'lumotlar yuklanmoqda...</p>
+                  <p className="font-medium text-sm">Hisobot tayyorlanmoqda...</p>
                 </td></tr>
               ) : groups.length === 0 ? (
                 <tr><td colSpan="5" className="p-16 text-center text-gray-400">
                   <div className="flex flex-col items-center">
                     <List size={40} className="mb-3 text-gray-300" />
-                    <p className="font-medium text-sm">Hech qanday qabul tarixi topilmadi.</p>
+                    <p className="font-medium text-sm">Hech qanday ma'lumot topilmadi.</p>
                   </div>
                 </td></tr>
               ) : groups.map((group) => {
@@ -250,7 +329,6 @@ export default function ReceiveHistoryPage() {
                             {group.totalNetWeight?.toLocaleString()} <span className="text-xs text-gray-400 font-bold">kg</span>
                           </span>
                         </div>
-                        <div className="text-[10px] font-bold text-gray-400 uppercase mt-0.5">{group.transactionCount} ta topshiriq</div>
                       </td>
                       <td className="p-3 whitespace-nowrap">
                         <div className="flex items-center gap-1.5">
@@ -336,15 +414,11 @@ export default function ReceiveHistoryPage() {
                                               {!cancelled && (
                                                 <>
                                                   {item.basketCount > 0 && (
-                                                    <button onClick={(e) => openModal('editQuantity', item, group.farmerId, e)}
-                                                      title="Savat sonini tahrirlash"
-                                                      className="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded-lg transition-colors border border-amber-100">
+                                                    <button onClick={(e) => openModal('editQuantity', item, group.farmerId, e)} title="Savat sonini tahrirlash" className="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded-lg transition-colors border border-amber-100">
                                                       <Package size={14} />
                                                     </button>
                                                   )}
-                                                  <button onClick={(e) => openModal('cancel', item, group.farmerId, e)}
-                                                    title="Tranzaksiyani bekor qilish"
-                                                    className="p-1.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-lg transition-colors border border-red-100">
+                                                  <button onClick={(e) => openModal('cancel', item, group.farmerId, e)} title="Tranzaksiyani bekor qilish" className="p-1.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-lg transition-colors border border-red-100">
                                                     <XCircle size={14} />
                                                   </button>
                                                 </>
@@ -391,7 +465,6 @@ export default function ReceiveHistoryPage() {
       {modal.isOpen && cfg && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={closeModal}>
           <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-md overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            {/* Modal Header */}
             <div className={`p-4 md:p-5 border-b border-gray-100 flex items-center justify-between ${cfg.bg}`}>
               <div className="flex items-center gap-3">
                 <cfg.icon size={20} className={cfg.iconCls} />
@@ -401,14 +474,12 @@ export default function ReceiveHistoryPage() {
             </div>
 
             <div className="p-4 md:p-5 space-y-4 max-h-[75vh] overflow-y-auto">
-              {/* Summary Block */}
               <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 text-[12px] md:text-[13px] space-y-1.5">
                 <div className="flex justify-between"><span className="text-gray-500">Meva:</span><span className="font-bold text-gray-800">{modal.tx?.fruitName}</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Sof vazn:</span><span className="font-bold text-emerald-600">{modal.tx?.netWeight} kg</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Joriy summa:</span><span className="font-bold text-[#0B1A42]">{modal.tx?.totalAmount?.toLocaleString()} so'm</span></div>
               </div>
 
-              {/* Cancel Warning */}
               {modal.type === 'cancel' && (
                 <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
                   <AlertTriangle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
@@ -418,7 +489,6 @@ export default function ReceiveHistoryPage() {
                 </div>
               )}
 
-              {/* Edit Quantity with Max Limit Protection */}
               {modal.type === 'editQuantity' && (
                 <div className="space-y-3">
                   <div>
@@ -426,7 +496,6 @@ export default function ReceiveHistoryPage() {
                       <label className="text-[10px] md:text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                         Yangi savat sonini kiriting
                       </label>
-                      {/* Max Limit Badge */}
                       {maxAllowed !== null && (
                         <span className="text-[10px] md:text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
                           Maksimal: {maxAllowed} ta
@@ -435,54 +504,30 @@ export default function ReceiveHistoryPage() {
                     </div>
                     
                     <input 
-                      type="number" 
-                      min={1} 
-                      max={maxAllowed || ''}
-                      disabled={modalLoading}
+                      type="number" min={1} max={maxAllowed || ''} disabled={modalLoading}
                       value={form.newBasketCount}
                       onChange={(e) => {
                         let val = parseInt(e.target.value);
                         if (isNaN(val)) val = '';
-                        
-                        // FRONTEND MAX LIMIT PROTECTOR
-                        if (maxAllowed !== null && val > maxAllowed) {
-                          val = maxAllowed;
-                        }
-                        
+                        if (maxAllowed !== null && val > maxAllowed) val = maxAllowed;
                         setForm(f => ({ ...f, newBasketCount: val }));
                       }}
                       className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 disabled:bg-gray-100 disabled:text-gray-400 transition-all" 
                     />
                   </div>
 
-                  {/* Preview Dynamic Block */}
                   {preview && (
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[11px] md:text-[12px] space-y-1.5">
                       <div className="text-[9px] md:text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1.5">Qayta hisoblangan natija</div>
-                      <div className="flex justify-between text-amber-800">
-                        <span>Yangi sof vazn:</span>
-                        <span className="font-bold">{preview.newNet} kg</span>
-                      </div>
-                      <div className="flex justify-between text-amber-800">
-                        <span>Yangi brutto / tara:</span>
-                        <span className="font-bold">{preview.newGross} / {preview.newTara} kg</span>
-                      </div>
-                      <div className="flex justify-between border-t border-amber-200 pt-1.5 mt-1 text-amber-900">
-                        <span>Yangi summa:</span>
-                        <span className="font-bold">{preview.newTotal?.toLocaleString()} so'm</span>
-                      </div>
-                      <div className="flex justify-between text-amber-900">
-                        <span>O'zgarish:</span>
-                        <span className={`font-black ${preview.diff < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-                          {preview.diff > 0 ? '+' : ''}{preview.diff?.toLocaleString()} so'm
-                        </span>
-                      </div>
+                      <div className="flex justify-between text-amber-800"><span>Yangi sof vazn:</span><span className="font-bold">{preview.newNet} kg</span></div>
+                      <div className="flex justify-between text-amber-800"><span>Yangi brutto / tara:</span><span className="font-bold">{preview.newGross} / {preview.newTara} kg</span></div>
+                      <div className="flex justify-between border-t border-amber-200 pt-1.5 mt-1 text-amber-900"><span>Yangi summa:</span><span className="font-bold">{preview.newTotal?.toLocaleString()} so'm</span></div>
+                      <div className="flex justify-between text-amber-900"><span>O'zgarish:</span><span className={`font-black ${preview.diff < 0 ? 'text-red-600' : 'text-emerald-600'}`}>{preview.diff > 0 ? '+' : ''}{preview.diff?.toLocaleString()} so'm</span></div>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Reason Input */}
               <div>
                 <label className="text-[10px] md:text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Sabab *</label>
                 <textarea value={form.reason} onChange={(e) => setForm(f => ({ ...f, reason: e.target.value }))}
@@ -490,7 +535,6 @@ export default function ReceiveHistoryPage() {
                   className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 transition-all" />
               </div>
 
-              {/* Error Message */}
               {modalError && (
                 <div className="flex items-start gap-2 p-2.5 bg-red-50 border border-red-100 rounded-lg text-[12px] md:text-[13px] text-red-700">
                   <AlertTriangle size={15} className="flex-shrink-0 mt-0.5" />
@@ -499,7 +543,6 @@ export default function ReceiveHistoryPage() {
               )}
             </div>
 
-            {/* Modal Footer */}
             <div className="p-4 md:p-5 pt-0 flex gap-3">
               <button onClick={closeModal} disabled={modalLoading} className="flex-1 py-2 md:py-2.5 border border-gray-200 text-gray-600 font-bold text-sm rounded-lg hover:bg-gray-50 transition-all disabled:opacity-50">
                 Yopish

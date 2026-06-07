@@ -94,10 +94,16 @@ const cropService = {
   },
 
   // 8. Excel faylni yuklash
-  downloadExcelReport: async (startDate, endDate, search = '') => {
+  downloadExcelReport: async (startDate, endDate, search = '', fruitTypeId = null) => {
     try {
+      const params = {};
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+      if (search) params.search = search;
+      if (fruitTypeId) params.fruitTypeId = fruitTypeId;
+
       const response = await api.get(`${BASE_URL}/export/excel`, {
-        params: { startDate, endDate, search },
+        params,
         responseType: 'blob'
       });
       return response.data;
