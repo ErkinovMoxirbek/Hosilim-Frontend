@@ -16,6 +16,8 @@ import AdminBasketPointsGridPage from "../../admin/AdminBasketPointsGridPage";
 import AdminBasketsTablePage from "../../admin/AdminBasketsTablePage";
 import AdminFridgePointsGridPage from "../../admin/AdminFridgePointsGridPage";
 import AdminFridgeTablePage from "../../admin/AdminFridgeTablePage";
+import FarmerDebtsPage from "../../admin/FarmerDebtsPage";
+import PaymentHistoryPage from "../../admin/PaymentHistoryPage";
 
 const ComingSoon = ({ title }) => (
   <div className="p-4 lg:p-8 bg-white rounded-lg lg:rounded-xl border border-gray-200 text-center py-32 shadow-sm">
@@ -95,9 +97,9 @@ const AdminLayout = () => {
               <Route path="/exporters/payment-history" element={<ComingSoon title="To'lovlar Tarixi" />} />
 
               {/* MOLIYA VA KASSA */}
-              <Route path="/finance/debts" element={<ComingSoon title="Fermerlar Qarzdorligi va To'lov" />} />
+              <Route path="/finance/debts" element={<FarmerDebtsPage />} />
               <Route path="/report" element={<ComingSoon title="Oraliq Moliya Hisobotlari" />} />
-              <Route path="/finance/history" element={<ComingSoon title="Kassa Tarixi" />} />
+              <Route path="/finance/history" element={<PaymentHistoryPage />} />
 
               <Route path="/analytics" element={<ComingSoon title="Kengaytirilgan Tahlil va Statistika" />} />
               <Route path="/settings" element={<ComingSoon title="Tizim Sozlamalari va Zaxira" />} />
