@@ -125,9 +125,7 @@ const Header = React.memo(({ onRefresh, isLoading }) => (
         </div>
         Eksport Tarixi
       </h1>
-      <p className="text-sm text-slate-500 mt-2 ml-[60px] font-medium">
-        Hamkorlarga sotilgan va jo‘natilgan barcha yuklar ro‘yxati
-      </p>
+    
     </div>
 
     <button

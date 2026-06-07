@@ -18,6 +18,11 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
+  Plus,
+  Edit2,
+  Trash2,
+  X,
+  UserPlus
 } from "lucide-react";
 
 import { exporterService } from "../../services/exporterService";
@@ -46,7 +51,7 @@ const fmtDate = (d) => {
   })} ${date.toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" })}`;
 };
 
-/* ────────────────────────  FILTERS  ──────────────────────── */
+/* ────────────────────────  FILTERS & HEADER  ──────────────────────── */
 const Filters = memo(
   ({
     startDate,
@@ -57,12 +62,15 @@ const Filters = memo(
     search,
     onSearchChange,
     onExportCSV,
+    onAddExporter,
     isLoading,
   }) => (
     <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-      <h1 className="text-2xl sm:text-3xl font-black text-[#0B1A42] tracking-tight">
-        Oraliq Hisobot
-      </h1>
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-black text-[#0B1A42] tracking-tight flex items-center gap-2">
+          Eksport hisoboti
+        </h1>
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         {/* Date range */}
@@ -99,12 +107,20 @@ const Filters = memo(
           />
           <input
             type="text"
-            placeholder="Fermer F.I.O yoki raqami..."
+            placeholder="F.I.O yoki telefon..."
             value={search}
             onChange={onSearchChange}
-            className="pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm focus:outline-none focus:border-blue-500 shadow-sm w-full sm:w-[240px]"
+            className="pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm focus:outline-none focus:border-blue-500 shadow-sm w-full sm:w-[200px]"
           />
         </div>
+
+        {/* Add Button */}
+        <button
+          onClick={onAddExporter}
+          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-sm"
+        >
+          <UserPlus size={18} /> Yangi qo'shish
+        </button>
 
         {/* Export */}
         <button
@@ -131,7 +147,6 @@ const KPICard = memo(({ icon: Icon, bg, border, title, value, unit }) => (
     <div className={`text-2xl font-black text-${bg}-700`}>
       {value} <span className="text-sm">{unit}</span>
     </div>
-
   </div>
 ));
 
@@ -151,46 +166,11 @@ const KPI = memo(({ data }) => {
   }, [data]);
 
   const cards = [
-    {
-      bg: "emerald",
-      border: "emerald",
-      title: "Sof Vazn",
-      value: fmtKg(totals.weight),
-      unit: "kg",
-      icon: Scale,
-    },
-    {
-      bg: "orange",
-      border: "orange",
-      title: "Savatlar Soni",
-      value: totals.baskets,
-      unit: "ta",
-      icon: Package,
-    },
-    {
-      bg: "blue",
-      border: "blue",
-      title: "Jami Summa",
-      value: fmtCurrency(totals.totalAmount),
-      unit: "UZS",
-      icon: Wallet,
-    },
-    {
-      bg: "teal",
-      border: "teal",
-      title: "To'langan",
-      value: fmtCurrency(totals.paid),
-      unit: "UZS",
-      icon: CheckCircle,
-    },
-    {
-      bg: "rose",
-      border: "rose",
-      title: "Qoldiq (Qarz)",
-      value: fmtCurrency(totals.debt),
-      unit: "UZS",
-      icon: AlertCircle,
-    },
+    { bg: "emerald", border: "emerald", title: "Sof Vazn", value: fmtKg(totals.weight), unit: "kg", icon: Scale },
+    { bg: "orange", border: "orange", title: "Savatlar Soni", value: totals.baskets, unit: "ta", icon: Package },
+    { bg: "blue", border: "blue", title: "Jami Summa", value: fmtCurrency(totals.totalAmount), unit: "UZS", icon: Wallet },
+    { bg: "teal", border: "teal", title: "To'langan", value: fmtCurrency(totals.paid), unit: "UZS", icon: CheckCircle },
+    { bg: "rose", border: "rose", title: "Qoldiq (Qarz)", value: fmtCurrency(totals.debt), unit: "UZS", icon: AlertCircle },
   ];
 
   return (
@@ -245,6 +225,8 @@ const ExporterRow = memo(
     exporter,
     isExpanded,
     onToggle,
+    onEdit,
+    onDelete,
     txs,
     txLoading,
     txError,
@@ -307,12 +289,32 @@ const ExporterRow = memo(
               {fmtCurrency(currentDebt)} <span className="text-[10px] text-rose-600/70">UZS</span>
             </span>
           </td>
+
+          {/* 🟢 AMALLAR (ACTIONS) */}
+          <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-end gap-2">
+              <button 
+                onClick={() => onEdit(exporter)}
+                className="p-1.5 text-blue-500 hover:bg-blue-50 rounded transition-colors"
+                title="Tahrirlash"
+              >
+                <Edit2 size={18} />
+              </button>
+              <button 
+                onClick={() => onDelete(exporter.exporterId)}
+                className="p-1.5 text-rose-500 hover:bg-rose-50 rounded transition-colors"
+                title="O'chirish"
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+          </td>
         </tr>
 
         {/* Expanded area – lazy loaded transactions */}
         {isExpanded && (
           <tr className="bg-slate-50/80 border-b-2 border-slate-200">
-            <td colSpan="7" className="p-0">
+            <td colSpan="8" className="p-0">
               <div className="px-4 sm:px-16 py-4">
                 {txLoading ? (
                   <div className="flex items-center justify-center py-6 text-gray-500">
@@ -338,11 +340,9 @@ const ExporterRow = memo(
     );
   },
   (prev, next) => {
-    // Prevent re‑render unless relevant props change
     const sameId = prev.exporter.exporterId === next.exporter.exporterId;
     const sameExpand = prev.isExpanded === next.isExpanded;
-    const sameTx =
-      prev.txs === next.txs && prev.txLoading === next.txLoading && prev.txError === next.txError;
+    const sameTx = prev.txs === next.txs && prev.txLoading === next.txLoading && prev.txError === next.txError;
     return sameId && sameExpand && sameTx;
   }
 );
@@ -361,10 +361,24 @@ export default function ExportersManagement() {
   // ----------------------------------------------------------------------
   const [report, setReport] = useState([]);
   const [isReportLoading, setIsReportLoading] = useState(true);
-  const [expandedRows, setExpandedRows] = useState({}); // { exporterId: true/false }
-  const [txCache, setTxCache] = useState({}); // { exporterId: [...transactions] }
-  const [txLoading, setTxLoading] = useState({}); // { exporterId: true/false }
-  const [txError, setTxError] = useState({}); // { exporterId: "Error message" }
+  const [expandedRows, setExpandedRows] = useState({});
+  const [txCache, setTxCache] = useState({});
+  const [txLoading, setTxLoading] = useState({});
+  const [txError, setTxError] = useState({});
+
+  // ----------------------------------------------------------------------
+  // MODAL STATE (CRUD UCHUN)
+  // ----------------------------------------------------------------------
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("add"); // "add" | "edit"
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    id: null,
+    name: "",
+    surname: "",
+    phoneNumber: "+998",
+    address: ""
+  });
 
   // ----------------------------------------------------------------------
   // DEBOUNCE SEARCH
@@ -374,7 +388,7 @@ export default function ExportersManagement() {
   const debouncedEnd = useDebounce(endDate);
 
   // ----------------------------------------------------------------------
-  // FETCH REPORT – runs when any filter changes (debounced)
+  // FETCH REPORT
   // ----------------------------------------------------------------------
   const fetchReport = useCallback(async () => {
     setIsReportLoading(true);
@@ -387,7 +401,6 @@ export default function ExportersManagement() {
       const data = await exporterService.getExportersReport(params);
       setReport(data);
 
-      // Reset expanded UI + transaction cache (report changed)
       setExpandedRows({});
       setTxCache({});
       setTxLoading({});
@@ -404,14 +417,13 @@ export default function ExportersManagement() {
   }, [fetchReport]);
 
   // ----------------------------------------------------------------------
-  // TOGGLE ROW – lazy load transactions on first expand
+  // TOGGLE ROW (LAZY LOAD TRANSACTIONS)
   // ----------------------------------------------------------------------
   const toggleRow = useCallback(
     async (exporterId) => {
       const willExpand = !expandedRows[exporterId];
       setExpandedRows((prev) => ({ ...prev, [exporterId]: willExpand }));
 
-      // If we are expanding and we don’t have the data yet → fetch
       if (willExpand && !txCache[exporterId]) {
         setTxLoading((prev) => ({ ...prev, [exporterId]: true }));
         try {
@@ -419,18 +431,11 @@ export default function ExportersManagement() {
           if (debouncedStart) params.startDate = debouncedStart;
           if (debouncedEnd) params.endDate = debouncedEnd;
 
-          const txs = await exporterService.getExporterTransactions(
-            exporterId,
-            params
-          );
+          const txs = await exporterService.getExporterTransactions(exporterId, params);
           setTxCache((prev) => ({ ...prev, [exporterId]: txs }));
           setTxError((prev) => ({ ...prev, [exporterId]: null }));
         } catch (e) {
-          console.error(`Tx fetch error for ${exporterId}:`, e);
-          setTxError((prev) => ({
-            ...prev,
-            [exporterId]: "Tranzaktsiyalarni yuklashda xatolik",
-          }));
+          setTxError((prev) => ({ ...prev, [exporterId]: "Tranzaktsiyalarni yuklashda xatolik" }));
         } finally {
           setTxLoading((prev) => ({ ...prev, [exporterId]: false }));
         }
@@ -440,7 +445,72 @@ export default function ExportersManagement() {
   );
 
   // ----------------------------------------------------------------------
-  // EXCEL EXPORT (Backend orqali yuklash)
+  // CRUD ACTIONS (QO'SHISH, TAHRIRLASH, O'CHIRISH)
+  // ----------------------------------------------------------------------
+  const handleOpenAddModal = () => {
+    setModalMode("add");
+    setFormData({ id: null, name: "", surname: "", phoneNumber: "+998", address: "" });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (exporter) => {
+    setModalMode("edit");
+    // Bizda "fullName" bor, shuni ism familiyaga bo'lamiz (yoki backenddan aniq kelsa o'zini qoyamiz)
+    const [name, ...surnames] = (exporter.fullName || "").split(" ");
+    setFormData({
+      id: exporter.exporterId,
+      name: name || "",
+      surname: surnames.join(" ") || "",
+      phoneNumber: exporter.phoneNumber || "+998",
+      address: exporter.address || ""
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (formData.phoneNumber.length < 13) {
+      alert("Iltimos, telefon raqamni to'liq kiriting (+998xxxxxxxxx)");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        name: formData.name,
+        surname: formData.surname,
+        phoneNumber: formData.phoneNumber,
+        address: formData.address,
+      };
+
+      if (modalMode === "add") {
+        await exporterService.createExporter(payload);
+      } else {
+        await exporterService.updateExporter(formData.id, payload);
+      }
+      
+      setIsModalOpen(false);
+      fetchReport(); // Jadvalni yangilash
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Rostdan ham bu hamkorni o'chirmoqchimisiz?")) {
+      try {
+        await exporterService.deleteExporter(id);
+        fetchReport();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+  };
+
+  // ----------------------------------------------------------------------
+  // EXCEL EXPORT
   // ----------------------------------------------------------------------
   const exportToExcel = async () => {
     try {
@@ -451,8 +521,6 @@ export default function ExportersManagement() {
       if (debouncedSearch) params.search = debouncedSearch;
 
       const blobData = await exporterService.downloadExcelReport(params);
-
-      // Blobni brauzerda yuklab olamiz
       const url = window.URL.createObjectURL(new Blob([blobData]));
       const link = document.createElement('a');
       link.href = url;
@@ -460,7 +528,6 @@ export default function ExportersManagement() {
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
-
     } catch (e) {
       alert("Excel yuklashda xatolik yuz berdi: " + e.message);
     } finally {
@@ -473,7 +540,8 @@ export default function ExportersManagement() {
   // ----------------------------------------------------------------------
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto min-h-screen bg-[#F8FAFC] space-y-6">
-      {/* filters */}
+      
+      {/* Filters & Header */}
       <Filters
         startDate={startDate}
         endDate={endDate}
@@ -486,13 +554,14 @@ export default function ExportersManagement() {
         search={search}
         onSearchChange={(e) => setSearch(e.target.value)}
         onExportCSV={exportToExcel}
+        onAddExporter={handleOpenAddModal}
         isLoading={isReportLoading}
       />
 
       {/* KPI cards */}
       <KPI data={report} />
 
-      {/* main table */}
+      {/* Main table */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1000px]">
@@ -504,34 +573,34 @@ export default function ExportersManagement() {
                 <th className="p-4">Savatlar</th>
                 <th className="p-4">Oraliqdagi Summa</th>
                 <th className="p-4">To'langan</th>
-                <th className="p-4 text-right pr-6">Qarz (Qoldiq)</th>
+                <th className="p-4 text-right">Qarz (Qoldiq)</th>
+                <th className="p-4 text-right pr-6">Amallar</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-gray-100">
-              {/* Loading state */}
               {isReportLoading ? (
                 <tr>
-                  <td colSpan="7" className="p-16 text-center text-gray-400">
+                  <td colSpan="8" className="p-16 text-center text-gray-400">
                     <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-3" />
                     <p className="font-bold text-sm">Hisobot tayyorlanmoqda...</p>
                   </td>
                 </tr>
               ) : report.length === 0 ? (
-                // No data
                 <tr>
-                  <td colSpan="7" className="p-16 text-center text-gray-400 font-bold">
+                  <td colSpan="8" className="p-16 text-center text-gray-400 font-bold">
                     Ma'lumot topilmadi
                   </td>
                 </tr>
               ) : (
-                // Real rows
                 report.map((exp) => (
                   <ExporterRow
                     key={exp.exporterId}
                     exporter={exp}
                     isExpanded={!!expandedRows[exp.exporterId]}
                     onToggle={toggleRow}
+                    onEdit={handleOpenEditModal}
+                    onDelete={handleDelete}
                     txs={txCache[exp.exporterId]}
                     txLoading={!!txLoading[exp.exporterId]}
                     txError={txError[exp.exporterId]}
@@ -542,6 +611,74 @@ export default function ExportersManagement() {
           </table>
         </div>
       </div>
+
+      {/* 🟢 CRUD MODAL (Qo'shish va Tahrirlash) */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-[#0B1A42]">
+                {modalMode === "add" ? "Yangi Hamkor (Eksportyor)" : "Hamkorni Tahrirlash"}
+              </h2>
+              <button onClick={() => setIsModalOpen(false)} disabled={isSubmitting} className="p-1 text-gray-400 hover:text-red-500 rounded-md transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5">Ism <span className="text-red-500">*</span></label>
+                <input 
+                  type="text" required value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  placeholder="Eksportyor ismi" disabled={isSubmitting}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5">Familiya <span className="text-red-500">*</span></label>
+                <input 
+                  type="text" required value={formData.surname}
+                  onChange={(e) => setFormData({...formData, surname: e.target.value})}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  placeholder="Familiyasi" disabled={isSubmitting}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5">Telefon <span className="text-red-500">*</span></label>
+                <input 
+                  type="text" required value={formData.phoneNumber}
+                  onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5">Manzil (Ixtiyoriy)</label>
+                <input 
+                  type="text" value={formData.address}
+                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  placeholder="Viloyat yoki tuman..." disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setIsModalOpen(false)} disabled={isSubmitting} className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors">
+                  Bekor qilish
+                </button>
+                <button type="submit" disabled={isSubmitting} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-70">
+                  {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Saqlanmoqda...</> : "Saqlash"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
