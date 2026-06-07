@@ -7,7 +7,7 @@ import Sidebar from "./components/Sidebar";
 
 import BrokerDashboard from "../../brokerAndAccountant/BrokerDashboard";
 import ReceiveCropPage from "../../brokerAndAccountant/ReceiveCropPage";
-import CancelledSalePage from "../../brokerAndAccountant/CancelledSalePage";
+import CropTransactionHistory from "../../brokerAndAccountant/CropTransactionHistory";
 import ReceiveHistoryPage from "../../brokerAndAccountant/ReceiveHistoryPage";
 import PricingPage from "../../brokerAndAccountant/PriceManagerPage";
 import BasketCatalogPage from "../../brokerAndAccountant/BasketCatalogPage";
@@ -95,7 +95,7 @@ const AccountantLayout = () => {
               <Route path="receive/all" element={<ReceiveHistoryPage />} />
               {/* XATOLIK TUZATILDI: Omborxona uchun sahifa qo'shildi */}
               <Route path="receive/warehouse" element={<ComingSoon title="Omborxona" />} /> 
-              <Route path="receive/cancelled" element={<CancelledSalePage />} />
+              <Route path="receive/cancelled" element={<CropTransactionHistory />} />
 
               {/* 🟢 SAVATLAR */}
               <Route path="baskets" element={<Navigate to="balances" replace />} />

@@ -7,7 +7,7 @@ import Sidebar from "./components/Sidebar";
 
 import BrokerDashboard from "../../brokerAndAccountant/BrokerDashboard";
 import ReceiveCropPage from "../../brokerAndAccountant/ReceiveCropPage";
-import CancelledSalePage from "../../brokerAndAccountant/CancelledSalePage";
+import CropTransactionHistory from "../../brokerAndAccountant/CropTransactionHistory";
 import ReceiveHistoryPage from "../../brokerAndAccountant/ReceiveHistoryPage";
 import PricingPage from "../../brokerAndAccountant/PriceManagerPage";
 import BasketCatalogPage from "../../brokerAndAccountant/BasketCatalogPage";
@@ -94,7 +94,7 @@ const BrokerLayout = () => {
               <Route path="receive/new" element={<ReceiveCropPage />} />
               <Route path="receive/all" element={<ReceiveHistoryPage />} />
               <Route path="receive/warehouse" element={<MyStocksPage />} />
-              <Route path="receive/cancelled" element={<CancelledSalePage />} />
+              <Route path="receive/cancelled" element={<CropTransactionHistory />} />
 
               {/* SAVATLAR YO'LLARI */}
               <Route path="baskets" element={<Navigate to="balances" replace />} />

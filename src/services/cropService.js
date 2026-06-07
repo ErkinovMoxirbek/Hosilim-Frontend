@@ -49,7 +49,7 @@ const cropService = {
     }
   },
 
-  // ← YANGI: Meva turlarini yuklash
+  // 5. Meva turlarini yuklash
   getFruitTypes: async () => {
     try {
       const response = await api.get('/fruit-types/active');
@@ -60,14 +60,14 @@ const cropService = {
     }
   },
 
-  // fruitTypeId parametri qo'shildi
+  // 6. Hisobotlarni guruhlangan holda yuklash
   getReportsGrouped: async (startDate, endDate, search = '', page = 0, size = 50, fruitTypeId = null) => {
     try {
       const params = { page, size };
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
       if (search) params.search = search;
-      if (fruitTypeId) params.fruitTypeId = fruitTypeId;  // ← YANGI
+      if (fruitTypeId) params.fruitTypeId = fruitTypeId; 
 
       const response = await api.get(`${BASE_URL}/report/grouped`, { params });
       return response.data?.data || { content: [], totalPages: 0 };
@@ -77,13 +77,13 @@ const cropService = {
     }
   },
 
-  // fruitTypeId parametri qo'shildi
+  // 7. Hisobot detallarini yuklash
   getReportsDetails: async (farmerId, startDate, endDate, fruitTypeId = null) => {
     try {
       const params = {};
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
-      if (fruitTypeId) params.fruitTypeId = fruitTypeId;  // ← YANGI
+      if (fruitTypeId) params.fruitTypeId = fruitTypeId; 
 
       const response = await api.get(`${BASE_URL}/report/${farmerId}/details`, { params });
       return response.data?.data || { transactions: [], periodEarned: 0, periodPaid: 0, periodDifference: 0 };
@@ -93,6 +93,7 @@ const cropService = {
     }
   },
 
+  // 8. Excel faylni yuklash
   downloadExcelReport: async (startDate, endDate, search = '') => {
     try {
       const response = await api.get(`${BASE_URL}/export/excel`, {
@@ -106,6 +107,7 @@ const cropService = {
     }
   },
 
+  // 9. Chekni yuklash
   downloadReceipt: async (transactionId) => {
     try {
       const response = await api.get(`${BASE_URL}/${transactionId}/receipt/download`, {
@@ -116,7 +118,76 @@ const cropService = {
       console.error("Chekni yuklashda xato:", error);
       throw error;
     }
-  }
+  },
+
+  // =========================================================================
+  // YANGI QO'SHILGAN METODLAR
+  // =========================================================================
+
+  // 10. Tranzaksiyani bekor qilish
+  cancelTransaction: async (id, reason) => {
+    try {
+      // DELETE so'rovida body bo'lmaydi, shuning uchun parametrlar config ichidagi 'params' da ketadi
+      const response = await api.delete(`${BASE_URL}/${id}/cancel`, {
+        params: { reason }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Tranzaksiyani bekor qilishda xato [id=${id}]:`, error);
+      throw error;
+    }
+  },
+
+  // 11. Narxni tuzatish
+  correctTransactionPrice: async (id, newPriceId, reason) => {
+    try {
+      // PATCH so'rovida ikkinchi parametr - body payload. Bizda body yo'q (null), ma'lumotlar query param sifatida ketadi.
+      const response = await api.patch(`${BASE_URL}/${id}/correct-price`, null, {
+        params: { newPriceId, reason }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Narxni tuzatishda xato [id=${id}]:`, error);
+      throw error;
+    }
+  },
+
+  correctTransactionQuantity: async (id, newBasketCount, reason) => {
+    try {
+      // Backenddagi @RequestParam nomi bilan bir xil bo'lishi kerak
+      const response = await api.patch(`${BASE_URL}/${id}/correct-quantity`, null, {
+        params: { 
+            newBasketCount: newBasketCount, 
+            reason: reason 
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Miqdorni tuzatishda xato [id=${id}]:`, error);
+      throw error;
+    }
+  },
+  // =========================================================================
+  // FILIAL (LENTA) TARIXINI OLISH (Paginatsiya bilan)
+  // =========================================================================
+  getCollectionPointHistory: async (page = 0, size = 15) => {
+    try {
+      // API endi faqat /history ga murojaat qiladi (token orqali filial aniqlanadi)
+      const response = await api.get(`${BASE_URL}/history`, {
+        params: { page, size }
+      });
+      return response.data?.data || { content: [], totalPages: 0 };
+    } catch (error) {
+      console.error(`Tarixni yuklashda xato:`, error);
+      throw error;
+    }
+  },
+
+  // services/cropService.js
+  getMaxAllowedBaskets: async (id) => {
+    const response = await api.get(`${BASE_URL}/${id}/max-allowed-baskets`);
+    return response.data.data; // Integer qaytadi
+  },
 };
 
 export default cropService;

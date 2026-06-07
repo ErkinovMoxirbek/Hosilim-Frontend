@@ -14,6 +14,8 @@ import AdminPointsGridPage from "../../admin/AdminPointsGridPage";
 import AdminReceivesTablePage from "../../admin/AdminReceivesTablePage";
 import AdminBasketPointsGridPage from "../../admin/AdminBasketPointsGridPage";
 import AdminBasketsTablePage from "../../admin/AdminBasketsTablePage";
+import AdminFridgePointsGridPage from "../../admin/AdminFridgePointsGridPage";
+import AdminFridgeTablePage from "../../admin/AdminFridgeTablePage";
 
 const ComingSoon = ({ title }) => (
   <div className="p-4 lg:p-8 bg-white rounded-lg lg:rounded-xl border border-gray-200 text-center py-32 shadow-sm">
@@ -83,7 +85,8 @@ const AdminLayout = () => {
               <Route path="/admin-stock/receives/:pointId" element={<AdminReceivesTablePage />} />
               <Route path="/admin-stock/baskets" element={<AdminBasketPointsGridPage />} />
               <Route path="/admin-stock/baskets/:pointId" element={<AdminBasketsTablePage />} />
-              <Route path="/admin-stock/fridges" element={<ComingSoon title="Barcha Xolodilniklar Holati" />} />
+              <Route path="/admin-stock/fridges" element={<AdminFridgePointsGridPage />} />
+              <Route path="/admin-stock/fridges/:pointId" element={<AdminFridgeTablePage />} />
 
               {/* EKSPORT (HAMKORLAR) */}
               <Route path="/exporters/report" element={<ComingSoon title="Eksportyorlar Boshqaruvi" />} />
