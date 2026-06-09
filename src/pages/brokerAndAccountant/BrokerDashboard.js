@@ -1,35 +1,47 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import {
-  ShoppingCart, Users, Package, DollarSign,
-  Scale, Filter, ChevronDown, Calendar, TrendingUp,
-  TrendingDown, Minus, RefreshCw, AlertCircle,ShoppingBasket
+  ShoppingCart, Users, Package, DollarSign, Scale,
+  Filter, ChevronDown, Calendar, TrendingUp, TrendingDown,
+  Minus, RefreshCw, AlertCircle, ShoppingBasket,
+  ArrowRight, Clock, CheckCircle2,
 } from 'lucide-react';
-import { brokerDashboardService } from '../../services/brokerDashboardService';
+import { brokerDashboardService }    from '../../services/brokerDashboardService';
+import basketTransactionService  from '../../services/basketTransactionService';
 
-// ─── CONSTANTS ──────────────────────────────────────────────────────────────
-const FRUIT_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#F97316'];
-
-const FILTER_OPTIONS = [
-  { value: 'today',  label: 'Bugun' },
-  { value: 'week',   label: 'Bu hafta' },
-  { value: 'month',  label: 'Bu oy' },
-  { value: 'all',    label: 'Barcha vaqtlar' },
-  { value: 'custom', label: 'Sana tanlash' },
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+const FRUIT_COLORS       = ['#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4','#F97316'];
+const FILTER_OPTIONS     = [
+  { value: 'today', label: 'Bugun' },
+  { value: 'week',  label: 'Bu hafta' },
+  { value: 'month', label: 'Bu oy' },
+  { value: 'all',   label: 'Barcha vaqtlar' },
+  { value: 'custom',label: 'Sana tanlash' },
 ];
-
 const CHART_DAYS_OPTIONS = [7, 14, 30];
 
-// ─── HELPERS ────────────────────────────────────────────────────────────────
-const fmt    = (n) => Number(n || 0).toLocaleString('uz-UZ');
-const fmtKg  = (n) => `${fmt(n)} kg`;
-const fmtSom = (n) => `${fmt(n)} so'm`;
-const fmtDate = (d) => new Date(d).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' });
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const fmt     = (n) => Number(n || 0).toLocaleString('uz-UZ');
+const fmtKg   = (n) => `${fmt(n)} kg`;
+const fmtSom  = (n) => `${fmt(n)} so'm`;
+const fmtDate = (d) =>
+  new Date(d).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' });
 
-// ─── UI COMPONENTS ──────────────────────────────────────────────────────────
+// NEW — urgency rang pending widget uchun
+const getPendingUrgency = (iso) => {
+  if (!iso) return { dot: 'bg-slate-300', val: 'text-slate-600', pulse: false };
+  const h = (Date.now() - new Date(iso).getTime()) / 3_600_000;
+  if (h < 3)  return { dot: 'bg-emerald-400', val: 'text-emerald-600', pulse: false };
+  if (h < 6)  return { dot: 'bg-amber-400',   val: 'text-amber-600',   pulse: false };
+  if (h < 10) return { dot: 'bg-orange-500',  val: 'text-orange-600',  pulse: false };
+  return             { dot: 'bg-red-500',     val: 'text-rose-600',    pulse: true  };
+};
+
+// ─── UI COMPONENTS ────────────────────────────────────────────────────────────
 function GrowthBadge({ value }) {
   if (value === null || value === undefined) return null;
   const isPos  = value > 0;
@@ -64,11 +76,20 @@ function Skeleton({ className }) {
   return <div className={`animate-pulse bg-slate-200 rounded-lg ${className}`} />;
 }
 
-function StatCard({ label, value, unit, icon: Icon, color, bg, growth, loading }) {
+// onClick prop qo'shildi (6-chi karta uchun)
+function StatCard({ label, value, unit, icon: Icon, color, bg, growth, loading, onClick }) {
   return (
-    <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between min-h-[110px]">
+    <div
+      onClick={onClick}
+      className={`bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm
+        hover:shadow-md hover:-translate-y-0.5 transition-all duration-300
+        flex flex-col justify-between min-h-[110px]
+        ${onClick ? 'cursor-pointer active:scale-[0.98]' : ''}`}
+    >
       <div className="flex justify-between items-start">
-        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest leading-snug max-w-[75%]">{label}</p>
+        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest leading-snug max-w-[75%]">
+          {label}
+        </p>
         <div className={`w-8 h-8 rounded-full ${bg} ${color} flex items-center justify-center shrink-0`}>
           <Icon size={15} strokeWidth={2.5} />
         </div>
@@ -112,17 +133,101 @@ function ErrorBanner({ message, onRetry }) {
   );
 }
 
-// ─── MAIN COMPONENT ─────────────────────────────────────────────────────────
+// ─── NEW: PENDING WIDGET ──────────────────────────────────────────────────────
+function PendingWidget({ data, loading, onNavigate }) {
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6">
+        <Skeleton className="h-5 w-44 mb-1" />
+        <Skeleton className="h-3 w-32 mb-5" />
+        <div className="space-y-3">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6 flex flex-col">
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h3 className="font-bold text-slate-900 text-base">Bugun kutilayotganlar</h3>
+          <p className="text-slate-400 text-xs mt-0.5">Savatlarini qaytarmagan fermerlar</p>
+        </div>
+        {data.length > 0 && (
+          <span className="bg-rose-500 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full leading-none">
+            {data.length}
+          </span>
+        )}
+      </div>
+
+      {data.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center py-8 text-center">
+          <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center mb-3">
+            <CheckCircle2 size={18} className="text-emerald-500" strokeWidth={1.5} />
+          </div>
+          <p className="text-slate-800 font-bold text-sm">Hammasi qaytarilgan!</p>
+          <p className="text-slate-400 text-xs mt-1">Bugungi barcha savatlar qaytdi</p>
+        </div>
+      ) : (
+        <>
+          <div className="flex-1 space-y-0.5">
+            {data.slice(0, 5).map((farmer) => {
+              const urg = getPendingUrgency(farmer.lastGivenAt);
+              return (
+                <div
+                  key={farmer.farmerId}
+                  className="flex items-center gap-3 py-2.5 border-b border-slate-50 last:border-0"
+                >
+                  <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${urg.dot} ${urg.pulse ? 'animate-pulse' : ''}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-slate-800 truncate">{farmer.farmerFullName}</p>
+                    <p className="text-[10px] text-slate-400 font-medium">{farmer.farmerPhone ?? '—'}</p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className={`text-base font-black leading-none ${urg.val}`}>{farmer.totalPendingBaskets}</p>
+                    <p className="text-[10px] text-slate-400">ta savat</p>
+                  </div>
+                </div>
+              );
+            })}
+            {data.length > 5 && (
+              <p className="text-[11px] text-slate-400 font-medium pt-2.5 text-center">
+                +{data.length - 5} ta boshqa fermer
+              </p>
+            )}
+          </div>
+
+          <button
+            onClick={onNavigate}
+            className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl
+              border border-slate-200 text-sm font-bold text-slate-600
+              hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-all"
+          >
+            Barchasini ko'rish
+            <ArrowRight size={14} />
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function BrokerDashboard() {
+  const navigate = useNavigate();
+
   const [stats,        setStats]        = useState(null);
   const [dailyChart,   setDailyChart]   = useState([]);
   const [fruitChart,   setFruitChart]   = useState([]);
   const [topFarmers,   setTopFarmers]   = useState([]);
+  const [pendingData,  setPendingData]  = useState([]);   // NEW
 
   const [loadingStats,   setLoadingStats]   = useState(true);
   const [loadingChart,   setLoadingChart]   = useState(true);
   const [loadingFruits,  setLoadingFruits]  = useState(true);
   const [loadingFarmers, setLoadingFarmers] = useState(true);
+  const [loadingPending, setLoadingPending] = useState(true); // NEW
 
   const [error,        setError]        = useState(null);
   const [filterType,   setFilterType]   = useState('today');
@@ -161,7 +266,7 @@ export default function BrokerDashboard() {
     try {
       const data = await brokerDashboardService.getDailyChart(chartDays);
       setDailyChart(data.map(d => ({ ...d, dateLabel: fmtDate(d.date) })));
-    } catch { /* silent */ }
+    } catch { }
     finally { setLoadingChart(false); }
   }, [chartDays]);
 
@@ -170,7 +275,7 @@ export default function BrokerDashboard() {
     try {
       const data = await brokerDashboardService.getFruitDistribution(fruitFilter);
       setFruitChart(data);
-    } catch { /* silent */ }
+    } catch { }
     finally { setLoadingFruits(false); }
   }, [fruitFilter]);
 
@@ -179,35 +284,66 @@ export default function BrokerDashboard() {
     try {
       const data = await brokerDashboardService.getTopFarmers(topFilter);
       setTopFarmers(data);
-    } catch { /* silent */ }
+    } catch { }
     finally { setLoadingFarmers(false); }
   }, [topFilter]);
+
+  // NEW
+  const fetchPending = useCallback(async () => {
+    setLoadingPending(true);
+    try {
+      const data = await basketTransactionService.getPendingReturns();
+      const sorted = [...data].sort((a, b) => {
+        if (!a.lastGivenAt && !b.lastGivenAt) return 0;
+        if (!a.lastGivenAt) return 1;
+        if (!b.lastGivenAt) return -1;
+        return new Date(a.lastGivenAt) - new Date(b.lastGivenAt);
+      });
+      setPendingData(sorted);
+    } catch { }
+    finally { setLoadingPending(false); }
+  }, []);
 
   useEffect(() => { fetchStats();      }, [fetchStats]);
   useEffect(() => { fetchDailyChart(); }, [fetchDailyChart]);
   useEffect(() => { fetchFruitChart(); }, [fetchFruitChart]);
   useEffect(() => { fetchTopFarmers(); }, [fetchTopFarmers]);
+  useEffect(() => { fetchPending();    }, [fetchPending]);   // NEW
 
   const activeFilterLabel = filterType === 'custom'
     ? customDate.split('-').reverse().join('.')
     : FILTER_OPTIONS.find(o => o.value === filterType)?.label ?? 'Bugun';
 
+  // 6 ta stat card — oxirgisi pending uchun
   const statCards = [
-    { label: "Qabul qilingan og'irlik", value: stats ? fmt(stats.totalAcceptedWeight) : '—', unit: 'kg',    icon: Scale,       color: 'text-blue-500',    bg: 'bg-blue-50',    growth: stats?.weightGrowthPercent },
-    { label: 'Mahsulot qiymati',        value: stats ? fmt(stats.totalIncome)          : '—', unit: "so'm", icon: DollarSign,  color: 'text-emerald-500', bg: 'bg-emerald-50', growth: stats?.incomeGrowthPercent },
-    { label: 'Qabul qilingan savatlar', value: stats ? fmt(stats.receivedBaskets)      : '—', unit: 'ta',   icon: ShoppingBasket, color: 'text-purple-500',  bg: 'bg-purple-50',  growth: null },
-    { label: 'Tarqatilgan savatlar',    value: stats ? fmt(stats.distributedBaskets)    : '—', unit: 'ta',   icon: ShoppingCart,color: 'text-amber-500',   bg: 'bg-amber-50',   growth: null },
-    { label: 'Ombordagi zaxira',        value: stats ? fmt(stats.totalInventory)        : '—', unit: 'kg',   icon: Package,    color: 'text-rose-500',    bg: 'bg-rose-50',    growth: null },
+    { label: "Qabul qilingan og'irlik", value: stats ? fmt(stats.totalAcceptedWeight) : '—', unit: 'kg',    icon: Scale,         color: 'text-blue-500',    bg: 'bg-blue-50',    growth: stats?.weightGrowthPercent, loading: loadingStats   },
+    { label: 'Mahsulot qiymati',        value: stats ? fmt(stats.totalIncome)          : '—', unit: "so'm", icon: DollarSign,    color: 'text-emerald-500', bg: 'bg-emerald-50', growth: stats?.incomeGrowthPercent,  loading: loadingStats   },
+    { label: 'Qabul qilingan savatlar', value: stats ? fmt(stats.receivedBaskets)      : '—', unit: 'ta',   icon: ShoppingBasket,color: 'text-purple-500',  bg: 'bg-purple-50',  growth: null,                        loading: loadingStats   },
+    { label: 'Tarqatilgan savatlar',    value: stats ? fmt(stats.distributedBaskets)   : '—', unit: 'ta',   icon: ShoppingCart,  color: 'text-amber-500',   bg: 'bg-amber-50',   growth: null,                        loading: loadingStats   },
+    { label: 'Ombordagi zaxira',        value: stats ? fmt(stats.totalInventory)       : '—', unit: 'kg',   icon: Package,       color: 'text-rose-500',    bg: 'bg-rose-50',    growth: null,                        loading: loadingStats   },
+    {
+      label: 'Kutilayotgan fermerlar',
+      value: String(pendingData.length),
+      unit: 'ta',
+      icon: Clock,
+      color: pendingData.length > 0 ? 'text-rose-500'    : 'text-emerald-500',
+      bg:    pendingData.length > 0 ? 'bg-rose-50'       : 'bg-emerald-50',
+      growth: null,
+      loading: loadingPending,
+      onClick: () => navigate('/dashboard/broker/baskets/pending'),
+    },
   ];
 
   const maxWeight = topFarmers.length > 0
     ? Math.max(...topFarmers.map(f => Number(f.totalWeight))) : 1;
 
+  // NEW — fetchPending qo'shildi
   const handleRefreshAll = () => {
     fetchStats();
     fetchDailyChart();
     fetchFruitChart();
     fetchTopFarmers();
+    fetchPending();
   };
 
   return (
@@ -272,15 +408,13 @@ export default function BrokerDashboard() {
 
       {error && <ErrorBanner message={error} onRetry={fetchStats} />}
 
-      {/* STAT CARDS */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {statCards.map((card, i) => <StatCard key={i} {...card} loading={loadingStats} />)}
+      {/* STAT CARDS — 6 ta, lg:grid-cols-6 */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        {statCards.map((card, i) => <StatCard key={i} {...card} />)}
       </div>
 
-      {/* CHARTS ROW */}
+      {/* CHARTS ROW — o'zgarmagan */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* Area Chart */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -289,9 +423,7 @@ export default function BrokerDashboard() {
             </div>
             <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
               {CHART_DAYS_OPTIONS.map(d => (
-                <button
-                  key={d}
-                  onClick={() => setChartDays(d)}
+                <button key={d} onClick={() => setChartDays(d)}
                   className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                     chartDays === d ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                   }`}
@@ -323,7 +455,6 @@ export default function BrokerDashboard() {
           )}
         </div>
 
-        {/* Pie Chart */}
         <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -358,15 +489,17 @@ export default function BrokerDashboard() {
                     <span className="font-bold text-slate-800">{item.percentage}%</span>
                   </div>
                 ))}
-                {fruitChart.length > 4 && <p className="text-[10px] text-slate-400 font-medium">+{fruitChart.length - 4} ta boshqa</p>}
+                {fruitChart.length > 4 && (
+                  <p className="text-[10px] text-slate-400 font-medium">+{fruitChart.length - 4} ta boshqa</p>
+                )}
               </div>
             </>
           )}
         </div>
       </div>
 
-      {/* BOTTOM ROW */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* BOTTOM ROW — lg:grid-cols-3, PendingWidget 3-chi ustun */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Bar Chart */}
         <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6">
@@ -440,6 +573,13 @@ export default function BrokerDashboard() {
             </div>
           )}
         </div>
+
+        {/* NEW: Pending Widget */}
+        <PendingWidget
+          data={pendingData}
+          loading={loadingPending}
+          onNavigate={() => navigate('/dashboard/broker/baskets/pending')}
+        />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Phone, Package, ChevronDown, Loader2, Receipt, AlertCircle } from 'lucide-react';
-import distributionService from '../../services/distributionService'; 
+import distributionService from '../../services/basketTransactionService'; 
 
 // Debounce (Tez yozganda serverni qotirmaslik uchun)
 function useDebounce(value, delay) {

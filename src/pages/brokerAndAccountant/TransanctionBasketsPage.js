@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Search, Calendar, ChevronLeft, ChevronRight, Loader2, ArrowDownCircle, ArrowUpCircle, AlertCircle } from 'lucide-react';
-import distributionService from '../../services/distributionService';
+import distributionService from '../../services/basketTransactionService';
 
 // Transaction turini chiroyli ko'rsatish
 const getTypeBadge = (type) => {

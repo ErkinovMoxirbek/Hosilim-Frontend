@@ -20,6 +20,7 @@ import AnnouncementsPage from "../../brokerAndAccountant/AnnouncementsPage";
 import FarmerBalancesPage from "../../brokerAndAccountant/FarmerBalancesPage";
 import ReportPage from "../../brokerAndAccountant/ReportPage";
 import MyStocksPage from "../../brokerAndAccountant/MyStocksPage";
+import PendingReturnsPage from "../../brokerAndAccountant/PendingReturnsPage";
 
 // Haladelnik va Moliya
 import FridgeInventoryPage from "../../brokerAndAccountant/fridge/FridgeInventoryPage"; 
@@ -103,7 +104,7 @@ const BrokerLayout = () => {
               <Route path="baskets/balances" element={<FarmerBalancesPage />} />
               <Route path="baskets/transaction" element={<TransactionBasketsPage />} />
               <Route path="baskets/history" element={<BasketHistoryPage />} />
-              <Route path="baskets/farmers" element={<FarmerPage />} />
+              <Route path="baskets/pending" element={<PendingReturnsPage />} />
 
               {/* HALADELNIK YO'LLARI */}
               <Route path="inventory" element={<Navigate to="stocks" replace />} />

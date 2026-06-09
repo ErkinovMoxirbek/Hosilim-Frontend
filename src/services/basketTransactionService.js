@@ -2,7 +2,7 @@ import api from "../api/Axios";
 
 const BASE_URL = "/basket-transactions";
 
-const distributionService = {
+const basketTransactionService = {
 
   // Barcha tarqatilgan savatlar tarixini olish
   getAllTransactions: async (page = 0, size = 15) => {
@@ -106,6 +106,20 @@ const distributionService = {
       throw error; // Xatoni sahifaga uzatamiz (Alert chiqishi uchun)
     }
   },
+
+  getPendingReturns: async (date) => {
+    try {
+      const params = {};
+      if (date) params.date = date;
+      const res = await api.get(`${BASE_URL}/pending-returns`, { params });
+      return res.data?.data || [];
+    } catch (err) {
+      throw new Error(
+        err.response?.data?.message ||
+        "Kutilayotgan qaytarishlarni yuklashda xatolik."
+      );
+    }
+  }
 };
 
-export default distributionService;
+export default basketTransactionService;
