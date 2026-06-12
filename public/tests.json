@@ -1,0 +1,907 @@
+[
+  {
+    "id": 1,
+    "question": "\"Texnologiya va uni o'qitish metodikasi\" fani nimani o'rgatadi?",
+    "options": [
+      "Texnologiya faniga oid nazariy bilim, amaliy ko'nikma va malakalarni egallashlari, kasb tanlashda o'quvchilarning intellektual qobiliyatlarini ilmiy va texnologik ijodkorlikka jalb qilish imkoniyatini rivojlantirishga.",
+      "Ilmiy-texnik bilimlarni real hayotda qo'llashga, amaliy ko'nikma xosil bo'lishiga, o'zaro do'stona munosabatga o'rgatadi.",
+      "Texnologiya fani o'quvchilarni mehnatga hurmat bilan yondashishga tayyorlaydi.",
+      "O'quvchilarni texnologiya darslarida sa'nat asarini yaratishga, qog'oz va kartondan ishlashga o'rgatadi."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 2,
+    "question": "Texnologiya o'quv dasturi nechanchi yilda qayta takomillashtirilgan?",
+    "options": ["2017 yilda", "2018 yilda", "2021 yilda", "2019 yilda"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 3,
+    "question": "Umumiy o'rta ta'limning milliy o'quv dasturida \"Texnologiya\" fanining kompetensiyalari nechta deb belgilab berilgan?",
+    "options": ["3 ta", "5 ta", "7 ta", "4 ta"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 4,
+    "question": "Origami san'atining vatani qaysi qatorda to'g'ri ko'rsatilgan?",
+    "options": ["Xitoy", "Rassiya", "Fransiya", "Koreya"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 5,
+    "question": "\"Texnologiya\" fani o'quv dasturida qanday yangi yondashuvlar kiritilgan?",
+    "options": [
+      "Vizual o'qitish metodi, STEAM yondashuvi, TRIZ yondashuvi.",
+      "Vizual o'qitish metodi, PISA yondashuvi, Ta'limga texnologik yondashuvi.",
+      "Vizual o'qitish metodi, TIMSS yondashuvi, TALIS yondashuvi.",
+      "Vizual o'qitish metodi, PIRLS yondashuvi, EGMA yondashuvi."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 6,
+    "question": "Kartonni yelimlab ishlagandan so'ng cho'tkani...?",
+    "options": [
+      "Sovun va suv bilan yuvib quriting",
+      "Suv bilan yuving",
+      "Tashlab yuboring",
+      "Quriting"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 7,
+    "question": "Qog'oz bu?",
+    "options": ["Material", "Asbob", "Turar joy", "Tabiiy material"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 8,
+    "question": "Qaychini stolda qanday qoldirilishi kerak?",
+    "options": ["Yopiq", "Ochiq stol chetida", "Muhim emas", "Stolning o'rtasiga ochiq"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 9,
+    "question": "STEAM ta'limida steam so'zining yoymasi to'g'ri berilgan qatorni belgilang?",
+    "options": [
+      "Science, Technology, Enginering, Art, Mathematics",
+      "Subject, Evrestik, Art, Mathematics",
+      "Science, Technology, Engineering",
+      "Techno, Engineering, Arithmetic"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 10,
+    "question": "\"Texnologiya\" fani o'quv dastuda qaysi metodlar qo'llanilgan?",
+    "options": [
+      "Muammoli izlanish, bahs-munozara, kichik tadqiqotlar, kichik guruhlarda ishlash, evristik suhbat.",
+      "Muammoli izlanish, venn diogrammasi, kichik tadqiqotlar, savol-javob metodi, evristik suhbat.",
+      "Muammoli izlanish, sinkveyn, katta tadqiqotlar, blis savollari, zinama-zina metodi.",
+      "Muammoli izlanish, tarmoqlash, yelpig'ich metodi, guruhlarda ishlash"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 11,
+    "question": "Kvilling so'zi bizga qayerdan kirib kelgan?",
+    "options": ["Yevropadan", "Amerikadan", "Rossiyadan", "Afrikadan"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 12,
+    "question": "Texnologiya darslarining vazifalari qaysi qatorda to'g'ri berilgan?",
+    "options": [
+      "Ijodiy, amaliy, tashkiliy, uslubiy",
+      "Amaliy",
+      "Amaliy, Ijodiy",
+      "Ijodiy, tashkiliy, amaliy"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 13,
+    "question": "Kompetensiya nima?",
+    "options": [
+      "Sohaga oid bilim, ko'nikma, malaka, qarashlar majmui, shaxsning qadriyati va sifatlari, namoyon bo'lishi yoki ta'sir ko'rsatish qobiliyati.",
+      "Kompetensiya bu bilim va ko'nikmalarning yig'indisi",
+      "Shaxsning qadriyati va sifatlari, namoyon bo'lishi.",
+      "Shaxs sifatlarining namoyon bo'lishi."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 14,
+    "question": "\"Texnologiya\" fani o'quv dasturida 2-sinf bo'yicha necha soat kiritilgan?",
+    "options": ["34", "36", "33", "32"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 15,
+    "question": "Qaysi mamlakatda origami bo'yicha birinchi kitob \"Qog'ozdan o'yinchoqlar yasash\" nashr etilgan?",
+    "options": [
+      "1937 yilda Londonda",
+      "1897 yilda Amerikada",
+      "1737 yilda Yaponiyada",
+      "1637 yilda Rossiyada"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 16,
+    "question": "Zamonaviy kasblar keltirilgan qatorni toping?",
+    "options": [
+      "Rieltor, bayer, HR director, PR menedjer, promouter, deklarant, marketolog, logist",
+      "Kinolog, stomotolog, logist, mutaxassis.",
+      "Ekolog, geolog, deklarant.",
+      "Bayer, stomotolog, biolog, texnolog."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 17,
+    "question": "Kvilling uslubidan dastlab kimlar foydalangan?",
+    "options": ["Roxibalar", "Quruvchilar", "O'qituvchilar", "Tikuvchilar"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 18,
+    "question": "Robot modeli ...?",
+    "options": [
+      "Geometrik shakllardan yasaladi",
+      "Fazoviy jismlardan yasaladi",
+      "Chiqindi materiallardan yasaladi",
+      "Turli xil materiallardan yasaladi"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 19,
+    "question": "Origami turlari nechta?",
+    "options": ["4 ta turi", "10 ta turi", "3 ta turi", "6 ta turi"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 20,
+    "question": "Kvilling uchun mo'ljallangan qog'oz tasmalar uzunligi to'g'ri ko'rsatilgan qatorni toping?",
+    "options": [
+      "15-60 santimetr",
+      "15-60 millimetr",
+      "1-15 millimetr",
+      "15-70 millimetr"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 21,
+    "question": "Origami so'zining kelib chiqishi?",
+    "options": [
+      "\"Origami\" so'zining o'zi bizga quyosh chiqayotgan mamlakatdan kelgan",
+      "\"Ori\", ya'ni \"qatlama\" va \"Kami\" - qog'oz so'zidan kelgan.",
+      "\"Ori\", ya'ni \"buklash\" va \"Kami\" yassi karton so'zidan kelgan.",
+      "\"Ori\", ya'ni \"qirqish\" va \"Kami\" tekis hajmli qog'oz so'zidan kelgan."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 22,
+    "question": "Applikatsiya ishini bajarishda asosiy e'tibor nimaga qaratilishi kerak?",
+    "options": [
+      "Uning umumiy ko'rinishiga",
+      "Uning yorqin ranglariga",
+      "Uning badiiy ko'rinishiga",
+      "Uning dekorativ turiga"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 23,
+    "question": "Robot bu...?",
+    "options": [
+      "Oldindan belgilangan dastur asosida harakat qiladigan, turli xil operatsiyalarni bajarish uchun mo'ljallangan avtomatik qurilma.",
+      "Oldindan belgilangan dastur asosida harakat qiladigan qurilma.",
+      "Turli xil operatsiyalarni bajarish uchun mo'ljallangan avtomatik qurilma.",
+      "Avtomatik qurilma."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 24,
+    "question": "Origami sanatining lug'aviy manosi qaysi qatorda to'g'ri ko'rsatilgan?",
+    "options": [
+      "Klassik origami - qaychi va yelim ishlatmasdan modelni bitta varaqdan (kvadratdan) yig'ish qobiliyati",
+      "Klassik origami - qaychi va yelim bilan ishlash sanati (kvadratdan) yig'ish qobiliyati",
+      "Klassik origami - kartondan va gafri qog'ozdan (to'g'ri to'rtburchakdan) yig'ish qobiliyati",
+      "Klassik origami - bir nechta varaqdan (piramida) yig'ish qobiliyati."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 25,
+    "question": "Kviling san'ati qaysi asrda vujudga kelgan?",
+    "options": ["XV asrda", "XII asrda", "XVI asrda", "XVII asrda"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 26,
+    "question": "Mozaika bilan ishlashda bola qanday rivojlanadi?",
+    "options": [
+      "Maqsadni belgilash va uni amalga oshirish, barmoqlarning nozik motorli qobiliyatlari, mantiqiy fikrlash hamda badiiy did.",
+      "Aqliy faoliyat, jismoniy faoliyat, maqsad sari intilish, tasvirni tanlashga yordam berishi bilan.",
+      "Naqshlariga va rasmlariga ko'ra o'ziga xos xususiyatlarga ega bo'lish.",
+      "Xalq amaliy san'ati dekorativ san'at turlari vujudga keladi."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 27,
+    "question": "\"Texnologiya fani esa har qanday sharoitda qanday bo'lishidan qat'iy nazar, oldindan belgilangan natijani beruvchi jarayondir\" deb qaysi olim aytgan?",
+    "options": ["A.Kushner", "G.Altshuller", "Y. Shumpeter", "M.Montessori"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 28,
+    "question": "Kviling san'atining lug'aviy manosi qaysi qatorda to'g'ri ko'rsatilgan?",
+    "options": [
+      "Kvilling - (inglizchadan olingan bo'lib lug'aviy ma'nosi \"qush pati\" ni anglatadi) uzun qog'oz qirqimlarining spiralsimon aylantirishidan hajmli shakl yasash san'atidir.",
+      "Kvilling - (fransuzchadan olingan bo'lib lug'aviy ma'nosi \"qush qanoti\" ni anglatadi) qog'oz qirqimlarining spiralsimon aylantirishidan hajmli shakl yasash san'atidir",
+      "Kvilling - (nemischadan olingan bo'lib \"oq qush\" ni anglatadi) uzun qog'ozlardan hajmli shakl yasash san'atidir.",
+      "Kvilling - (fors tilidan olingan bo'lib lug'aviy ma'nosi \"ziyrak qush\" ni anglatadi) turli xil qog'oz va kartonlardan spiralsimon hajmli shakl yasash san'atidir."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 29,
+    "question": "Kartonning necha turi mavjud?",
+    "options": ["4 ta", "2 ta", "5 ta", "3 ta"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 30,
+    "question": "Applikatsiya qachon paydo bo'lgan?",
+    "options": [
+      "Applikatsiya 2500 yil muqaddam ko'chmanchi xalqlar orasida paydo bo'lgan.",
+      "Applikatsiya 2200 yil muqaddam paydo bo'lgan.",
+      "Applikatsiya 2000 yil muqaddam ko'chmanchi xalqlar orasida paydo bo'lgan.",
+      "Applikatsiya 1500 yil muqaddam ko'chmanchi xalqlar orasida paydo bo'lgan."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 31,
+    "question": "Texnologiya fanidan to'garaklar qay tartibda olib boriladi?",
+    "options": [
+      "To'garak mashg'uloti xaftada bir martta o'tkaziladi.",
+      "To'garak mashg'uloti xaftada ikki martta o'tkaziladi.",
+      "To'garak mashg'uloti ikki xaftada bir martta o'tkaziladi.",
+      "To'garak mashg'uloti xaftada uch martta o'tkaziladi."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 32,
+    "question": "Ipdan qaysi hayvoncha modeli yasash o'rgatiladi?",
+    "options": ["Qushcha", "Fil", "Sichqoncha", "Ayiqcha"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 33,
+    "question": "Applikatsiya nimadan yasaladi?",
+    "options": [
+      "Turli xil materialllardan",
+      "Rangli qog'ozlardan",
+      "Barglar to'plamidan",
+      "Rangli kartonlardan"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 34,
+    "question": "Qishloq xo'jalik asboblari berilgan qatorni belgilang?",
+    "options": [
+      "O'roq, omoch, xaskash, ketmon, leyka, belkurak.",
+      "Gulqaychi, mikrometr, chizg'ich.",
+      "Leyka, belkurak, mikrometr, chizg'ich.",
+      "Arra, randa, sirkul, xaskash."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 35,
+    "question": "Plastilin bilan ishlash uchun kerak bo'ladigan ish qurollarini tanlang?",
+    "options": [
+      "Maxsus taxtacha, maxsus pichoqcha.",
+      "Suv idishlari, maxsus pichoqcha.",
+      "Maxsus pichoqcha, yelim.",
+      "Ip g'altaklari, yelim."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 36,
+    "question": "To'g'ri chok tikish uchun nechta qoidaga amal qilish kerak?",
+    "options": ["3", "5", "7", "4"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 37,
+    "question": "O'quv-metodik majmua nima?",
+    "options": [
+      "Darslik, mashq daftari, o'qituvchi uchun metodik qo'llanma, darsliklarning multimediali ilovasidan iborat majmua.",
+      "Darslik, darsliklarning multimediali ilovasidan iborat majmua.",
+      "Dars ishlanmalar majmui.",
+      "O'qituvchi uchun metodik qo'llanma."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 38,
+    "question": "Harakatli o'yinchoqlar nechanchi sinfda o'rgatiladi?",
+    "options": ["3-sinf", "2-sinf", "1-sinf", "4-sinf"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 39,
+    "question": "Umumiy o'rta ta'lim muassasasi o'quvchilarining bilimi sifatini nazorat qilishning reyting tizimi tartibi kim tomonidan tasdiqlanadi?",
+    "options": [
+      "O'zbekiston Respublikasi Xalq ta'limi vazirligi hamda Vazirlar Mahkamasi huzuridagi Davlat test markazi tomonidan tasdiqlanadi.",
+      "O'zbekiston Respublikasi Xalq ta'limi vazirligi tomonidan tasdiqlanadi.",
+      "Vazirlar Mahkamasi huzuridagi Davlat test markazi tomonidan tasdiqlanadi.",
+      "Oliy attestatsiya komissiyasi tomonidan tasdiqlanadi."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 40,
+    "question": "Qog'oz bilan ishlashda foydalaniladigan ish qurollarini tanlang?",
+    "options": [
+      "Qaychi, qalam, chizg'ich, yelim.",
+      "Igna, ip, ruchka.",
+      "Chizg'ich, sirkul, qaychi, yelim",
+      "Qalam, qaychi."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 41,
+    "question": "Harakatlanuvchi o'yinchoq yasash uchun kerak bo'ladigan ish qurollarini belgilang?",
+    "options": [
+      "Karton, qaychi, yelim, rangli qog'oz, ip.",
+      "Plastellin, karton.",
+      "Karton va yelim.",
+      "Karton, qaychi, yelim, rangli qog'oz, igna, ip, plastellin, gazlamalar."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 42,
+    "question": "3-sinf darsligining pape-mashe mavzusida qaysi oshxona anjomi yasalgan?",
+    "options": ["Piyola", "Choynak", "Kosa", "Qoshiq"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 43,
+    "question": "\"Texnologiya\" fani o'quv dasturida 1-sinf bo'yicha necha soat kiritilgan?",
+    "options": ["33", "36", "34", "37"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 44,
+    "question": "2-sinf \"Texnologiya\" darsligida robotni nimalar yordamida yasash mumkin?",
+    "options": [
+      "Geometrik shakllardan, rangli qog'ozdan.",
+      "Qog'oz, plastilin.",
+      "Somon, plastilen.",
+      "Kartondan, plasmasdan"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 45,
+    "question": "Tugmalar bilan ishlash nechanchi sinfda amalga oshiriladi?",
+    "options": [
+      "1-sinfning 2-yarim yilligida",
+      "1-sinfning 1-yarim yilligida",
+      "2-sinfning 2-yarim yilligida",
+      "3-sinfning 2-yarim yilligida."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 46,
+    "question": "Avtomobil maketini yasash necha bosqichda amalga oshiriladi?",
+    "options": ["8", "7", "9", "6"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 47,
+    "question": "1-sinf uchun mo'ljallangan \"Hayvonot bog'i\" mavzusida kompozitsiya yasash qaysi ish turidan foydalanilgan?",
+    "options": [
+      "Qog'oz va karton bilan ishlash.",
+      "Gazlama bilan ishlash.",
+      "Tabiiy materiallar bilan ishlash.",
+      "Mozayka usulidan."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 48,
+    "question": "2-sinf «Texnologiya» darsligida barglardan qush rasmini yasash uchun nimalar kerak bo'ladi?",
+    "options": [
+      "Barglar, qaychi, yelim.",
+      "Kitob, qaychi.",
+      "Mato, qaychi.",
+      "Qaychi, daftar."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 49,
+    "question": "1-4 sinflar uchun Baholash tizimi bu...?",
+    "options": [
+      "Davlat ta'lim standarti bo'yicha umumiy o'rta ta'limning malaka talablarini o'quvchilar tomonidan o'zlashtirilishi darajasini hamda umumiy o'rta ta'lim muassasasining faoliyati samaradorligini aniqlaydigan mezonlar majmuidan iborat.",
+      "Umumiy o'rta ta'limning malaka talablari umumta'lim fanlari bo'yicha ta'lim mazmunining majburiy minimumi o'quv yuklamalari hajmiga hamda ta'lim sifatiga qo'yiladigan talablardan iborat.",
+      "O'rganilgan bilim va shakllangan ko'nikmalarni notanish vaziyatlarda qo'llay olish va yangi bilimlar hosil qilish.",
+      "Mavjud bilim, ko'nikma va malakalarni kundalik faoliyatda qo'llay olish qobiliyati."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 50,
+    "question": "Model bu...?",
+    "options": [
+      "Buyumning qurilmasi va ishlash prinsipini namoyish qilish uchun mo'ljallangan uning kichraytirilgan yoki kattalshtirilgan nusxasi",
+      "Buyumning kichraytirilgan yoki kattalshtirilgan nusxasi",
+      "Buyumning qurilmasi va ishlash prinsipini namoyish qilish uchun mo'ljallangan uning kichraytirilgan nusxasi",
+      "Buyumning qurilmasi va ishlash prinsipini namoyish qilish uchun mo'ljallangan uning kattalshtirilgan nusxasi."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 51,
+    "question": "Kartondan harakatlanuvchi ayiqchani yasash bosqichlari necha qismdan iborat?",
+    "options": ["9", "5", "7", "8"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 52,
+    "question": "Paralon va ipdan yumshoq o'yinchoq yasash nechanchi sinfda o'rgatiladi?",
+    "options": ["3-sinf", "2-sinf", "1-sinf", "4-sinf"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 53,
+    "question": "1-4 sinflar uchun mo'ljallanmagan ish turini belgilang?",
+    "options": [
+      "Polimer materiallarga ishlov berish texnologiyasi.",
+      "Tabiiy va turli materiallar bilan ishlash.",
+      "Gazlama va tolali materiallar bilan ishlash.",
+      "Badiiy qurish-yasash va texnik modellashtirish."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 54,
+    "question": "Boshlang'ich sinf o'quvchilari uchun eng ko'p soat ajratilgan ish turini belgilang?",
+    "options": [
+      "Qog'oz va karton bilan ishlash.",
+      "Applikatsiya.",
+      "Tabiiy materiallar bilan ishlash",
+      "Gazlama bilan ishlash."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 55,
+    "question": "Tabiiy materiallar bilan ishlash nechanchi sinfdan boshlab o'rgatiladi?",
+    "options": ["1-sinf", "2-sinf", "3-sinf", "4-sinf"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 56,
+    "question": "Model asosida kuchukcha shaklini yasash uchun kerak bo'ladigan ish qurollarini belgilang?",
+    "options": [
+      "Eskiz, karton, yelim, qaychi, chizg'ich, qalam.",
+      "Karton, yelim, qaychi, chizg'ich, qalam.",
+      "Eskiz, karton, yelim, qaychi.",
+      "Eskiz, karton, yelim, qaychi, chizg'ich, qalam, ruchka, flomaster."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 57,
+    "question": "Qaysi qatorda oziq-ovqat uchun don mahsulotlari berilgan?",
+    "options": [
+      "Bug'doy, grechka, guruch, mosh",
+      "Bug'doy, vermishel, arpa",
+      "Makaron, arpa, no'xot",
+      "Ugra, loviya, mosh"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 58,
+    "question": "O'quvchilarni texnologiya darslarida mehnatga axloqiy tayyorlash?",
+    "options": [
+      "Bolalarga jamoada ishlashni, o'zaro do'stona yordam berishni, ijodiy tashabbuskorlikni, tashkilotchilik qobiliyatlarini namoyish qilishdan iborat.",
+      "O'quvchilarni mehnat natijalariga hurmat bilan yondashishlari nazarda tutiladi.",
+      "Texnologiya darsi orqali o'quvchilarni mehnatga tayyorlash.",
+      "O'quvchilarni texnologiya darslarida o'quvchilarni o'zaro do'stona munosabatga o'rgatish."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 59,
+    "question": "Marketolog kim?",
+    "options": [
+      "Tashkilotning mahsuloti yoki xizmatini bozor talablariga mos darajaga olib chiqish bilan shug'ullanuvchi mutaxassis.",
+      "Bozor talablari bilan shug'ullanuvchi mutaxassis.",
+      "Tashkilot mutaxassisi.",
+      "Bozor narxlari bilan shug'ullanuvchi mutaxassis."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 60,
+    "question": "Texnologiya fanining psixologik komponentlari qaysi qatorda to'g'ri ko'rsatilgan?",
+    "options": [
+      "Sezib-anglash, idrok, diqqat, xotira, tafakkur.",
+      "Diqqat, idrok, xotira, tafakkur.",
+      "Idrok, ko'rish, eshitish.",
+      "Sezib-anglash, psixomotor, emotsional, idrok, diqqat, xotira."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 61,
+    "question": "Qog'ozni oddiy usullarda buklab qanday shakllar hosil qilish mumkin?",
+    "options": [
+      "16 ta kvadrat va 32 ta uchburchak.",
+      "16 ta kvadrat va 30 ta uchburchak.",
+      "14 ta kvadrat 28 ta uchburchak.",
+      "14 ta kvadrat va 32 ta uchburchak."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 62,
+    "question": "Qog'ozni ketma-ket buklash usulida nimalar yasash mumkin?",
+    "options": [
+      "Uycha, paraxod, pirpirak, qo'shqayiq, yelkanli qayiq, qushcha, samolyot, baliqcha.",
+      "Uycha, paraxod, pirpirak, qo'shqayiq, qushcha, samalyot, baliqcha.",
+      "Uycha, paraxod, pirpirak, qo'shqayiq, yelkanli qayiq, qushcha, samalyot, kuchukcha.",
+      "Uycha, paraxod, pirpirak, qo'shqayiq, yelkanli qayiq, samalyot, baliqcha."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 63,
+    "question": "Darsga qo'yiladigan maqsadlarini belgilang?",
+    "options": [
+      "Ta'limiy, tarbiyaviy, rivojlantiruvchi maqsad",
+      "Ta'limiy, tashkiliy, yakuniy maqsad",
+      "Ta'limiy, tarbiyaviy, tashkiliy maqsad",
+      "Rivojlantiruvchi, tashkiliy maqsad."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 64,
+    "question": "\"Bayram tabriknomasi tayyorlash\" mavzusi qaysi ish turiga kiradi?",
+    "options": [
+      "Qog'oz va karton bilan ishlash turiga kiradi",
+      "Karton va rangli qog'oz bilan ishlash turiga kiradi",
+      "Applikatsiya va mozaika",
+      "Konstruktorlik va modellashtirish ishlar turiga kiradi"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 65,
+    "question": "Amaliy ish darsning qaysi bosqichida amalga oshiriladi?",
+    "options": [
+      "Asosiy qismida",
+      "Tashkiliy qismida",
+      "Yakuniy qismida",
+      "Mustahkamlash qismida."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 66,
+    "question": "Texnologik jarayonda ketma-ketlik qay tartibda olib boriladi?",
+    "options": [
+      "Buklash, qirqish, birlashtirish, yelimlash.",
+      "Qirqish, origami, yelimlash.",
+      "Qirqish, yelimlash, tikish.",
+      "Yelimlash, tikish, bezash."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 67,
+    "question": "Qog'ozdan qanday amaliy ishlar bajariladi?",
+    "options": [
+      "Applikatsiya va mozaika ishlari, maketlar yasash, pape-mashe ishlari bajariladi.",
+      "Applikatsiya va mozaika ishlari",
+      "Qog'ozdan maketlar yasaladi.",
+      "Applikatsiya"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 68,
+    "question": "Texnologiya darsining necha qismi amaliy ishga ajratiladi?",
+    "options": [
+      "Darsning 3/4 qismi",
+      "Darsning 100% foizi",
+      "Darsning 2/4 qismi",
+      "Darsning 1/4 qismi"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 69,
+    "question": "Uzluksiz ta'lim tizimi qaysi javobda to'g'ri ko'rsatilgan?",
+    "options": [
+      "Maktabgacha ta'lim, umumiy o'rta ta'lim, o'rta maxsus kasb-hunar ta'limi, oliy ta'lim, oliy ta'limdan keyingi ta'lim, kadrlar malakasini oshirish va ularni qayta tayyorlash, maktabdan tashqari ta'lim.",
+      "Boshlang'ich ta'lim, o'rta maxsus bilim va kasb-hunar ta'limi.",
+      "Maktabgacha ta'lim, oliy ta'lim (bakalavr va magistratura).",
+      "Umumiy o'rta ta'lim, boshlang'ich ta'lim, oliy ta'lim."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 70,
+    "question": "Kichik guruhlarda ishlash shaklini aniqlang.",
+    "options": [
+      "Bunda, o'quvchilarning hammasi bir xil topshiriqni bajarishdan iboratdir, shuning uchun o'qituvchi bir vaqtning o'zida butun gruppa ishiga rahbarlik qila oladi.",
+      "Bunda, gruppaning har biri 3-4 kishilik guruhlarga bo'linishi, bu guruhlarning har qaysisi o'z topshirig'ini bajarishi nazarda tutiladi.",
+      "Bunda, hamma o'quvchilar har xil ishni bajarishdan iborat.",
+      "O'quvchilar individual ish bajaradi."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 71,
+    "question": "O'qitishning yakka holda ishlash shaklini aniqlang.",
+    "options": [
+      "Hamma o'quvchilar har xil ishni bajaradi, o'quv jarayonni boshqarish o'quvchilarning hammasini zarur materiallar bilan ta'minlash qiyin bo'ladi.",
+      "O'quvchilarning hammasi bir xil topshiriqni bajaradilar. O'qituvchi bir vaqtda butun guruh ishiga rahbarlik qila oladi.",
+      "Barcha o'quvchilar har xil ishni bajarishidan iborat.",
+      "Sinf o'quvchilari umumiy topshiriq ustida ishlaydilar."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 72,
+    "question": "O'quvchilardagi qaysi fazilatlari texnologiya darslarida muhim sanaladi?",
+    "options": [
+      "Tejamkorlik, ijodkorlik fazilatlari.",
+      "Tejamkorlik, vatanparvarlik fazilatlari.",
+      "Mustaqillik, irodaviylik fazilatlari.",
+      "Ijodkorlik, tashkilotchilik fazilatlari."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 73,
+    "question": "Boshlang'ich sinf texnologiya xonasida nimalarga amal qilish kerak?",
+    "options": [
+      "Ish joyini to'g'ri tashkil etishga, sanitariya-gigienik talablarga rioya qilishga, texnika xavfsizligi qoidalariga amal qilishga.",
+      "Ish joyini to'g'ri tashkil etishga, texnika xavfsizligi qoidalariga amal qilishga.",
+      "Sanitariya-gigienik talablarga rioya qilishga va ish joyini to'g'ri tashkil etishga.",
+      "Ish joyini to'g'ri tashkil etishga, sanitariya-gigienik talablarga rioya qilishga, texnika xavfsizligi qoidalariga amal qilishga, navbatchilik qilishga."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 74,
+    "question": "Texnologiya amaliy darslarida asosan nimalarga e'tibor berish kerak?",
+    "options": [
+      "Ish sifatini ta'minlovchi omillarga.",
+      "Ish joyini tayyorlashga.",
+      "Aniqlik va tozalikka rioya qilishga.",
+      "Ishlov berishda olingan aniqlik va tozalikka rioya qilishga."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 75,
+    "question": "Texnologik malaka nima?",
+    "options": [
+      "Darsda egallangan ko'nikmani mashqlar orqali takomillashib malakaga aylanishi.",
+      "Amaliy ish faoliyatining mashq qilishlar jarayonida yetilgan, mujassamlashgan tajribasi.",
+      "Tez va aniq bajarish malakasi.",
+      "Amaliy ish faoliyatining mashq qilishlar"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 76,
+    "question": "Texnologiya darslarida amaliy mashg'ulotlarni bajarish uchun nimalarga e'tibor berish kerak?",
+    "options": [
+      "Jamoa bo'lib ishlashga, texnika xavfsizligi qoidalariga",
+      "Texnika xavfsizligi qoidalariga",
+      "Kerakli materiallarni to'g'ri tanlashga.",
+      "Amaliy ish faoliyatini mashq qilishga."
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 77,
+    "question": "Ish fartugidan qaysi ish turlarida foydalaniladi?",
+    "options": [
+      "Turli materiallar va plastilin bilan ishlashda",
+      "Qog'oz va karton bilan ishlashda",
+      "Gazlama bilan ishlashda",
+      "Konstruktorlik ishlarida"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 78,
+    "question": "Texnologiya darslarida yakuniy qismga necha daqiqa ajratiladi?",
+    "options": ["10 daqiqa", "6 daqiqa", "5 daqiqa", "12 daqiqa"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 79,
+    "question": "2-sinf Texnologiya darslarida eng ko'p soat qaysi ish turiga ajratilgan?",
+    "options": [
+      "Qog'oz va karton bilan ishlash turiga",
+      "Applikatsiya va mozaika ish turiga",
+      "Tabiiy materiallar bilan ishlash turiga",
+      "Gazlama bilan ishlash turiga"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 80,
+    "question": "3-sinf Texnologiya darslarida eng ko'p soat qaysi ish turiga ajratilgan?",
+    "options": [
+      "Qog'oz va karton bilan ishlash turiga",
+      "Applikatsiya va mozaika ish turiga",
+      "Tabiiy va turli materiallar bilan ishlash turiga",
+      "Modellash va konstruktorlik ish turiga"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 81,
+    "question": "Qaldirg'och maketini yasash qaysi sinflarda o'rgatiladi?",
+    "options": ["4-sinfda", "3-sinfda", "1-sinfda", "2-sinfda"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 82,
+    "question": "Texnologiya darslarida tashkiliy qismga necha daqiqa ajratiladi?",
+    "options": ["10 daqiqa", "8 daqiqa", "5 daqiqa", "15 daqiqa"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 83,
+    "question": "Buzoqcha maketini yasashda nimalardan foydalaniladi?",
+    "options": [
+      "Rangli qog'oz, qaychi, yelim, qalam",
+      "Rangli qog'oz, qaychi, gazlama bo'laklari",
+      "Qog'oz turlari, gazlama bo'laklari",
+      "Qaychi, yelim, qalam, qog'oz"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 84,
+    "question": "Texnologiya darslarida asosiy qismga necha daqiqa ajratiladi?",
+    "options": ["25 daqiqa", "10 daqiqa", "15 daqiqa", "5 daqiqa"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 85,
+    "question": "Amaliy dars jarayonida qanday yelimdan foydalanish tavsiya etiladi?",
+    "options": [
+      "PVA yelimidan",
+      "Gelli yelimdan",
+      "Oddiy suyuq yelimdan",
+      "Turli yelimlardan"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 86,
+    "question": "Texnik modellashtirish ishlarining ahamiyati nimalardan iborat?",
+    "options": [
+      "Texnik model va maketlar haqida tasavvurga ega bo'ladilar va politexnik bilim doiralari kengayadi",
+      "Texnik modellar bilan tanishadi",
+      "Politexnik bilimga ega bo'ladi",
+      "Maket turlari bilan tanishadi"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 87,
+    "question": "Tuxum po'chog'idan nimalar yasaladi?",
+    "options": [
+      "Hajmdor o'yinchoqlar",
+      "Applikatsiyalar",
+      "Gullar",
+      "Maketlar"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 88,
+    "question": "Mozaika ish turida nimalardan foydalaniladi?",
+    "options": [
+      "Qog'oz bo'laklari, Tabiiy urug'lar, tuxum po'choqlari",
+      "Qog'oz bo'laklari",
+      "Tabiiy urug'lar",
+      "Tuxum po'choqlari"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 89,
+    "question": "Barglardan nimalar yasaladi?",
+    "options": [
+      "Turli applikatsiyalar",
+      "Quyon",
+      "Baliq",
+      "Qushlar va uy hayvonlari"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 90,
+    "question": "Yong'oq po'chog'idan plastilin yordamida qaysi hayvonni yasash mumkin?",
+    "options": ["Toshbaqa", "Qurbaqa", "Kuchukcha", "Ayiqcha"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 91,
+    "question": "Yer uchastkada ishlayotganda qanday ish birinchi amalga oshiriladi?",
+    "options": [
+      "Yerni tozalash",
+      "Agat olish",
+      "Suv quyish",
+      "O'g'it solish"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 92,
+    "question": "Yog'ochga naqsh ishlashda qanday arra turidan foydalaniladi?",
+    "options": [
+      "Lobzik arra",
+      "Katta arra",
+      "To'g'ri arra",
+      "Temir arra"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 93,
+    "question": "Yog'ochni quritishni necha xil usuli bor?",
+    "options": ["2", "5", "3", "4"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 94,
+    "question": "Zardo'zlik san'ati rivojlangan viloyatni toping?",
+    "options": ["Buxoro", "Samarqand", "Farg'ona", "Qashqadaryo"],
+    "correctAnswer": 0
+  },
+  {
+    "id": 95,
+    "question": "Tolali ekinlarni aniqlang?",
+    "options": [
+      "Paxta, kanop",
+      "Beda, makka",
+      "Sholi, bugdoy",
+      "Kungaboqar, soya"
+    ],
+    "correctAnswer": 0
+  }
+]
