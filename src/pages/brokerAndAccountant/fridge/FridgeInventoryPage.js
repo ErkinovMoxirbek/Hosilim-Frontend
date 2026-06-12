@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
-  Search, Clock, Layers,
+  Search, Clock, ShoppingBasket,
   ThermometerSnowflake, ThermometerSun,
   ChevronDown, MapPin, Building2,
   X, Loader2, ArrowRight
@@ -296,7 +296,7 @@ export default function FridgeInventoryPage() {
                   </span>
                 </div>
                 <div className="px-4 pb-3 flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-1.5 text-gray-500"><Layers size={12} /> Savat</span>
+                  <span className="flex items-center gap-1.5 text-gray-500"><ShoppingBasket size={12} /> {stock.basketName}</span>
                   <span className="font-bold text-gray-900 bg-gray-50 px-2 py-0.5 rounded border border-gray-100" style={{ fontFamily: '"DM Mono", monospace' }}>{stock.basketCount} ta</span>
                 </div>
                 <div className="grid grid-cols-2 border-y border-gray-100 divide-x divide-gray-100 bg-gray-50/50">

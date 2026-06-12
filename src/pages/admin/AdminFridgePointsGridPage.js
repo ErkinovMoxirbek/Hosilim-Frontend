@@ -18,7 +18,7 @@ export default function AdminFridgePointsGridPage() {
     try {
       setLoading(true);
       const data = await adminStockService.getPointsFridgeSummary(filters.search, pagination.page, pagination.size);
-      setPoints(data.content || []);
+      setPoints(data || []);
       setPagination(prev => ({ ...prev, totalElements: data.totalElements || 0, totalPages: data.totalPages || 0 }));
     } catch (err) { 
       console.error(err); 

@@ -18,6 +18,19 @@ export const brokerDashboardService = {
     }
   },
 
+  getBasketStats: async (filterType, customDate) => {
+    try {
+      const params = { filter: filterType };
+      if (filterType === 'custom') params.date = customDate;
+      const response = await api.get(`${API_URL}/basket-stats`, { params });
+      return response.data?.data || null;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || "Savat statistikasini yuklashda xatolik."
+      );
+    }
+  },
+
   getDailyChart: async (chartDays) => {
     try {
       const response = await api.get(`${API_URL}/chart/daily`, {

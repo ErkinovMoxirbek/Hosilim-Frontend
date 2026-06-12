@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingBasket, MapPin, User, ChevronRight, RefreshCw, Search, ChevronLeft, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { ShoppingBasket, MapPin, User, ChevronRight, RefreshCw, Search, ChevronLeft, ArrowUpRight, ArrowDownLeft, RotateCcw } from 'lucide-react';
 import { adminStockService } from '../../services/admin/adminStockService';
 
 export default function AdminBasketPointsGridPage() {
@@ -80,19 +80,31 @@ export default function AdminBasketPointsGridPage() {
                                 </div>
 
                                 {/* SAVATLAR STATISTIKASI */}
-                                <div className="mt-5 pt-4 border-t border-slate-100 flex justify-between items-center bg-slate-50/50 -mx-5 -mb-5 px-5 py-4 rounded-b-xl">
-                                    <div>
-                                        <div className="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-1"><ArrowUpRight size={12} className="text-rose-500" /> Tarqatildi</div>
-                                        <div className="text-sm font-semibold text-slate-900 mt-0.5">{point.totalGiven} ta</div>
+                                <div className="mt-5 -mx-5 -mb-5 rounded-b-xl overflow-hidden">
+                                    <div className="px-5 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                                        <div>
+                                            <div className="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-1"><ArrowUpRight size={12} className="text-rose-500" /> Tarqatildi</div>
+                                            <div className="text-sm font-semibold text-slate-900 mt-0.5">{point.totalGiven} ta</div>
+                                        </div>
+                                        <div className="text-center border-l border-r border-slate-200 px-4">
+                                            <div className="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-1 justify-center"><ArrowDownLeft size={12} className="text-emerald-500" /> Qaytdi</div>
+                                            <div className="text-sm font-semibold text-slate-900 mt-0.5">{point.totalReturned} ta</div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-[10px] uppercase font-bold text-slate-500">Qoldiq qarz</div>
+                                            <div className={`text-sm font-bold mt-0.5 ${point.currentDebt > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{point.currentDebt} ta</div>
+                                        </div>
                                     </div>
-                                    <div className="text-center border-l border-r border-slate-200 px-4">
-                                        <div className="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-1 justify-center"><ArrowDownLeft size={12} className="text-emerald-500" /> Qaytdi</div>
-                                        <div className="text-sm font-semibold text-slate-900 mt-0.5">{point.totalReturned} ta</div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-[10px] uppercase font-bold text-slate-500">Qoldiq qarz</div>
-                                        <div className={`text-sm font-bold mt-0.5 ${point.currentDebt > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{point.currentDebt} ta</div>
-                                    </div>
+
+                                    {/* 🆕 BEKOR QILINGAN SAVATLAR */}
+                                    {point.totalCancelled > 0 && (
+                                        <div className="px-5 py-2 bg-slate-100/80 border-t border-slate-200 flex items-center justify-between">
+                                            <div className="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-1.5">
+                                                <RotateCcw size={12} className="text-slate-400" /> Bekor qilingan
+                                            </div>
+                                            <div className="text-xs font-bold text-slate-600">{point.totalCancelled} ta</div>
+                                        </div>
+                                    )}
                                 </div>
                             </button>
                         ))}

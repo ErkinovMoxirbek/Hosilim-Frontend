@@ -24,7 +24,7 @@ export default function AdminFridgeTablePage() {
     try {
       setTableLoading(true);
       const data = await adminStockService.getFridgeStocksByPoint(pointId, filters.search, pagination.page, pagination.size);
-      setStocks(data.content || []);
+      setStocks(data || []);
       setPagination(prev => ({ ...prev, totalElements: data.totalElements || 0, totalPages: data.totalPages || 0 }));
     } catch (err) { 
       console.error(err); 
