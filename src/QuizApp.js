@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 
 // ============================================
 // 🎨 ICONS
@@ -55,8 +55,6 @@ const Icons = {
 // ============================================
 // 🎲 3D DICE - CSS based, smooth
 // ============================================
-const Dice3D = motion.div;
-
 const diceVariants = {
   initial: { 
     rotateX: -25, 
@@ -233,7 +231,7 @@ const Dice3DComponent = ({ spinning = false, size = 160 }) => {
           <DiceFace gradient="linear-gradient(135deg, #fef3e2 0%, #fecaca 100%)">
             <div className="grid grid-cols-3 grid-rows-3 gap-2 w-3/4 h-3/4 p-2">
               {[0,8].map(pos => (
-                <div key={pos} className={`flex items-center justify-center ${pos === 0 ? 'col-start-1 row-start-1' : 'col-start-3 row-start-3'}`}>
+                <div key={pos} className={`flex items-center justify-center ${pos === 0 ? 'col-start-1 row-start-1' : pos === 3 ? 'col-start-3 row-start-3' : 'col-start-3 row-start-3'}`}>
                   <div className={`w-4 h-4 rounded-full ${dotColor} shadow-md`}></div>
                 </div>
               ))}
@@ -314,6 +312,9 @@ const optionVariants = {
     transition: { delay: i * 0.06, type: "spring", stiffness: 250, damping: 20 }
   })
 };
+
+// Global constants for components
+const CONFETTI_COLORS = ['#E11D48', '#F59E0B', '#FB7185', '#FCD34D', '#10B981', '#F472B6'];
 
 // ============================================
 // 🎯 MAIN COMPONENT
@@ -496,14 +497,13 @@ const QuizApp = () => {
   // 🎊 CONFETTI
   // ============================================
   const Confetti = () => {
-    const colors = ['#E11D48', '#F59E0B', '#FB7185', '#FCD34D', '#10B981', '#F472B6'];
     const pieces = useMemo(() => 
       Array.from({ length: 80 }, (_, i) => ({
         id: i,
         left: Math.random() * 100,
         delay: Math.random() * 0.5,
         duration: 2 + Math.random() * 1.5,
-        color: colors[Math.floor(Math.random() * colors.length)],
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
         rotation: Math.random() * 360,
         xDrift: (Math.random() - 0.5) * 200,
       })), []
@@ -575,7 +575,7 @@ const QuizApp = () => {
   // ============================================
   // 📊 PROGRESS CIRCLE
   // ============================================
-  const ProgressCircle = ({ percentage, isSuccess, isPerfect }) => {
+  const ProgressCircle = ({ percentage }) => {
     const radius = 85;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (percentage / 100) * circumference;
@@ -953,6 +953,7 @@ const QuizApp = () => {
 
     return (
       <Layout key="results">
+        {isSuccess && <Confetti />}
         <motion.div 
           className="bg-white/90 backdrop-blur-xl rounded-[2rem] shadow-2xl border-2 border-white/80 overflow-hidden mt-4"
           initial={{ opacity: 0, y: 30 }}
@@ -1029,7 +1030,7 @@ const QuizApp = () => {
               transition={{ delay: 0.5 }}
             >{subtitle}</motion.p>
 
-            <ProgressCircle percentage={percentage} isSuccess={isSuccess} isPerfect={isPerfect} />
+            <ProgressCircle percentage={percentage} />
 
             <motion.div 
               className="grid grid-cols-3 gap-2 md:gap-3 mt-6"
@@ -1290,10 +1291,6 @@ const QuizApp = () => {
                     custom={i}
                     whileHover={!feedback ? { scale: 1.01, x: 4 } : {}}
                     whileTap={!feedback ? { scale: 0.98 } : {}}
-                    animate-state={selected && !feedback ? { 
-                      x: [0, -2, 2, -2, 2, 0] 
-                    } : {}}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
                     {selected && !feedback && (
                       <motion.div
