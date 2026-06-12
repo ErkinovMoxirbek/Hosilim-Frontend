@@ -5,6 +5,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import AuthPage from "./pages/AuthPage";
 import DashboardRoutes from "./pages/dashboard/DashboardRoutes";
 import QuizApp from "./QuizApp";
+import QuizApp2 from "./QuizApp2";
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         
           <Route path="/" element={<AuthPage />} />
           <Route path="/quiz" element={<QuizApp />} />
+          <Route path="/quiz-2" element={<QuizApp2 />} />
       
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard/*" element={<DashboardRoutes />} />
