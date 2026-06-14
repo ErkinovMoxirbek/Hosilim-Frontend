@@ -5,8 +5,15 @@ import farmerService from '../../services/farmerService';
 import { useAuth } from '../../hooks/useAuth';
 import {
   Loader2, Search, X, Check, Package, Clock, User,
-  ShoppingBasket, Hash, Phone, Receipt, Box, ChevronDown, ChevronUp, Plus
+  ShoppingBasket, Hash, Phone, Receipt, Box, ChevronDown, ChevronUp, Plus, Calendar
 } from 'lucide-react';
+
+const toLocalDateString = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
 
 export default function BasketDistributionPage() {
   const [distributions, setDistributions] = useState([]);
@@ -14,6 +21,11 @@ export default function BasketDistributionPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successId, setSuccessId] = useState(null);
+
+  // Sana holati — default: bugun
+  const today = toLocalDateString(new Date());
+  const [transactionDate, setTransactionDate] = useState(today);
+  const isBackDate = transactionDate !== today;
 
   // QuickAdd state
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -41,10 +53,8 @@ export default function BasketDistributionPage() {
   const dropdownRef = useRef(null);
   const quantityInputRef = useRef(null);
   const historyListRef = useRef(null);
-  // quickAdd ochiq bo'lsa dropdown yopilmasligi uchun ref
   const quickAddOpenRef = useRef(false);
 
-  // quickAddOpen o'zgarganda ref ni ham yangilaymiz
   useEffect(() => {
     quickAddOpenRef.current = quickAddOpen;
   }, [quickAddOpen]);
@@ -56,9 +66,8 @@ export default function BasketDistributionPage() {
     return fullName.substring(0, 2).toUpperCase();
   };
 
-  // Click outside handler — quickAdd ochiq bo'lsa ISHLAMASIN
   const handleClickOutside = useCallback((event) => {
-    if (quickAddOpenRef.current) return; // <-- asosiy fix
+    if (quickAddOpenRef.current) return;
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setIsDropdownOpen(false);
     }
@@ -82,7 +91,7 @@ export default function BasketDistributionPage() {
       try {
         const results = await distributionService.searchFarmers(farmerSearch.trim());
         setSearchResults(Array.isArray(results) ? results : []);
-        setQuickAddOpen(false); // yangi qidiruv kelsa quick add ni yopamiz
+        setQuickAddOpen(false);
       } catch (e) {
         console.error(e);
       } finally {
@@ -123,8 +132,6 @@ export default function BasketDistributionPage() {
     setSelectedBasketStock(sel ? sel.quantity : 0);
   };
 
-  // API dan kelgan farmer turli field nomlar bilan kelishi mumkin.
-  // name/surname/phone — ichki standart, shu formatga normalizatsiya qilamiz.
   const normalizeFarmer = (farmer) => ({
     ...farmer,
     name:    farmer.name    || farmer.firstName  || '',
@@ -173,7 +180,6 @@ export default function BasketDistributionPage() {
     setDebtDetails({ totalBaskets: 0, totalAmount: 0, baskets: [] });
   };
 
-  // Tez qo'shish — openQuickAdd bosqichi
   const openQuickAdd = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -186,7 +192,6 @@ export default function BasketDistributionPage() {
   const cancelQuickAdd = (e) => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     setQuickAddOpen(false);
-    // Dropdown ochiq qolsin, faqat quick add yopilsin
   };
 
   const handleQuickAdd = async (e) => {
@@ -224,7 +229,12 @@ export default function BasketDistributionPage() {
     }
     setIsSubmitting(true);
     try {
-      const newDist = await distributionService.distributeBasket(formData);
+      // transactionDate ni backend ga yuboramiz (YYYY-MM-DD format)
+      const payload = {
+        ...formData,
+        transactionDate: transactionDate,
+      };
+      const newDist = await distributionService.distributeBasket(payload);
       if (newDist) {
         const newId = newDist.id || Date.now();
         setSuccessId(newId);
@@ -280,6 +290,45 @@ export default function BasketDistributionPage() {
               {/* ===== LEFT: FORM ===== */}
               <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col gap-6">
 
+                {/* ===== SANA TANLASH ===== */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+                      <Calendar size={15} className="text-slate-500" />
+                      Tarqatish sanasi
+                    </label>
+                    {isBackDate && (
+                      <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 bg-amber-100 text-amber-700 rounded border border-amber-200">
+                        <Clock size={10} />
+                        O'tgan sana
+                      </span>
+                    )}
+                  </div>
+                  <input
+                    type="date"
+                    value={transactionDate}
+                    max={today}
+                    onChange={e => setTransactionDate(e.target.value || today)}
+                    className={`w-full px-4 py-3 bg-slate-50 border rounded-lg text-slate-900 outline-none transition-all font-medium cursor-pointer
+                      ${isBackDate
+                        ? 'border-amber-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-400/10'
+                        : 'border-slate-300 focus:border-[#1B5E20] focus:ring-4 focus:ring-green-500/10'
+                      }`}
+                  />
+                  {isBackDate && (
+                    <p className="mt-1.5 text-xs text-amber-600 font-medium flex items-center gap-1">
+                      <span>⚠</span>
+                      Tranzaksiya{' '}
+                      <strong>
+                        {new Date(transactionDate + 'T00:00:00').toLocaleDateString('uz-UZ', {
+                          day: '2-digit', month: 'long', year: 'numeric'
+                        })}
+                      </strong>{' '}
+                      sanasiga yoziladi.
+                    </p>
+                  )}
+                </div>
+
                 {/* Farmer search */}
                 <div className="relative" ref={dropdownRef}>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -304,7 +353,6 @@ export default function BasketDistributionPage() {
                     </div>
                   ) : (
                     <div className="relative">
-                      {/* Search input */}
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         {isSearchingFarmer
                           ? <Loader2 size={18} className="text-[#1B5E20] animate-spin" />
@@ -322,18 +370,14 @@ export default function BasketDistributionPage() {
                         className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 focus:border-[#1B5E20] focus:ring-4 focus:ring-green-500/10 rounded-lg text-slate-900 outline-none transition-all font-medium"
                       />
 
-                      {/* Dropdown */}
                       {isDropdownOpen && farmerSearch.length >= 2 && (
                         <div className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-xl border border-slate-200 max-h-72 overflow-y-auto">
-
                           {isSearchingFarmer ? (
                             <div className="p-4 text-center text-slate-500 text-sm flex items-center justify-center gap-2">
                               <Loader2 size={16} className="animate-spin text-[#1B5E20]" />
                               Bazada izlanmoqda...
                             </div>
-
                           ) : searchResults.length > 0 ? (
-                            /* Natijalar ro'yxati */
                             searchResults.map(f => (
                               <div
                                 key={f.id}
@@ -344,9 +388,7 @@ export default function BasketDistributionPage() {
                                 <span className="text-sm font-medium text-slate-500">{f.phone || f.phoneNumber}</span>
                               </div>
                             ))
-
                           ) : !quickAddOpen ? (
-                            /* Topilmadi + tez qo'shish tugmasi */
                             <div className="p-4 text-center">
                               <p className="text-sm text-slate-500 font-medium mb-3">
                                 «{farmerSearch}» topilmadi
@@ -359,12 +401,10 @@ export default function BasketDistributionPage() {
                                 «{farmerSearch}» ni tez qo'shish
                               </button>
                             </div>
-
                           ) : (
-                            /* ===== QUICK ADD FORMA ===== */
                             <div
                               className="p-4 space-y-3"
-                              onMouseDown={e => e.stopPropagation()} // butun forma ichida click outside ni bloklash
+                              onMouseDown={e => e.stopPropagation()}
                             >
                               <div className="flex items-center justify-between mb-1">
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -377,7 +417,6 @@ export default function BasketDistributionPage() {
                                   <X size={14} />
                                 </button>
                               </div>
-
                               <input
                                 autoFocus
                                 type="text"
@@ -403,7 +442,6 @@ export default function BasketDistributionPage() {
                                 onKeyDown={e => { if (e.key === 'Enter') handleQuickAdd(e); }}
                                 className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:border-[#1B5E20] focus:ring-2 focus:ring-green-500/10 outline-none font-mono"
                               />
-
                               <div className="flex gap-2 pt-1">
                                 <button
                                   onMouseDown={cancelQuickAdd}
@@ -483,12 +521,16 @@ export default function BasketDistributionPage() {
                     type="button"
                     onClick={handleSubmit}
                     disabled={isSubmitting || !selectedFarmer || !formData.quantity}
-                    className="w-full px-8 py-3.5 bg-[#1B5E20] text-white rounded-lg font-bold hover:bg-green-800 focus:ring-4 focus:ring-green-500/30 disabled:opacity-50 disabled:hover:bg-[#1B5E20] transition-all flex justify-center items-center gap-2 shadow-sm"
+                    className={`w-full px-8 py-3.5 text-white rounded-lg font-bold focus:ring-4 disabled:opacity-50 transition-all flex justify-center items-center gap-2 shadow-sm
+                      ${isBackDate
+                        ? 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500/30 disabled:hover:bg-amber-600'
+                        : 'bg-[#1B5E20] hover:bg-green-800 focus:ring-green-500/30 disabled:hover:bg-[#1B5E20]'
+                      }`}
                   >
                     {isSubmitting
                       ? <Loader2 size={20} className="animate-spin" />
                       : <Check size={20} strokeWidth={2.5} />}
-                    Jarayonni tasdiqlash
+                    {isBackDate ? `${transactionDate} ga tasdiqlash` : 'Jarayonni tasdiqlash'}
                   </button>
                 </div>
               </div>
@@ -586,7 +628,6 @@ export default function BasketDistributionPage() {
             {/* ===== BOTTOM: QARZ DETALLARI ===== */}
             {selectedFarmer && (
               <div className="mt-6 bg-white border border-green-500 rounded-xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-
                 <div
                   onClick={() => setIsStatsExpanded(!isStatsExpanded)}
                   className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-green-50/30 gap-4 cursor-pointer hover:bg-green-50/60 transition-colors"

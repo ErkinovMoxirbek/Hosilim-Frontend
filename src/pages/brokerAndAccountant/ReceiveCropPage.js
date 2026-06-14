@@ -7,7 +7,7 @@ import cropService from '../../services/cropService';
 import {
   Scale, UserCircle, Apple, Box, Calculator, CheckCircle2,
   Loader2, AlertCircle, Printer, ArrowRightLeft, X, Layers,
-  Search, TrendingUp, Pencil
+  Search, TrendingUp, Pencil, Calendar, Clock
 } from 'lucide-react';
 
 // ─── Konstantalar ────────────────────────────────────────────────────────────
@@ -28,9 +28,15 @@ const INITIAL_QUICK_EDIT = {
   amount:      '',
 };
 
+// ─── Sana yordamchisi (ISO formatting, timezone xavfsiz) ────────────────────
+const toLocalDateString = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 // ─── FIX 1: visualViewport — klaviatura ochilganda inputni ko'radi ────────────
-// window.visualViewport barcha zamonaviy brauzerlarda (iOS Safari, Android Chrome) ishlaydi.
-// Klaviatura ochilganda viewport shrink bo'ladi → biz farqni keyboard height deb hisoblaymiz.
 function useKeyboardAware() {
   const [kbHeight, setKbHeight] = useState(0);
 
@@ -42,21 +48,16 @@ function useKeyboardAware() {
     const handler = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        // Keyboard = window balandligi MINUS ko'rinadigan viewport balandligi
         const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
         setKbHeight(kb);
 
-        // Klaviatura ochiq bo'lsa va aktiv input pastda qolgan bo'lsa — scroll
         if (kb > 80) {
           const el = document.activeElement;
           if (el && ['INPUT', 'TEXTAREA'].includes(el.tagName)) {
             const rect = el.getBoundingClientRect();
-            const safeBottom = vv.height - 24;   // 24px breathing room
+            const safeBottom = vv.height - 24;
             if (rect.bottom > safeBottom) {
-              window.scrollBy({
-                top: rect.bottom - safeBottom + 32,
-                behavior: 'smooth',
-              });
+              window.scrollBy({ top: rect.bottom - safeBottom + 32, behavior: 'smooth' });
             }
           }
         }
@@ -76,8 +77,6 @@ function useKeyboardAware() {
 }
 
 // ─── FIX 2: visualViewport-ga asoslangan scroll ───────────────────────────────
-// Eski: scrollIntoView faqat document scroll ni hisoblab, keyboard ni hisoblamaydi
-// Yangi: visualViewport.height ga nisbatan hisoblaydi
 const scrollToInput = (e) => {
   const el = e.currentTarget;
   setTimeout(() => {
@@ -97,7 +96,6 @@ const scrollToInput = (e) => {
 };
 
 // ─── Yordamchi UI komponentlar ───────────────────────────────────────────────
-
 function SectionLabel({ icon: Icon, text, iconClass = 'text-emerald-500' }) {
   return (
     <label className="flex items-center gap-2 text-[12px] font-extrabold text-gray-400 uppercase tracking-widest mb-3">
@@ -122,9 +120,6 @@ function InfoBanner({ type = 'info', icon: Icon = AlertCircle, children }) {
   );
 }
 
-// ─── react-select uchun umumiy stil ──────────────────────────────────────────
-// menuPosition="fixed" — dropdown klaviatura ostiga tushib qolmaydi
-// menuPlacement="auto" — joy bo'lmasa yuqoriga ochiladi
 const selectStyles = (focusColor = '#10B981') => ({
   control: (base, state) => ({
     ...base,
@@ -133,14 +128,18 @@ const selectStyles = (focusColor = '#10B981') => ({
     borderColor: state.isFocused ? focusColor : '#D1D5DB',
     boxShadow: state.isFocused ? `0 0 0 4px ${focusColor}1A` : 'none',
     '&:hover': { borderColor: focusColor },
-    minHeight: '46px',           // Tablet uchun touch-friendly
+    minHeight: '46px',
   }),
   menuPortal: (base) => ({ ...base, zIndex: 9999 }),
 });
 
 // ─── Asosiy sahifa ────────────────────────────────────────────────────────────
-
 export default function ReceiveCropPage() {
+
+  // ── Sana holati — default: bugun ───────────────────────────────────────────
+  const today = toLocalDateString(new Date());
+  const [transactionDate, setTransactionDate] = useState(today);
+  const isBackDate = transactionDate !== today;
 
   // ── Holat ──────────────────────────────────────────────────────────────────
   const [isPageLoading, setIsPageLoading]   = useState(true);
@@ -176,10 +175,8 @@ export default function ReceiveCropPage() {
   const [isQuickSaving, setIsQuickSaving] = useState(false);
   const [quickError, setQuickError]   = useState(null);
 
-  // ── FIX 1: klaviatura balandligini kuzatish ────────────────────────────────
   const keyboardHeight = useKeyboardAware();
 
-  // ── Bosish orqali yopish (Dropdown) ────────────────────────────────────────
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -190,7 +187,6 @@ export default function ReceiveCropPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ── Statik ma'lumotlarni yuklash ───────────────────────────────────────────
   useEffect(() => {
     (async () => {
       setIsPageLoading(true);
@@ -205,7 +201,6 @@ export default function ReceiveCropPage() {
     })();
   }, []);
 
-  // ── Farmer qidirish (Debounce) ─────────────────────────────────────────────
   useEffect(() => {
     if (farmerSearch.trim().length < 2) {
       setSearchResults([]);
@@ -228,7 +223,6 @@ export default function ReceiveCropPage() {
     return () => clearTimeout(timer);
   }, [farmerSearch]);
 
-  // ── Farmer tanlanganida savatlarni yuklash ─────────────────────────────────
   useEffect(() => {
     if (!form.farmerId) {
       setFarmerBaskets([]);
@@ -252,7 +246,6 @@ export default function ReceiveCropPage() {
     })();
   }, [form.farmerId]);
 
-  // ── Select options ─────────────────────────────────────────────────────────
   const basketOptions = useMemo(() => {
     if (!form.farmerId || farmerBaskets.length === 0) return [];
     return farmerBaskets.map(b => ({ value: b.basketName, label: b.basketName }));
@@ -264,14 +257,12 @@ export default function ReceiveCropPage() {
       label: `${p.fruitTypeName} (${p.quality}) — ${p.amount?.toLocaleString()} so'm/kg`,
     })), [prices]);
 
-  // ── Tanlangan savat uchun maksimal son ─────────────────────────────────────
   const maxAllowedBaskets = useMemo(() => {
     if (!form.basketName || farmerBaskets.length === 0) return 0;
     const found = farmerBaskets.find(b => b.basketName === form.basketName);
     return found ? found.quantity : 0;
   }, [form.basketName, farmerBaskets]);
 
-  // ── Kvitansiya hisob-kitobi ────────────────────────────────────────────────
   const isReadyToCalculate = useMemo(() => {
     if (activeMode !== MODE.CROP) return false;
     if (!form.farmerId || !form.priceId || !form.basketName) return false;
@@ -346,7 +337,6 @@ export default function ReceiveCropPage() {
     }
   };
 
-  // ── Boshqa amallar ─────────────────────────────────────────────────────────
   const addWeight = (e) => {
     e?.preventDefault();
     const val = parseFloat(currentWeight);
@@ -394,13 +384,15 @@ export default function ReceiveCropPage() {
           sampleBasketCount: parseInt(sampleCount || 0),
           sampleWeight:      parseFloat(sampleWeight || 0),
           grossWeight:       0,
+          transactionDate:   transactionDate,   // <-- yangi maydon
         });
         setSuccessMessage('Hosil muvaffaqiyatli qabul qilindi!');
       } else {
         await distributionService.returnEmptyBaskets({
-          farmerId:  form.farmerId,
-          basketName: form.basketName,
-          quantity:  parseInt(form.basketCount),
+          farmerId:        form.farmerId,
+          basketName:      form.basketName,
+          quantity:        parseInt(form.basketCount),
+          transactionDate: transactionDate,     // <-- yangi maydon
         });
         setSuccessMessage("Bo'sh savatlar muvaffaqiyatli qabul qilindi!");
       }
@@ -413,13 +405,11 @@ export default function ReceiveCropPage() {
     }
   };
 
-  // ── Yordamchi o'zgaruvchilar ───────────────────────────────────────────────
   const farmerHasNoBaskets = form.farmerId && !isFarmerBasketsLoading && farmerBaskets.length === 0;
   const isSubmitDisabled   = isSubmitting || isCalculating ||
     (activeMode === MODE.CROP && (!receipt || !form.basketName || farmerHasNoBaskets));
   const totalBatchWeight   = weightBatches.reduce((s, w) => s + w, 0);
 
-  // ── Sahifa yuklanayotgan holat ─────────────────────────────────────────────
   if (isPageLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-[70vh] gap-4">
@@ -429,12 +419,9 @@ export default function ReceiveCropPage() {
     );
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div
       className="p-4 sm:p-6 max-w-6xl mx-auto overflow-x-hidden"
-      // FIX 3: Klaviatura ochilganda kontentni pastga itarilishiga yo'l beradi.
-      // keyboardHeight > 0 bo'lganda pastga keyboard balandligi + zapas joy qo'shiladi.
       style={{ paddingBottom: keyboardHeight > 0 ? keyboardHeight + 40 : 96 }}
     >
 
@@ -471,17 +458,49 @@ export default function ReceiveCropPage() {
       </div>
 
       {/* ── Asosiy grid ───────────────────────────────────────────────────── */}
-      {/*
-        FIX 4: lg:grid-cols-3 → md:grid-cols-3
-        Eski: faqat 1024px+ da 2 ustunli ko'rinish (iPad ko'p holda md da bo'ladi)
-        Yangi: 768px+ dan boshlab forma + kvitansiya yonma-yon ko'rinadi
-      */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {/* ── Forma paneli ────────────────────────────────────────────────── */}
-        {/* FIX 5: lg:col-span-2 → md:col-span-2 */}
         <div className="md:col-span-2 bg-white rounded-2xl border border-gray-200 shadow-sm p-5 sm:p-7 space-y-8">
           <form id="mainForm" onSubmit={handleSubmit} className="space-y-8">
+
+            {/* ===== SANA TANLASH — har ikkala rejimda ham ko'rinadi ===== */}
+            <div className={`p-4 rounded-2xl border transition-colors ${isBackDate ? 'bg-amber-50/60 border-amber-200' : 'bg-gray-50/50 border-gray-100'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <label className="flex items-center gap-2 text-[12px] font-extrabold text-gray-400 uppercase tracking-widest">
+                  <Calendar size={14} className={isBackDate ? 'text-amber-500' : 'text-gray-400'} />
+                  {activeMode === MODE.CROP ? 'Qabul sanasi' : "Qaytarish sanasi"}
+                </label>
+                {isBackDate && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 bg-amber-100 text-amber-700 rounded border border-amber-200">
+                    <Clock size={10} />
+                    O'tgan sana
+                  </span>
+                )}
+              </div>
+              <input
+                type="date"
+                value={transactionDate}
+                max={today}
+                onChange={e => setTransactionDate(e.target.value || today)}
+                className={`w-full px-4 py-3 bg-white border rounded-xl text-gray-900 outline-none transition-all font-medium cursor-pointer text-base
+                  ${isBackDate
+                    ? 'border-amber-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-400/10'
+                    : 'border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10'
+                  }`}
+              />
+              {isBackDate && (
+                <p className="mt-1.5 text-xs text-amber-600 font-medium">
+                  ⚠ Tranzaksiya{' '}
+                  <strong>
+                    {new Date(transactionDate + 'T00:00:00').toLocaleDateString('uz-UZ', {
+                      day: '2-digit', month: 'long', year: 'numeric'
+                    })}
+                  </strong>{' '}
+                  sanasiga 23:59:00 vaqtida yoziladi.
+                </p>
+              )}
+            </div>
 
             {/* 1. FERMER TANLASH */}
             <div className="bg-gray-50/50 p-5 rounded-2xl border border-gray-100">
@@ -523,7 +542,6 @@ export default function ReceiveCropPage() {
                         : <Search size={20} className="text-gray-400" />
                       }
                     </div>
-                    {/* text-base (16px) — iOS zoom oldini oladi */}
                     <input
                       type="text"
                       autoComplete="off"
@@ -618,11 +636,6 @@ export default function ReceiveCropPage() {
                   <SectionLabel icon={Apple} text="Meva turi va narx" />
                   <div className="flex gap-2 items-center">
                     <div className="flex-1">
-                      {/*
-                        FIX 6: menuPosition="fixed" menuPlacement="auto"
-                        Dropdown klaviatura ostida ko'rinmay qolmaydi.
-                        menuPortalTarget={document.body} — z-index muammosi yo'q.
-                      */}
                       <Select
                         options={priceOptions}
                         placeholder="Mevani tanlang..."
@@ -892,14 +905,7 @@ export default function ReceiveCropPage() {
         </div>
 
         {/* ── Kvitansiya paneli ────────────────────────────────────────────── */}
-        {/* FIX 7: lg:col-span-1 → md:col-span-1 */}
         <div className="md:col-span-1">
-          {/*
-            FIX 8: lg:sticky lg:top-6 → md:sticky md:top-4
-            Tablet (768px+) da ham sticky ishlaydi.
-            Klaviatura ochilganda sticky ustun forma bilan "kurash" qilmasligi uchun
-            max-h va overflow qo'shilmadi — visualViewport scroll boshqaradi.
-          */}
           <div className="bg-[#0B1A42] rounded-2xl shadow-xl p-5 sm:p-6 text-white md:sticky md:top-4 border border-blue-900/50">
             <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
               <span className="flex items-center gap-2.5 text-sm font-black uppercase tracking-wide">
@@ -910,6 +916,14 @@ export default function ReceiveCropPage() {
               </span>
               {isCalculating && <Loader2 size={17} className="animate-spin text-emerald-400" />}
             </div>
+
+            {/* Tanlangan sana badge */}
+            {isBackDate && (
+              <div className="mb-4 flex items-center gap-2 px-3 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl">
+                <Calendar size={14} className="text-amber-400 flex-shrink-0" />
+                <span className="text-amber-300 text-xs font-bold">{transactionDate} sanasiga yoziladi</span>
+              </div>
+            )}
 
             {activeMode === MODE.CROP && (
               receipt ? (
@@ -963,29 +977,36 @@ export default function ReceiveCropPage() {
               type="submit"
               form="mainForm"
               disabled={isSubmitDisabled}
-              className={`w-full ${activeMode === MODE.CROP ? (receipt ? 'mt-5' : 'mt-6') : 'mt-6'} flex items-center justify-center gap-2 py-4 rounded-xl font-extrabold text-[13px] uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98] shadow-lg ${activeMode === MODE.CROP ? 'bg-emerald-500 hover:bg-emerald-400 text-[#0B1A42]' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+              className={`w-full ${activeMode === MODE.CROP ? (receipt ? 'mt-5' : 'mt-6') : 'mt-6'} flex items-center justify-center gap-2 py-4 rounded-xl font-extrabold text-[13px] uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98] shadow-lg
+                ${isBackDate
+                  ? 'bg-amber-500 hover:bg-amber-400 text-white'
+                  : activeMode === MODE.CROP
+                    ? 'bg-emerald-500 hover:bg-emerald-400 text-[#0B1A42]'
+                    : 'bg-blue-600 hover:bg-blue-500 text-white'
+                }`}
             >
               {isSubmitting
                 ? <Loader2 size={18} className="animate-spin" />
                 : <CheckCircle2 size={18} strokeWidth={2.5} />
               }
-              {activeMode === MODE.CROP ? 'HOSILNI QABUL QILISH' : 'SAVATNI QABUL QILISH'}
+              {isBackDate
+                ? `${transactionDate} ga qabul qilish`
+                : activeMode === MODE.CROP
+                  ? 'HOSILNI QABUL QILISH'
+                  : 'SAVATNI QABUL QILISH'
+              }
             </button>
           </div>
         </div>
-
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════════
           TEZKOR NARX O'ZGARTIRISH MODALI
-          FIX 9: Modal ichida ham visualViewport-aware scroll ishlaydi.
-          overscrollBehavior: contain — modal ichida scroll page ni harakatlatmaydi.
           ═══════════════════════════════════════════════════════════════════ */}
       {quickEdit.open && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm overflow-y-auto z-50" style={{ overscrollBehavior: 'contain' }}>
           <div className="flex min-h-full items-start sm:items-center justify-center p-4 py-10">
             <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
-
               <div className="p-5 border-b border-amber-100 flex justify-between items-start bg-amber-50/60">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -1067,7 +1088,6 @@ export default function ReceiveCropPage() {
                   </button>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -1077,7 +1097,6 @@ export default function ReceiveCropPage() {
   );
 }
 
-// ── Kichik yordamchi komponent ────────────────────────────────────────────────
 function ReceiptRow({ label, value, valueClass = 'text-white' }) {
   return (
     <div className="flex justify-between items-center text-gray-300">
