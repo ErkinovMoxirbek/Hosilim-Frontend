@@ -60,7 +60,8 @@ const basketTransactionService = {
       const payload = {
         farmerId: parseInt(distributionData.farmerId, 10),
         basketId: parseInt(distributionData.basketId, 10),
-        quantity: parseInt(distributionData.quantity, 10)
+        quantity: parseInt(distributionData.quantity, 10),
+        transactionDate: distributionData.transactionDate ?? null,  // "YYYY-MM-DD" yoki null
       };
 
       const response = await api.post(`${BASE_URL}/give`, payload);
@@ -100,7 +101,7 @@ const basketTransactionService = {
     */
     try {
       const response = await api.post(`${BASE_URL}/return-empty`, data);
-      return response.data; 
+      return response.data;
     } catch (error) {
       console.error("Bo'sh savatni qaytarishda xatolik:", error);
       throw error; // Xatoni sahifaga uzatamiz (Alert chiqishi uchun)
