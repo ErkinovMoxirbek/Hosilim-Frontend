@@ -8,11 +8,11 @@ const ProductsPage = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeSearchQuery, setActiveSearchQuery] = useState(''); // Haqiqiy qidiruv uchun alohida state
+    const [activeSearchQuery, setActiveSearchQuery] = useState('');
     
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
-    const [pageSize] = useState(10); // Bitta sahifada 10 ta mahsulot chiqadi
+    const [pageSize] = useState(10); 
     
     // Forma holati
     const [showForm, setShowForm] = useState(false);
@@ -20,34 +20,29 @@ const ProductsPage = () => {
     const [editingId, setEditingId] = useState(null);
     const [saving, setSaving] = useState(false);
 
-    // Ma'lumotlarni yuklash funksiyasini useCallback bilan o'rab barqaror qilamiz
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         try {
-            // productService orqali pagedata keladi
             const data = await productService.getAllProducts(page, pageSize, activeSearchQuery);
-            setProducts(data.content); // Spring Page'dagi ro'yxat
-            setTotalPages(data.totalPages); // Jami sahifalar soni
+            setProducts(data.content); 
+            setTotalPages(data.totalPages); 
         } catch (error) {
             alert("Mahsulotlarni yuklashda xatolik yuz berdi!");
         } finally {
             setLoading(false);
         }
-    }, [page, pageSize, activeSearchQuery]); // Ushbu qiymatlar o'zgargandagina funksiya yangilanadi
+    }, [page, pageSize, activeSearchQuery]); 
 
-    // Sahifa yoki qidiruv matni o'zgarganda ma'lumotni yangilash
     useEffect(() => {
         fetchProducts();
-    }, [fetchProducts]); // Endi ESLint sizdan xatolik topmaydi
+    }, [fetchProducts]); 
 
-    // Qidiruv uchun alohida funksiya
     const handleSearch = (e) => {
         e.preventDefault();
-        setPage(0); // Qidiruv bo'lganda doim 1-sahifaga qaytamiz
-        setActiveSearchQuery(searchQuery); // Faqat tugma bosilganda qidiruvni ishga tushiradi
+        setPage(0); 
+        setActiveSearchQuery(searchQuery); 
     };
 
-    // Forma logikasi
     const handleOpenForm = (product = null) => {
         if (product) {
             setFormData({
@@ -70,7 +65,6 @@ const ProductsPage = () => {
         setEditingId(null);
     };
 
-    // Saqlash (Yaratish yoki Yangilash)
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.name) {
@@ -86,7 +80,7 @@ const ProductsPage = () => {
                 await productService.createProduct(formData);
             }
             handleCloseForm();
-            fetchProducts(); // Ro'yxatni yangilaymiz
+            fetchProducts(); 
         } catch (error) {
             alert("Saqlashda xatolik yuz berdi!");
         } finally {
@@ -94,13 +88,11 @@ const ProductsPage = () => {
         }
     };
 
-    // O'chirish (Soft delete)
     const handleDelete = async (id) => {
-        if (!window.confirm("Bu mahsulotni o'chirishga ishonchingiz komilmi? (Katalogdan yashiriladi)")) return;
+        if (!window.confirm("Bu mahsulotni o'chirishga ishonchingiz komilmi?")) return;
         
         try {
             await productService.deleteProduct(id);
-            // Sahifadagi yagona mahsulot o'chib ketsa va sahifa 0 dan katta bo'lsa, oldingi sahifaga qaytamiz
             if (products.length === 1 && page > 0) {
                 setPage(page - 1);
             } else {
@@ -112,173 +104,174 @@ const ProductsPage = () => {
     };
 
     return (
-        <div style={{ padding: '24px', backgroundColor: '#0f172a', minHeight: '100vh', color: 'white', fontFamily: 'system-ui, sans-serif' }}>
-            
-            {/* ─── Header qismi ─── */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '15px' }}>
-                <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 'bold' }}>📚 Mahsulotlar Katalogi</h2>
+        <div className="min-h-screen bg-gray-50 text-gray-900 font-sans p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto space-y-6">
                 
-                <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px' }}>
-                    <input 
-                        type="text" 
-                        placeholder="🔍 Nomi bo'yicha qidirish..." 
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ padding: '10px 15px', borderRadius: '8px', border: '1px solid #334155', backgroundColor: '#1e293b', color: 'white', width: '250px' }}
-                    />
-                    <button type="submit" style={{ backgroundColor: '#3b82f6', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
-                        Qidirish
-                    </button>
-                    <button 
-                        type="button"
-                        onClick={() => handleOpenForm()}
-                        style={{ backgroundColor: '#ccff00', color: '#000', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', marginLeft: '15px' }}
-                    >
-                        ➕ Yangi qo'shish
-                    </button>
-                </form>
-            </div>
-
-            {/* ─── Tahrirlash / Qo'shish Formasi ─── */}
-            {showForm && (
-                <form onSubmit={handleSubmit} style={{ backgroundColor: '#1e293b', padding: '20px', borderRadius: '12px', marginBottom: '24px', border: '1px solid #334155', display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', alignItems: 'end' }}>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '8px', color: '#cbd5e1', fontSize: '14px' }}>Mahsulot nomi <span style={{color: '#ef4444'}}>*</span></label>
+                {/* ─── Header va Qidiruv qismi ─── */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h2 className="text-2xl font-bold tracking-tight">Katalog</h2>
+                    
+                    <form onSubmit={handleSearch} className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
                         <input 
-                            type="text" required
-                            value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
-                            placeholder="Sut 3.2%"
-                            style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: 'white', boxSizing: 'border-box' }}
+                            type="text" 
+                            placeholder="Qidirish..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full sm:w-64 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
                         />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '8px', color: '#cbd5e1', fontSize: '14px' }}>O'lchov birligi <span style={{color: '#ef4444'}}>*</span></label>
-                        <select 
-                            value={formData.unit} onChange={(e) => setFormData({...formData, unit: e.target.value})}
-                            style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: 'white', boxSizing: 'border-box' }}
-                        >
-                            <option value="LITR">Litr</option>
-                            <option value="KG">Kilogramm</option>
-                            <option value="DONA">Dona / Quti</option>
-                            <option value="METR">Metr</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '8px', color: '#cbd5e1', fontSize: '14px' }}>Rasm URL manzili</label>
-                        <input 
-                            type="text"
-                            value={formData.imageUrl} onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                            placeholder="https://..."
-                            style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: 'white', boxSizing: 'border-box' }}
-                        />
-                    </div>
-                    <div style={{ gridColumn: '1 / -1' }}>
-                        <label style={{ display: 'block', marginBottom: '8px', color: '#cbd5e1', fontSize: '14px' }}>Qisqacha ta'rif</label>
-                        <textarea 
-                            value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})}
-                            placeholder="Mahsulot haqida ma'lumot..."
-                            rows="2"
-                            style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #475569', backgroundColor: '#0f172a', color: 'white', boxSizing: 'border-box', resize: 'vertical' }}
-                        />
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px', gridColumn: '1 / -1' }}>
-                        <button type="submit" disabled={saving} style={{ flex: 1, backgroundColor: '#3b82f6', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', cursor: saving ? 'not-allowed' : 'pointer' }}>
-                            {saving ? 'Saqlanmoqda...' : (editingId ? "💾 O'zgarishlarni saqlash" : "➕ Katalogga qo'shish")}
-                        </button>
-                        <button type="button" onClick={handleCloseForm} style={{ flex: 1, backgroundColor: '#334155', color: '#cbd5e1', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
-                            Bekor qilish
-                        </button>
-                    </div>
-                </form>
-            )}
+                        <div className="flex gap-2 w-full sm:w-auto">
+                            <button 
+                                type="submit" 
+                                className="w-full sm:w-auto px-5 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+                            >
+                                Izlash
+                            </button>
+                            <button 
+                                type="button"
+                                onClick={() => handleOpenForm()}
+                                className="w-full sm:w-auto px-5 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                            >
+                                + Yangi
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
-            {/* ─── Jadval (Table) Qismi ─── */}
-            <div style={{ backgroundColor: '#1e293b', borderRadius: '12px', border: '1px solid #334155', overflow: 'hidden' }}>
-                {loading ? (
-                    <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>⏳ Yuklanmoqda...</div>
-                ) : (
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                        <thead>
-                            <tr style={{ backgroundColor: '#0f172a', borderBottom: '1px solid #334155' }}>
-                                <th style={{ padding: '16px', color: '#94a3b8', fontWeight: '600' }}>Rasm</th>
-                                <th style={{ padding: '16px', color: '#94a3b8', fontWeight: '600' }}>Mahsulot nomi</th>
-                                <th style={{ padding: '16px', color: '#94a3b8', fontWeight: '600' }}>O'lchov</th>
-                                <th style={{ padding: '16px', color: '#94a3b8', fontWeight: '600' }}>Ta'rif</th>
-                                <th style={{ padding: '16px', color: '#94a3b8', fontWeight: '600', textAlign: 'right' }}>Harakatlar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {products.length === 0 ? (
-                                <tr>
-                                    <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
-                                        Katalogda mahsulot topilmadi
-                                    </td>
-                                </tr>
-                            ) : (
-                                products.map((product) => (
-                                    <tr key={product.id} style={{ borderBottom: '1px solid #334155' }}>
-                                        <td style={{ padding: '12px 16px' }}>
-                                            {product.imageUrl ? (
-                                                <img src={product.imageUrl} alt={product.name} style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />
-                                            ) : (
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '12px' }}>Rasm yo'q</div>
-                                            )}
-                                        </td>
-                                        <td style={{ padding: '16px', fontWeight: '500' }}>{product.name}</td>
-                                        <td style={{ padding: '16px' }}>
-                                            <span style={{ backgroundColor: '#334155', padding: '4px 10px', borderRadius: '6px', fontSize: '13px', color: '#cbd5e1' }}>
-                                                {product.unit}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '16px', color: '#94a3b8', fontSize: '14px', maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {product.description || "—"}
-                                        </td>
-                                        <td style={{ padding: '16px', textAlign: 'right' }}>
-                                            <button 
-                                                onClick={() => handleOpenForm(product)} 
-                                                style={{ background: 'transparent', border: 'none', color: '#60a5fa', cursor: 'pointer', fontSize: '16px', marginRight: '15px' }}
-                                                title="Tahrirlash"
-                                            >
-                                                ✏️
-                                            </button>
-                                            <button 
-                                                onClick={() => handleDelete(product.id)} 
-                                                style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '16px' }}
-                                                title="O'chirish"
-                                            >
-                                                🗑️
-                                            </button>
-                                        </td>
+                {/* ─── Tahrirlash / Qo'shish Formasi ─── */}
+                {showForm && (
+                    <div className="bg-white border border-gray-200 rounded-xl p-5 sm:p-6 shadow-sm">
+                        <h3 className="text-lg font-medium mb-4">{editingId ? "Tahrirlash" : "Yangi mahsulot"}</h3>
+                        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                            <div className="space-y-1">
+                                <label className="text-xs font-medium text-gray-500 uppercase">Nomi *</label>
+                                <input 
+                                    type="text" required
+                                    value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-medium text-gray-500 uppercase">O'lchov *</label>
+                                <select 
+                                    value={formData.unit} onChange={(e) => setFormData({...formData, unit: e.target.value})}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                                >
+                                    <option value="LITR">Litr</option>
+                                    <option value="KG">Kilogramm</option>
+                                    <option value="DONA">Dona</option>
+                                    <option value="METR">Metr</option>
+                                </select>
+                            </div>
+                            <div className="space-y-1 sm:col-span-2 lg:col-span-2">
+                                <label className="text-xs font-medium text-gray-500 uppercase">Rasm URL</label>
+                                <input 
+                                    type="text"
+                                    value={formData.imageUrl} onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                                />
+                            </div>
+                            <div className="space-y-1 sm:col-span-2 lg:col-span-4">
+                                <label className="text-xs font-medium text-gray-500 uppercase">Ta'rif</label>
+                                <textarea 
+                                    value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                    rows="1"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black resize-y"
+                                />
+                            </div>
+                            <div className="flex gap-3 sm:col-span-2 lg:col-span-4 justify-end mt-2">
+                                <button type="button" onClick={handleCloseForm} className="px-5 py-2 text-sm font-medium text-gray-600 hover:text-black transition-colors">
+                                    Bekor qilish
+                                </button>
+                                <button type="submit" disabled={saving} className="px-6 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors">
+                                    {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
+                {/* ─── Jadval Qismi (Mobil uchun overflow bilan) ─── */}
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    {loading ? (
+                        <div className="p-12 text-center text-sm text-gray-500">Yuklanmoqda...</div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse whitespace-nowrap">
+                                <thead>
+                                    <tr className="bg-gray-50/50 border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wider">
+                                        <th className="px-6 py-4 font-medium">Rasm</th>
+                                        <th className="px-6 py-4 font-medium">Nomi</th>
+                                        <th className="px-6 py-4 font-medium">O'lchov</th>
+                                        <th className="px-6 py-4 font-medium">Ta'rif</th>
+                                        <th className="px-6 py-4 font-medium text-right">Amallar</th>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200 text-sm">
+                                    {products.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                                                Hech narsa topilmadi.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        products.map((product) => (
+                                            <tr key={product.id} className="hover:bg-gray-50/50 transition-colors">
+                                                <td className="px-6 py-3">
+                                                    {product.imageUrl ? (
+                                                        <img src={product.imageUrl} alt={product.name} className="w-10 h-10 rounded-md object-cover border border-gray-200" />
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-400 text-xs border border-gray-200">Yo'q</div>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-3 font-medium text-gray-900">{product.name}</td>
+                                                <td className="px-6 py-3">
+                                                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600">
+                                                        {product.unit}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-3 text-gray-500 max-w-[200px] truncate">
+                                                    {product.description || "—"}
+                                                </td>
+                                                <td className="px-6 py-3 text-right">
+                                                    <button onClick={() => handleOpenForm(product)} className="text-gray-400 hover:text-black transition-colors px-2">
+                                                        Tahrirlash
+                                                    </button>
+                                                    <button onClick={() => handleDelete(product.id)} className="text-gray-400 hover:text-red-600 transition-colors px-2 ml-2">
+                                                        O'chirish
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+
+                {/* ─── Pagination Qismi ─── */}
+                {!loading && totalPages > 1 && (
+                    <div className="flex justify-between items-center bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm">
+                        <button 
+                            disabled={page === 0}
+                            onClick={() => setPage(page - 1)}
+                            className="px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+                        >
+                            Ortga
+                        </button>
+                        <span className="text-sm text-gray-500 font-medium">
+                            {page + 1} / {totalPages}
+                        </span>
+                        <button 
+                            disabled={page === totalPages - 1}
+                            onClick={() => setPage(page + 1)}
+                            className="px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+                        >
+                            Keyingisi
+                        </button>
+                    </div>
                 )}
             </div>
-
-            {/* ─── Pagination Qismi ─── */}
-            {!loading && totalPages > 1 && (
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', gap: '15px' }}>
-                    <button 
-                        disabled={page === 0}
-                        onClick={() => setPage(page - 1)}
-                        style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', backgroundColor: page === 0 ? '#334155' : '#3b82f6', color: page === 0 ? '#94a3b8' : 'white', cursor: page === 0 ? 'not-allowed' : 'pointer' }}
-                    >
-                        ◀ Oldingi
-                    </button>
-                    <span style={{ color: '#cbd5e1' }}>
-                        Sahifa {page + 1} / {totalPages}
-                    </span>
-                    <button 
-                        disabled={page === totalPages - 1}
-                        onClick={() => setPage(page + 1)}
-                        style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', backgroundColor: page === totalPages - 1 ? '#334155' : '#3b82f6', color: page === totalPages - 1 ? '#94a3b8' : 'white', cursor: page === totalPages - 1 ? 'not-allowed' : 'pointer' }}
-                    >
-                        Keyingi ▶
-                    </button>
-                </div>
-            )}
         </div>
     );
 };
