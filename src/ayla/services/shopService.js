@@ -1,4 +1,4 @@
-import apiClient from "../api/Axios";
+import apiClient from "../../api/Axios";
 
 const BASE_URL = "/ayla/shops";
 

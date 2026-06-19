@@ -1,0 +1,1114 @@
+/* src/styles/ios-theme.css
+   ------------------------------------------------------------------
+   Ayla — "Liquid Glass" dizayn tizimi.
+   iOS 26 uslubidagi shaffof, chuqurlik hissi beruvchi UI komponentlari.
+   Bu fayl barcha sahifalar (ProductListPage, ProductPricePage va h.k.)
+   tomonidan umumiy import qilinadi.
+   ------------------------------------------------------------------ */
+
+:root {
+  /* --- Ranglar --- */
+  --ayla-bg-1: #eef1fb;
+  --ayla-bg-2: #f7f4ee;
+  --ayla-accent: #3a6df0;
+  --ayla-accent-dark: #2451c7;
+  --ayla-accent-soft: rgba(58, 109, 240, 0.12);
+  --ayla-mint: #00b894;
+  --ayla-mint-soft: rgba(0, 184, 148, 0.12);
+  --ayla-danger: #ff3b30;
+  --ayla-danger-soft: rgba(255, 59, 48, 0.1);
+  --ayla-warning: #ff9f0a;
+
+  --ayla-text-1: #1c1c1e;
+  --ayla-text-2: #6e6e73;
+  --ayla-text-3: #aeaeb4;
+
+  --glass-fill: rgba(255, 255, 255, 0.62);
+  --glass-fill-strong: rgba(255, 255, 255, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-outline: rgba(60, 60, 67, 0.08);
+  --divider: rgba(60, 60, 67, 0.09);
+
+  /* --- Radius --- */
+  --r-xl: 30px;
+  --r-lg: 22px;
+  --r-md: 16px;
+  --r-sm: 12px;
+  --r-pill: 999px;
+
+  /* --- Soya --- */
+  --shadow-float: 0 14px 34px rgba(28, 36, 64, 0.10), 0 2px 8px rgba(28, 36, 64, 0.05);
+  --shadow-sheet: 0 -16px 50px rgba(20, 24, 44, 0.20);
+  --shadow-fab: 0 10px 24px rgba(58, 109, 240, 0.38);
+
+  /* --- Harakat --- */
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --blur-glass: 28px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.ayla-app {
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
+    "Segoe UI", system-ui, sans-serif;
+  color: var(--ayla-text-1);
+  background:
+    radial-gradient(900px 500px at 88% -8%, rgba(58, 109, 240, 0.16), transparent 60%),
+    radial-gradient(700px 460px at 6% 0%, rgba(0, 184, 148, 0.10), transparent 55%),
+    linear-gradient(180deg, var(--ayla-bg-1) 0%, var(--ayla-bg-2) 100%);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.ayla-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: max(18px, env(safe-area-inset-top)) 20px 14px;
+  backdrop-filter: blur(var(--blur-glass)) saturate(1.6);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.6);
+  background: rgba(238, 241, 251, 0.72);
+  border-bottom: 1px solid var(--glass-outline);
+}
+
+.ayla-topbar__title {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.ayla-topbar__subtitle {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--ayla-text-2);
+  font-weight: 500;
+}
+
+.ayla-topbar__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ayla-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  color: var(--ayla-accent);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 4px 6px 0;
+}
+
+.ayla-back:active {
+  opacity: 0.55;
+}
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+.ayla-search {
+  margin-top: 14px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ayla-search input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid var(--glass-outline);
+  background: var(--glass-fill);
+  backdrop-filter: blur(14px);
+  border-radius: var(--r-pill);
+  padding: 0 40px 0 38px;
+  font-size: 16px;
+  color: var(--ayla-text-1);
+  outline: none;
+  transition: box-shadow 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.ayla-search input::placeholder {
+  color: var(--ayla-text-3);
+}
+
+.ayla-search input:focus {
+  background: var(--glass-fill-strong);
+  box-shadow: 0 0 0 4px var(--ayla-accent-soft);
+}
+
+.ayla-search__icon {
+  position: absolute;
+  left: 13px;
+  width: 18px;
+  height: 18px;
+  color: var(--ayla-text-2);
+  pointer-events: none;
+}
+
+.ayla-search__clear {
+  position: absolute;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(110, 110, 115, 0.18);
+  color: var(--ayla-text-2);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s var(--spring), background 0.15s var(--ease);
+}
+
+.ayla-search__clear:active {
+  transform: scale(0.85);
+}
+
+/* =========================================================
+   LIST + GLASS CARD
+   ========================================================= */
+
+.ayla-content {
+  padding: 18px 16px 120px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.ayla-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ayla-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 14px;
+  border-radius: var(--r-lg);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--blur-glass)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.4);
+  box-shadow: var(--shadow-float);
+  cursor: pointer;
+  transition: transform 0.18s var(--spring), box-shadow 0.18s var(--ease),
+    background 0.18s var(--ease);
+}
+
+.ayla-card:active {
+  transform: scale(0.985);
+  background: var(--glass-fill-strong);
+}
+
+.ayla-card__avatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-md);
+  background: linear-gradient(150deg, var(--ayla-accent), var(--ayla-accent-dark));
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(58, 109, 240, 0.30);
+}
+
+.ayla-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ayla-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ayla-card__name {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ayla-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ayla-text-2);
+}
+
+.ayla-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: var(--r-pill);
+  background: var(--ayla-accent-soft);
+  color: var(--ayla-accent-dark);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ayla-card__trailing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ayla-price-tag {
+  font-variant-numeric: tabular-nums;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ayla-mint);
+  white-space: nowrap;
+}
+
+.ayla-price-tag--empty {
+  color: var(--ayla-text-3);
+  font-weight: 500;
+}
+
+.ayla-more-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(110, 110, 115, 0.12);
+  color: var(--ayla-text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s var(--spring), background 0.15s var(--ease);
+}
+
+.ayla-more-btn:active {
+  transform: scale(0.85);
+  background: rgba(110, 110, 115, 0.22);
+}
+
+/* =========================================================
+   SKELETON / EMPTY / ERROR
+   ========================================================= */
+
+.ayla-skeleton {
+  height: 76px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.45) 30%,
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(255, 255, 255, 0.45) 70%
+  );
+  background-size: 200% 100%;
+  animation: ayla-shimmer 1.3s ease-in-out infinite;
+  border: 1px solid var(--glass-outline);
+}
+
+@keyframes ayla-shimmer {
+  0% { background-position: 160% 0; }
+  100% { background-position: -60% 0; }
+}
+
+.ayla-empty {
+  text-align: center;
+  padding: 70px 20px;
+  color: var(--ayla-text-2);
+}
+
+.ayla-empty__icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  opacity: 0.55;
+}
+
+.ayla-empty__title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ayla-text-1);
+  margin: 0 0 4px;
+}
+
+.ayla-empty__subtitle {
+  font-size: 14px;
+  margin: 0;
+}
+
+.ayla-error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 16px;
+  border-radius: var(--r-md);
+  background: var(--ayla-danger-soft);
+  color: #b3261e;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.ayla-error-banner button {
+  border: none;
+  background: #b3261e;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   FAB
+   ========================================================= */
+
+.ayla-fab {
+  position: fixed;
+  right: 22px;
+  bottom: max(26px, env(safe-area-inset-bottom));
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(150deg, var(--ayla-accent), var(--ayla-accent-dark));
+  color: #fff;
+  box-shadow: var(--shadow-fab);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 25;
+  transition: transform 0.2s var(--spring), box-shadow 0.2s var(--ease);
+}
+
+.ayla-fab:active {
+  transform: scale(0.9);
+}
+
+.ayla-fab svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* =========================================================
+   OVERLAY / BOTTOM SHEET / MODAL
+   ========================================================= */
+
+.ayla-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 22, 36, 0.34);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: ayla-fade-in 0.2s var(--ease);
+}
+
+@keyframes ayla-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ayla-sheet {
+  width: 100%;
+  max-width: 560px;
+  background: rgba(250, 250, 253, 0.92);
+  backdrop-filter: blur(34px) saturate(1.7);
+  -webkit-backdrop-filter: blur(34px) saturate(1.7);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: none;
+  box-shadow: var(--shadow-sheet);
+  padding: 10px 18px max(22px, env(safe-area-inset-bottom));
+  animation: ayla-sheet-up 0.32s var(--spring);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+@keyframes ayla-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.ayla-sheet__handle {
+  width: 38px;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: rgba(110, 110, 115, 0.3);
+  margin: 6px auto 14px;
+}
+
+.ayla-sheet__title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ayla-text-2);
+  text-align: center;
+  margin: 0 0 12px;
+}
+
+.ayla-sheet__action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.55);
+  padding: 15px;
+  font-size: 16.5px;
+  font-weight: 500;
+  color: var(--ayla-text-1);
+  border-radius: var(--r-md);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: transform 0.12s var(--spring), background 0.15s var(--ease);
+}
+
+.ayla-sheet__action:active {
+  transform: scale(0.98);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.ayla-sheet__action--destructive {
+  color: var(--ayla-danger);
+}
+
+.ayla-sheet__action--cancel {
+  font-weight: 600;
+  background: rgba(120, 120, 128, 0.12);
+  margin-top: 4px;
+}
+
+/* --- Modal (forma) --- */
+
+.ayla-modal {
+  width: 100%;
+  max-width: 560px;
+  background: rgba(250, 250, 253, 0.94);
+  backdrop-filter: blur(34px) saturate(1.7);
+  -webkit-backdrop-filter: blur(34px) saturate(1.7);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-sheet);
+  animation: ayla-sheet-up 0.32s var(--spring);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .ayla-overlay { align-items: center; }
+  .ayla-modal,
+  .ayla-sheet {
+    border-radius: var(--r-xl);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  }
+  @keyframes ayla-sheet-up {
+    from { transform: translateY(24px) scale(0.97); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+  }
+}
+
+.ayla-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 8px 14px 16px;
+  border-bottom: 1px solid var(--divider);
+  flex-shrink: 0;
+}
+
+.ayla-modal__title {
+  font-size: 16.5px;
+  font-weight: 700;
+}
+
+.ayla-modal__close,
+.ayla-modal__save {
+  border: none;
+  background: none;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+}
+
+.ayla-modal__close {
+  color: var(--ayla-text-2);
+}
+
+.ayla-modal__close:active {
+  opacity: 0.5;
+}
+
+.ayla-modal__save {
+  color: var(--ayla-accent);
+}
+
+.ayla-modal__save:disabled {
+  color: var(--ayla-text-3);
+  cursor: not-allowed;
+}
+
+.ayla-modal__save:active:not(:disabled) {
+  opacity: 0.5;
+}
+
+.ayla-modal__body {
+  padding: 18px 18px 28px;
+  overflow-y: auto;
+}
+
+/* =========================================================
+   FORM FIELDS
+   ========================================================= */
+
+.ayla-field {
+  margin-bottom: 18px;
+}
+
+.ayla-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ayla-text-2);
+  margin-bottom: 7px;
+  padding-left: 2px;
+}
+
+.ayla-input,
+.ayla-textarea {
+  width: 100%;
+  border: 1px solid var(--glass-outline);
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--ayla-text-1);
+  outline: none;
+  transition: box-shadow 0.18s var(--ease), border-color 0.18s var(--ease);
+}
+
+.ayla-input:focus,
+.ayla-textarea:focus {
+  border-color: var(--ayla-accent);
+  box-shadow: 0 0 0 4px var(--ayla-accent-soft);
+}
+
+.ayla-textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+.ayla-field__error {
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--ayla-danger);
+  padding-left: 2px;
+}
+
+/* --- Segmented control --- */
+
+.ayla-segmented {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(120, 120, 128, 0.12);
+  border-radius: var(--r-md);
+}
+
+.ayla-segmented__option {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 9px 4px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ayla-text-2);
+  border-radius: calc(var(--r-md) - 4px);
+  cursor: pointer;
+  transition: background 0.2s var(--spring), color 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
+}
+
+.ayla-segmented__option.is-active {
+  background: #fff;
+  color: var(--ayla-text-1);
+  box-shadow: 0 2px 8px rgba(28, 36, 64, 0.14);
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.ayla-btn {
+  border: none;
+  border-radius: var(--r-md);
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: transform 0.15s var(--spring), opacity 0.15s var(--ease),
+    background 0.15s var(--ease);
+}
+
+.ayla-btn:active {
+  transform: scale(0.98);
+}
+
+.ayla-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ayla-btn--primary {
+  background: linear-gradient(150deg, var(--ayla-accent), var(--ayla-accent-dark));
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(58, 109, 240, 0.30);
+}
+
+.ayla-btn--destructive {
+  background: var(--ayla-danger);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(255, 59, 48, 0.28);
+}
+
+.ayla-btn--ghost {
+  background: rgba(120, 120, 128, 0.12);
+  color: var(--ayla-text-1);
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.ayla-toast-stack {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.ayla-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: var(--r-pill);
+  background: rgba(28, 28, 30, 0.86);
+  backdrop-filter: blur(16px);
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: ayla-toast-in 0.32s var(--spring);
+  max-width: 90vw;
+}
+
+@keyframes ayla-toast-in {
+  from { transform: translateY(-16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.ayla-toast--success .ayla-toast__dot { background: var(--ayla-mint); }
+.ayla-toast--error .ayla-toast__dot { background: var(--ayla-danger); }
+
+.ayla-toast__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   PRICE PAGE
+   ========================================================= */
+
+.ayla-price-hero {
+  border-radius: var(--r-xl);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--blur-glass)) saturate(1.4);
+  box-shadow: var(--shadow-float);
+  padding: 28px 22px;
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.ayla-price-hero__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ayla-text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 6px;
+}
+
+.ayla-price-hero__current {
+  font-size: 15px;
+  color: var(--ayla-text-2);
+  margin: 4px 0 0;
+}
+
+.ayla-price-input-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 10px 0 4px;
+}
+
+.ayla-stepper-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--glass-outline);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ayla-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s var(--spring), background 0.15s var(--ease);
+  flex-shrink: 0;
+}
+
+.ayla-stepper-btn:active {
+  transform: scale(0.88);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.ayla-price-input {
+  border: none;
+  background: transparent;
+  font-size: 40px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--ayla-text-1);
+  outline: none;
+  width: 100%;
+  max-width: 220px;
+}
+
+.ayla-price-unit {
+  font-size: 15px;
+  color: var(--ayla-text-2);
+  font-weight: 500;
+}
+
+.ayla-quick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.ayla-chip {
+  border: 1px solid var(--glass-outline);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ayla-text-1);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: transform 0.15s var(--spring), background 0.15s var(--ease);
+}
+
+.ayla-chip:active {
+  transform: scale(0.93);
+  background: var(--ayla-accent-soft);
+}
+
+/* =========================================================
+   SHELL / SIDEBAR LAYOUT
+   ========================================================= */
+
+.ayla-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: stretch;
+  background:
+    radial-gradient(900px 500px at 88% -8%, rgba(58, 109, 240, 0.16), transparent 60%),
+    radial-gradient(700px 460px at 6% 0%, rgba(0, 184, 148, 0.10), transparent 55%),
+    linear-gradient(180deg, var(--ayla-bg-1) 0%, var(--ayla-bg-2) 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
+    system-ui, sans-serif;
+  color: var(--ayla-text-1);
+}
+
+.ayla-sidebar {
+  width: 264px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 14px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(var(--blur-glass)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.5);
+  border-right: 1px solid var(--glass-outline);
+}
+
+.ayla-sidebar--desktop {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.ayla-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 22px;
+}
+
+.ayla-sidebar__brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  background: linear-gradient(150deg, var(--ayla-accent), var(--ayla-accent-dark));
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(58, 109, 240, 0.30);
+  flex-shrink: 0;
+}
+
+.ayla-sidebar__brand-text {
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.ayla-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ayla-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--r-md);
+  text-decoration: none;
+  color: var(--ayla-text-1);
+  transition: background 0.18s var(--ease), transform 0.15s var(--spring);
+}
+
+.ayla-sidebar__link:active {
+  transform: scale(0.98);
+}
+
+.ayla-sidebar__link:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.ayla-sidebar__link.is-active {
+  background: var(--glass-fill-strong);
+  box-shadow: var(--shadow-float);
+}
+
+.ayla-sidebar__link.is-active .ayla-sidebar__icon {
+  background: linear-gradient(150deg, var(--ayla-accent), var(--ayla-accent-dark));
+  box-shadow: 0 4px 12px rgba(58, 109, 240, 0.30);
+}
+
+.ayla-sidebar__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-sm);
+  background: rgba(120, 120, 128, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: background 0.2s var(--ease);
+}
+
+.ayla-sidebar__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ayla-sidebar__label {
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ayla-sidebar__hint {
+  font-size: 12px;
+  color: var(--ayla-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ayla-sidebar__close {
+  margin-left: auto;
+  border: none;
+  background: rgba(120, 120, 128, 0.14);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--ayla-text-2);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ayla-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* --- Sahifa topbar ichidagi hamburger tugma (faqat mobilda) ---
+   Sahifaning .ayla-topbar__row ichiga <SidebarMenuButton /> qo'yiladi,
+   shuning uchun alohida ikkinchi panel hosil bo'lmaydi. */
+
+.ayla-topbar__heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ayla-menu-btn {
+  display: none; /* desktopda yashirin, media query orqali mobilda ochiladi */
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--glass-outline);
+  background: var(--glass-fill);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--ayla-text-1);
+  flex-shrink: 0;
+  transition: transform 0.15s var(--spring), background 0.15s var(--ease);
+}
+
+.ayla-menu-btn:active {
+  transform: scale(0.9);
+  background: var(--glass-fill-strong);
+}
+
+/* --- Mobil drawer --- */
+
+.ayla-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 22, 36, 0.34);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 50;
+  display: flex;
+  animation: ayla-fade-in 0.2s var(--ease);
+}
+
+.ayla-sidebar--drawer {
+  width: min(264px, 82vw); /* tor telefonlarda ekranni to'liq qoplab yubormasligi uchun */
+  height: 100vh;
+  box-shadow: var(--shadow-sheet);
+  animation: ayla-drawer-in 0.28s var(--spring);
+}
+
+@keyframes ayla-drawer-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@media (max-width: 860px) {
+  .ayla-sidebar--desktop {
+    display: none;
+  }
+  .ayla-menu-btn {
+    display: flex;
+  }
+}
+
+@media (min-width: 861px) {
+  .ayla-sidebar-overlay {
+    display: none;
+  }
+}
+
+/* =========================================================
+   UTIL
+   ========================================================= */
+
+.ayla-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
