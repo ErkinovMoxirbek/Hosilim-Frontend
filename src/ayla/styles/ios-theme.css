@@ -1095,6 +1095,67 @@
 }
 
 /* =========================================================
+   PRICE CHIPS (Narxlar sahifasi)
+   ========================================================= */
+
+.ayla-price-chip {
+  display: inline-flex;
+  align-items: center;
+  background: var(--ayla-mint-soft);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.ayla-price-chip__label {
+  border: none;
+  background: none;
+  color: var(--ayla-mint);
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 8px 6px 8px 14px;
+  cursor: pointer;
+  transition: opacity 0.15s var(--ease);
+}
+
+.ayla-price-chip__label:active {
+  opacity: 0.6;
+}
+
+.ayla-price-chip__remove {
+  border: none;
+  background: none;
+  color: var(--ayla-mint);
+  opacity: 0.55;
+  font-size: 11px;
+  width: 26px;
+  height: 26px;
+  margin-right: 4px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s var(--spring), background 0.15s var(--ease), opacity 0.15s var(--ease);
+}
+
+.ayla-price-chip__remove:hover,
+.ayla-price-chip__remove:active {
+  opacity: 1;
+  background: rgba(0, 184, 148, 0.18);
+  transform: scale(0.9);
+}
+
+.ayla-chip--add {
+  border: 1px dashed var(--ayla-accent);
+  background: transparent;
+  color: var(--ayla-accent);
+}
+
+.ayla-chip--add:active {
+  background: var(--ayla-accent-soft);
+}
+
+/* =========================================================
    UTIL
    ========================================================= */
 

@@ -1,6 +1,6 @@
+// src/pages/ProductListPage.jsx
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { productService, formatSom, unitLabel, extractErrorMessage } from "../services/productService";
+import productService, { unitLabel, extractErrorMessage } from "../services/productService";
 import ProductFormModal from "../components/ProductFormModal";
 import ActionSheet from "../components/ActionSheet";
 import Toast, { useToast } from "../components/Toast";
@@ -57,7 +57,6 @@ function EmptyIcon() {
 }
 
 export default function ProductListPage() {
-  const navigate = useNavigate();
   const { toast, showToast } = useToast();
 
   const [products, setProducts] = React.useState([]);
@@ -77,7 +76,7 @@ export default function ProductListPage() {
     setLoading(true);
     setLoadError("");
     productService
-      .getAll()
+      .getAllProducts()
       .then((data) => setProducts(data || []))
       .catch((err) => setLoadError(extractErrorMessage(err)))
       .finally(() => setLoading(false));
@@ -120,7 +119,7 @@ export default function ProductListPage() {
     if (!confirmDelete) return;
     setDeleting(true);
     try {
-      await productService.remove(confirmDelete.id);
+      await productService.deleteProduct(confirmDelete.id);
       setProducts((prev) => prev.filter((p) => p.id !== confirmDelete.id));
       showToast("success", `${confirmDelete.name} o'chirildi`);
     } catch (err) {
@@ -206,7 +205,7 @@ export default function ProductListPage() {
               <div
                 key={product.id}
                 className="ayla-card"
-                onClick={() => navigate(`/ayla/products/${product.id}/price`)}
+                onClick={() => openEditForm(product)}
               >
                 <div className="ayla-card__avatar">
                   {product.imageUrl ? (
@@ -225,14 +224,6 @@ export default function ProductListPage() {
                 </div>
 
                 <div className="ayla-card__trailing">
-                  <span
-                    className={
-                      "ayla-price-tag" +
-                      (product.currentPrice == null ? " ayla-price-tag--empty" : "")
-                    }
-                  >
-                    {formatSom(product.currentPrice)}
-                  </span>
                   <button
                     type="button"
                     className="ayla-more-btn"
@@ -270,11 +261,6 @@ export default function ProductListPage() {
         actions={
           sheetProduct
             ? [
-                {
-                  label: "Narxni belgilash",
-                  onClick: () =>
-                    navigate(`/ayla/products/${sheetProduct.id}/price`),
-                },
                 {
                   label: "Tahrirlash",
                   onClick: () => openEditForm(sheetProduct),

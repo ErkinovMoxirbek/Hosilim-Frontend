@@ -1,6 +1,6 @@
 // src/components/ProductFormModal.jsx
 import React from "react";
-import { productService, PRODUCT_UNITS } from "../services/productService";
+import productService, { PRODUCT_UNITS, extractErrorMessage } from "../services/productService";
 
 const EMPTY_FORM = {
   name: "",
@@ -80,12 +80,12 @@ export default function ProductFormModal({
 
       const result =
         mode === "edit"
-          ? await productService.update(initialData.id, payload)
-          : await productService.create(payload);
+          ? await productService.updateProduct(initialData.id, payload)
+          : await productService.createProduct(payload);
 
       onSuccess(result, mode);
     } catch (err) {
-      setServerError(err.message || "Saqlashda xatolik yuz berdi");
+      setServerError(extractErrorMessage(err));
     } finally {
       setSubmitting(false);
     }

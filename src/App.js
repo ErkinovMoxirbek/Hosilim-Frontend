@@ -9,7 +9,7 @@ import QuizApp2 from "./QuizApp2";
 import MapPage from "./ayla/pages/MapPage";
 import AylaLayout from "./ayla/layout/AylaLayout";
 import ProductListPage from "./ayla/pages/ProductListPage";
-import ProductPricePage from "./ayla/pages/ProductPricePage";
+import PricingPage from "./ayla/pages/PricingPage";
 
 export default function App() {
   return (
@@ -23,10 +23,10 @@ export default function App() {
           <Route index element={<Navigate to="products" replace />} />
           <Route path="map" element={<MapPage />} />
           <Route path="products" element={<ProductListPage />} />
-          <Route path="products/:id/price" element={<ProductPricePage />} />
+          <Route path="pricing" element={<PricingPage />} />
         </Route>
 
-        {/* <Route path="pricing" element={<PricingPage />} /> */}
+      
         {/* <Route path="loadout" element={<LoadoutPage />} /> */}
         {/* <Route path="history" element={<HistoryPage />} /> */}
         <Route path="/quiz-2" element={<QuizApp2 />} />
