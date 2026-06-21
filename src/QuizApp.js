@@ -659,7 +659,7 @@ const QuizApp = () => {
               Maxsus Nilufarxon uchun
             </h1>
             <p className="text-[10px] text-rose-400/80 font-extrabold tracking-wider">
-              Texnologiya fani testlari
+              Matematika fani testlari
             </p>
           </div>
         </div>
