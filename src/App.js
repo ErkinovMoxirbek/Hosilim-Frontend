@@ -10,6 +10,10 @@ import MapPage from "./ayla/pages/MapPage";
 import AylaLayout from "./ayla/layout/AylaLayout";
 import ProductListPage from "./ayla/pages/ProductListPage";
 import PricingPage from "./ayla/pages/PricingPage";
+import LoadoutPage from "./ayla/pages/LoadoutPage";
+import HistoryPage from "./ayla/pages/HistoryPage";
+import SessionDetailPage from "./ayla/pages/SessionDetailPage";
+import StatsPage from "./ayla/pages/StatsPage";
 
 export default function App() {
   return (
@@ -24,6 +28,10 @@ export default function App() {
           <Route path="map" element={<MapPage />} />
           <Route path="products" element={<ProductListPage />} />
           <Route path="pricing" element={<PricingPage />} />
+          <Route path="loadout" element={<LoadoutPage />} />
+          <Route path="history" element={<HistoryPage />} />
+          <Route path="history/:id" element={<SessionDetailPage />} />
+          <Route path="stats" element={<StatsPage />} />
         </Route>
 
       

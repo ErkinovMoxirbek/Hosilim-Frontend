@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { path: "/ayla/pricing", label: "Narxlar", hint: "Tovar narxi boshqaruvi", icon: "💳" },
   { path: "/ayla/loadout", label: "Yuk Tashish", hint: "Sklad va logistika", icon: "🚚" },
   { path: "/ayla/history", label: "Savdo tarixi", hint: "O'tgan reyslar", icon: "🕒" },
+  { path: "/ayla/stats", label: "Statistika", hint: "Savdo statistikasi", icon: "📊" },
 ];
 
 /**

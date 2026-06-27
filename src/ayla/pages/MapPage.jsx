@@ -28,6 +28,7 @@ const EMPTY_FORM = { name: '', phoneNumber: '', viloyat: '', tuman: '' };
 const MapPage = () => {
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [fetchError, setFetchErr] = useState(null);
 
   const [selectedShop, setSelected] = useState(null);
@@ -58,6 +59,20 @@ const MapPage = () => {
   }, []);
 
   useEffect(() => { fetchShops(); }, [fetchShops]);
+
+  // Ekran ochilgandan keyin qo'lda yangilash funksiyasi
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setFetchErr(null);
+    try {
+      const data = await shopService.getAllShops();
+      setShops(data);
+    } catch (err) {
+      setFetchErr("Do'konlarni yangilashda xatolik yuz berdi");
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -178,7 +193,7 @@ const MapPage = () => {
     </div>
   );
 
-  if (fetchError) return (
+  if (fetchError && shops.length === 0) return (
     <div className="ayla-root ayla-centered">
       <div style={{ background: 'rgba(255, 59, 48, 0.1)', padding: '12px 20px', borderRadius: '100px' }}>
         <p style={{ color: '#ff3b30', fontSize: '15px', fontWeight: '500', margin: 0 }}>{fetchError}</p>
@@ -263,8 +278,21 @@ const MapPage = () => {
       {/* ── Floating Utilities ───────────────────────────────────────────────── */}
       {isAddMode && <div className="ayla-hint-pill">Karta ustiga bosing</div>}
 
+      {/* Yangilash (Refresh) Tugmasi */}
+      <button 
+        className={`ayla-fab-refresh ${refreshing ? 'spinning' : ''}`} 
+        onClick={handleRefresh} 
+        title="Xaritani yangilash"
+        disabled={refreshing}
+      >
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M23 4v6h-6"></path>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+      </button>
+
+      {/* Mening Joylashuvim Tugmasi */}
       <button className="ayla-fab-location" onClick={handleFindMe} title="Mening joylashuvim">
-        {/* Crosshair icon — more iOS native than arrow */}
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="4"/>
           <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
@@ -379,7 +407,9 @@ const CSS_STYLES = `
   * { box-sizing: border-box; }
 
   .ayla-root {
-    position: fixed; inset: 0;
+    position: relative;
+    width: 100%;
+    height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -484,6 +514,27 @@ const CSS_STYLES = `
     border-color: transparent;
     color: #fff;
     box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  }
+
+  /* ── FAB — Yangilash (Refresh) ────────────────────────────────── */
+  .ayla-fab-refresh {
+    position: absolute; right: 14px;
+    bottom: max(194px, calc(env(safe-area-inset-bottom) + 184px)); /* Location tugmasidan 50px yuqorida */
+    width: 44px; height: 44px; border-radius: 22px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border: 0.5px solid rgba(255,255,255,0.85);
+    color: #1c1c1e;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10), 0 4px 20px rgba(0,0,0,0.10);
+    transition: transform 0.15s, opacity 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ayla-fab-refresh:active { transform: scale(0.92); opacity: 0.8; }
+  .ayla-fab-refresh.spinning svg {
+    animation: ayla-spin 0.8s linear infinite;
   }
 
   /* ── FAB — Location ──────────────────────────────────────────── */
