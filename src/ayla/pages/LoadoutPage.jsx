@@ -380,7 +380,7 @@ export default function LoadoutPage() {
                   }}
                   onClick={() => {
                     // Loyihangizdagi router konfiguratsiyasiga qarab yo'naltiring. (Agar react-router-dom bo'lsa useNavigate ishlating)
-                    window.location.href = "/load-history";
+                    window.location.href = "/ayla/load-history";
                   }}
                 >
                   Barcha tarixlarni ko'rish (Arxiv) &rarr;
