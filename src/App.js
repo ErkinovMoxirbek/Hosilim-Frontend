@@ -14,6 +14,7 @@ import LoadoutPage from "./ayla/pages/LoadoutPage";
 import HistoryPage from "./ayla/pages/HistoryPage";
 import SessionDetailPage from "./ayla/pages/SessionDetailPage";
 import StatsPage from "./ayla/pages/StatsPage";
+import LoadHistoryPage from "./ayla/pages/LoadHistoryPage";
 
 export default function App() {
   return (
@@ -32,11 +33,10 @@ export default function App() {
           <Route path="history" element={<HistoryPage />} />
           <Route path="history/:id" element={<SessionDetailPage />} />
           <Route path="stats" element={<StatsPage />} />
+          <Route path="load-history" element={<LoadHistoryPage />} />
         </Route>
 
-      
-        {/* <Route path="loadout" element={<LoadoutPage />} /> */}
-        {/* <Route path="history" element={<HistoryPage />} /> */}
+    
         <Route path="/quiz-2" element={<QuizApp2 />} />
 
         <Route element={<PrivateRoute />}>

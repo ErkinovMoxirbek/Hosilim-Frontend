@@ -3,6 +3,7 @@ import React from "react";
 import sessionService, {
   extractSessionError,
   unitShort,
+  fmtDateTime,
 } from "../services/sessionService";
 import productService from "../services/productService";
 import Toast, { useToast } from "../components/Toast";
@@ -37,8 +38,9 @@ export default function LoadoutPage() {
   const [driverId, setDriverId] = React.useState("");
 
   // Reys holati
-  const [session, setSession] = React.useState(null);   // null = yo'q
+  const [session, setSession] = React.useState(null);
   const [loads, setLoads] = React.useState([]);
+  const [history, setHistory] = React.useState([]); 
   const [sessionLoading, setSessionLoading] = React.useState(false);
 
   // Yuk qo'shish modal
@@ -62,7 +64,12 @@ export default function LoadoutPage() {
 
   // ─── Haydovchi tanlanganda faol reysni tekshirish ──────────────────────
   React.useEffect(() => {
-    if (!driverId) { setSession(null); setLoads([]); return; }
+    if (!driverId) { 
+      setSession(null); 
+      setLoads([]); 
+      setHistory([]); 
+      return; 
+    }
     checkSession();
   }, [driverId]); // eslint-disable-line
 
@@ -72,10 +79,16 @@ export default function LoadoutPage() {
       const s = await sessionService.getActiveSession(driverId);
       setSession(s);
       if (s) {
-        const l = await sessionService.getSessionLoads(s.id);
+        // Parallel ravishda hamma qoldiqni ham, tarixni ham yuklaymiz
+        const [l, h] = await Promise.all([
+          sessionService.getSessionLoads(s.id),
+          sessionService.getSessionLoadHistory(s.id)
+        ]);
         setLoads(l || []);
+        setHistory(h || []);
       } else {
         setLoads([]);
+        setHistory([]);
       }
     } catch (err) {
       showToast("error", extractSessionError(err));
@@ -91,6 +104,7 @@ export default function LoadoutPage() {
       const s = await sessionService.startSession(driverId);
       setSession(s);
       setLoads([]);
+      setHistory([]);
       showToast("success", "Reys boshlandi");
     } catch (err) {
       showToast("error", extractSessionError(err));
@@ -120,8 +134,15 @@ export default function LoadoutPage() {
       await sessionService.loadProducts(session.id, [
         { productId: selProduct.id, quantity: Number(addQty) },
       ]);
-      const l = await sessionService.getSessionLoads(session.id);
+      
+      // Muvaffaqiyatli yuklangach, qoldiqni ham, tarixni ham yangilaymiz
+      const [l, h] = await Promise.all([
+        sessionService.getSessionLoads(session.id),
+        sessionService.getSessionLoadHistory(session.id)
+      ]);
+      
       setLoads(l || []);
+      setHistory(h || []);
       setAddOpen(false);
       showToast("success", `${selProduct.name} yuklandi`);
     } catch (err) {
@@ -138,6 +159,7 @@ export default function LoadoutPage() {
       await sessionService.completeSession(session.id);
       setSession(null);
       setLoads([]);
+      setHistory([]);
       setConfirmComplete(false);
       showToast("success", "Reys yakunlandi");
     } catch (err) {
@@ -263,9 +285,9 @@ export default function LoadoutPage() {
               </button>
             </div>
 
-            {/* Yuklangan mahsulotlar */}
+            {/* BAZA: Qolgan mahsulotlar (Jami) */}
             <p style={{ fontSize: 13, fontWeight: 700, color: "var(--ayla-text-2)", marginBottom: 10 }}>
-              Yuklangan mahsulotlar
+              Mashinadagi qoldiq
             </p>
 
             {loads.length === 0 ? (
@@ -273,13 +295,15 @@ export default function LoadoutPage() {
                 Hali mahsulot yuklanmagan
               </p>
             ) : (
-              <div className="ayla-list">
+              <div className="ayla-list" style={{ marginBottom: 24 }}>
                 {loads.map((load) => {
-                  const qty = load.loadedQuantity === Math.trunc(load.loadedQuantity)
-                    ? Math.trunc(load.loadedQuantity)
-                    : load.loadedQuantity;
+                  const loadedQty = load.loadedQuantity === Math.trunc(load.loadedQuantity)
+                    ? Math.trunc(load.loadedQuantity) : load.loadedQuantity;
+                  const availableQty = load.availableQuantity === Math.trunc(load.availableQuantity)
+                    ? Math.trunc(load.availableQuantity) : load.availableQuantity;
+
                   return (
-                    <div key={load.id} className="ayla-card" style={{ cursor: "default" }}>
+                    <div key={load.id} className="ayla-card" style={{ cursor: "default", alignItems: "center" }}>
                       <div className="ayla-card__avatar">
                         {load.product.name.charAt(0).toUpperCase()}
                       </div>
@@ -289,13 +313,79 @@ export default function LoadoutPage() {
                           <span className="ayla-badge">{unitShort(load.product.unit)}</span>
                         </div>
                       </div>
-                      <span style={{ fontSize: 15, fontWeight: 800, color: "var(--ayla-accent)", whiteSpace: "nowrap" }}>
-                        {qty} {unitShort(load.product.unit)}
-                      </span>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                        <span style={{ fontSize: 15, fontWeight: 800, color: "var(--ayla-accent)", whiteSpace: "nowrap" }}>
+                          {availableQty} {unitShort(load.product.unit)} qoldi
+                        </span>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ayla-text-3)", whiteSpace: "nowrap" }}>
+                          Jami: {loadedQty}
+                        </span>
+                      </div>
                     </div>
                   );
                 })}
               </div>
+            )}
+
+            {/* QO'SHILDI: Yuklash tarixi (Qachon nima qo'shildi) */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--ayla-text-2)" }}>
+                Yuklash tarixi
+              </p>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ayla-text-3)" }}>
+                Eng oxirgisi tepada
+              </span>
+            </div>
+
+            {history.length === 0 ? (
+              <p style={{ fontSize: 13, color: "var(--ayla-text-3)", padding: "8px 0" }}>
+                Tarix yo'q
+              </p>
+            ) : (
+              <>
+                <div className="ayla-list">
+                  {history.map((item) => {
+                     const addedQty = item.addedQuantity === Math.trunc(item.addedQuantity)
+                      ? Math.trunc(item.addedQuantity) : item.addedQuantity;
+
+                     return (
+                       <div key={item.id} className="ayla-card" style={{ padding: "12px 14px", cursor: "default" }}>
+                         <div style={{ flex: 1 }}>
+                           <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ayla-text-1)" }}>
+                             {item.product.name}
+                           </p>
+                           <p style={{ fontSize: 12, color: "var(--ayla-text-3)", marginTop: 4 }}>
+                             {fmtDateTime(item.addedAt)}
+                           </p>
+                         </div>
+                         <div style={{ fontSize: 14, fontWeight: 800, color: "var(--ayla-accent)" }}>
+                           +{addedQty} {unitShort(item.product.unit)}
+                         </div>
+                       </div>
+                     );
+                  })}
+                </div>
+
+                {/* YANGA QO'SHILDI: Arxiv tugmasi */}
+                <button
+                  className="ayla-btn ayla-btn--ghost"
+                  style={{
+                    marginTop: 12,
+                    width: "100%",
+                    color: "var(--ayla-accent)",
+                    fontWeight: 600,
+                    fontSize: 14,
+                    border: "1px dashed var(--ayla-accent)",
+                    minHeight: 44
+                  }}
+                  onClick={() => {
+                    // Loyihangizdagi router konfiguratsiyasiga qarab yo'naltiring. (Agar react-router-dom bo'lsa useNavigate ishlating)
+                    window.location.href = "/load-history";
+                  }}
+                >
+                  Barcha tarixlarni ko'rish (Arxiv) &rarr;
+                </button>
+              </>
             )}
           </>
         )}

@@ -45,6 +45,21 @@ const sessionService = {
     return res.data?.data || res.data;
   },
 
+  // QO'SHILDI: Joriy mashina yuklash tarixini olish (Top 10)
+  getSessionLoadHistory: async (sessionId) => {
+    const res = await api.get(`${BASE}/sessions/${sessionId}/loads/history`);
+    return res.data?.data || res.data;
+  },
+
+  // QO'SHILDI: Umumiy arxiv tarixi uchun (Paginatsiya va sana bilan)
+  getGlobalLoadHistory: async (date, page = 0, size = 15) => {
+    const params = { page, size };
+    if (date) params.date = date; // Format: YYYY-MM-DD
+    const res = await api.get(`${BASE}/load-history`, { params });
+    // Boshqa apilardan farqli ravishda bu Spring Page obyekti qaytarishi mumkin
+    return res.data?.data !== undefined ? res.data.data : res.data;
+  },
+
   // ─── Buyurtma ─────────────────────────────────────────────────────────────
   createOrder: async (sessionId, payload) => {
     const res = await api.post(`${BASE}/sessions/${sessionId}/orders`, payload);
